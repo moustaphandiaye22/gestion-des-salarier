@@ -34,6 +34,7 @@ describe('AuthService', () => {
         ...userData,
         motDePasse: 'hashedpassword',
         estActif: true,
+        entrepriseId: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -68,6 +69,7 @@ describe('AuthService', () => {
         prenom: 'User',
         role: 'EMPLOYE',
         estActif: true,
+        entrepriseId: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -92,6 +94,7 @@ describe('AuthService', () => {
         prenom: 'User',
         role: 'EMPLOYE' as const,
         estActif: true,
+        entrepriseId: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -130,6 +133,7 @@ describe('AuthService', () => {
         prenom: 'User',
         role: 'EMPLOYE' as const,
         estActif: true,
+        entrepriseId: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -149,9 +153,9 @@ describe('AuthService', () => {
         email: 'test@example.com',
         motDePasse: 'hashed',
         nom: 'Test',
-        prenom: 'User',
         role: 'EMPLOYE' as const,
         estActif: true,
+        entrepriseId: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       };

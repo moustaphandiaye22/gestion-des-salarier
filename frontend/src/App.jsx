@@ -1,9 +1,174 @@
+import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+
+import MainLayout from "./layouts/MainLayout";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+// Auth
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+
+// Pages
+import Dashboard from "./pages/Dashboard";
+import EmployeeList from "./pages/EmployeeList";
+import EmployeeForm from "./pages/EmployeeForm";
+import Entreprises from "./pages/Entreprises";
+import Paiements from "./pages/Paiements";
+import Bulletins from "./pages/Bulletins";
+import CyclesPaie from "./pages/CyclesPaie";
+import ParametreEntreprise from "./pages/ParametreEntreprise";
+import Rapports from "./pages/Rapports";
+import JournalAudit from "./pages/JournalAudit";
+import Utilisateurs from "./pages/Utilisateurs";
 
 function App() {
   return (
     <Routes>
-      
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Dashboard />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Dashboard />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/employees"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <EmployeeList />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employees/new"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <EmployeeForm />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employees/:id/edit"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <EmployeeForm />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/entreprises"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Entreprises />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/paiements"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Paiements />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/bulletins"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Bulletins />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/cycles-paie"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <CyclesPaie />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/parametres-entreprise"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <ParametreEntreprise />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/rapports"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Rapports />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/journal-audit"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <JournalAudit />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/utilisateurs"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Utilisateurs />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes>
   );
 }

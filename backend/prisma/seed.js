@@ -177,20 +177,24 @@ async function main() {
   // Create CyclePaie
   const cycle1 = await prisma.cyclePaie.create({
     data: {
-      periodeDebut: new Date('2024-01-01'),
-      periodeFin: new Date('2024-01-31'),
-      typeCycle: 'MENSUEL',
-      estFerme: false,
+      nom: 'Cycle Paie Janvier 2024',
+      description: 'Cycle de paie pour le mois de janvier 2024',
+      dateDebut: new Date('2024-01-01'),
+      dateFin: new Date('2024-01-31'),
+      statut: 'OUVERT',
+      frequence: 'MENSUEL',
       entrepriseId: entreprise1.id,
     },
   });
 
   const cycle2 = await prisma.cyclePaie.create({
     data: {
-      periodeDebut: new Date('2024-01-01'),
-      periodeFin: new Date('2024-01-31'),
-      typeCycle: 'MENSUEL',
-      estFerme: false,
+      nom: 'Cycle Paie Janvier 2024',
+      description: 'Cycle de paie pour le mois de janvier 2024',
+      dateDebut: new Date('2024-01-01'),
+      dateFin: new Date('2024-01-31'),
+      statut: 'OUVERT',
+      frequence: 'MENSUEL',
       entrepriseId: entreprise2.id,
     },
   });

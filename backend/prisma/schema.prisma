@@ -115,19 +115,22 @@ model Bulletin {
 
 model CyclePaie {
   id            Int               @id @default(autoincrement())
-  periodeDebut  DateTime
-  periodeFin    DateTime
-  typeCycle     TypeCyclePaie
-  estFerme      Boolean           @default(false)
-  dateCreation  DateTime          @default(now())
+  nom           String            @db.VarChar(100)
+  description   String?           @db.Text
+  dateDebut     DateTime
+  dateFin       DateTime
+  statut        StatutCyclePaie   @default(OUVERT)
+  frequence     FrequencePaie     @default(MENSUEL)
   entrepriseId  Int
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 
   // Relations
   entreprise    Entreprise        @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
   bulletins     Bulletin[]
   journauxAudit JournalAudit[]
 
-  @@unique([entrepriseId, periodeDebut, periodeFin])
+  @@unique([entrepriseId, nom])
   @@map("pay_cycles")
 }
 
@@ -248,6 +251,17 @@ enum StatutPaiement {
 }
 
 enum TypeCyclePaie {
+  MENSUEL
+  HEBDOMADAIRE
+  QUINZAINE
+}
+
+enum StatutCyclePaie {
+  OUVERT
+  FERME
+}
+
+enum FrequencePaie {
   MENSUEL
   HEBDOMADAIRE
   QUINZAINE

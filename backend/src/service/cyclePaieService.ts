@@ -1,5 +1,7 @@
+import type { TypeCyclePaie } from '@prisma/client';
 import { cyclePaieRepository } from '../repositories/cyclePaie.js';
 import { cyclePaieSchema } from '../validators/cyclePaie.js';
+import { StatutCyclePaie } from '@prisma/client';
 
 export class CyclePaieService {
 
@@ -34,7 +36,9 @@ export class CyclePaieService {
    return await this.cyclePaieRepository.delete(id);
   }
 
-  async setEstFerme(id: number, estFerme: boolean) {
-   return await this.cyclePaieRepository.setEstFerme(id, estFerme);
+  async setStatut(id: number, statut: StatutCyclePaie ){
+   return await this.cyclePaieRepository.setStatut(id, statut);
   }
 }
+
+
