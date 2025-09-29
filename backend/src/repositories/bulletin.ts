@@ -1,0 +1,43 @@
+import { PrismaClient, Prisma } from '@prisma/client';
+import type { Bulletin, StatutPaiement } from "@prisma/client"
+import { mnprisma } from '../config/db.js';
+import type { InterfaceRepository } from './InterfaceRepository.js';
+
+
+
+export class bulletinRepository implements InterfaceRepository<Bulletin> {
+
+  async findByEmploye(employeId: number): Promise<Bulletin[]> {
+    return mnprisma.bulletin.findMany({ where: { employeId }, include: { employe: true, cycle: true, paiements: true } });
+  }
+
+  async findByCycle(cycleId: number): Promise<Bulletin[]> {
+  return mnprisma.bulletin.findMany({ where: { cycleId }, include: { employe: true, cycle: true, paiements: true } });
+  }
+
+  async setStatutPaiement(id: number, statutPaiement: StatutPaiement): Promise<Bulletin> {
+    return mnprisma.bulletin.update({ where: { id }, data: { statutPaiement } });
+  }
+    
+  async create(data: Omit<Bulletin,"id">) : Promise<Bulletin> {
+    return mnprisma.bulletin.create({ data});
+  }
+
+  async findById(id: number): Promise<Bulletin | null> {
+  return mnprisma.bulletin.findUnique({ where: { id }, include: { employe: true, cycle: true, paiements: true } });
+  }
+
+  async findAll() : Promise<Bulletin[]> {
+  return mnprisma.bulletin.findMany({ include: { employe: true, cycle: true, paiements: true } });
+  }
+
+  async update(id: number, data: Partial <Omit<Bulletin,"id">>) {
+    return mnprisma.bulletin.update({ where: { id }, data });
+  }
+
+  async delete(id: number) : Promise<void> {
+    await mnprisma.bulletin.delete({ where: { id } });
+  }
+
+
+};

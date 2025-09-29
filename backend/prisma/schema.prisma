@@ -1,0 +1,279 @@
+// ==========================================
+// Schéma Prisma pour le Système de Gestion des Salaires Multi-Entreprises
+// Base de données : MySQL
+// Version : Prisma 5.x
+// ==========================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// MODÈLES PRINCIPAUX
+// ==========================================
+
+model Entreprise {
+  id             Int                @id @default(autoincrement())
+  nom            String             @db.VarChar(100)
+  description    String?            @db.Text
+  adresse        String?            @db.VarChar(255)
+  telephone      String?            @db.VarChar(20)
+  email          String?            @db.VarChar(100)
+  estActive      Boolean            @default(true)
+  dateCreation   DateTime           @default(now())
+
+  // Relations
+  utilisateurs   Utilisateur[]
+  employes       Employe[]
+  cyclesPaie     CyclePaie[]
+  paiements      Paiement[]
+  rapports       Rapport[]
+  journauxAudit  JournalAudit[]
+  tableauxDeBord TableauDeBord[]
+  parametres     ParametreEntreprise[]
+
+  @@unique([nom])
+  @@index([estActive])
+  @@map("companies")
+}
+
+model Utilisateur {
+  id            Int               @id @default(autoincrement())
+  nom           String            @db.VarChar(100)
+  email         String            @unique @db.VarChar(100)
+  motDePasse    String            @db.VarChar(255)
+  role          RoleUtilisateur   @default(EMPLOYE)
+  estActif      Boolean           @default(true)
+  entrepriseId  Int?
+
+  // Relations
+  entreprise    Entreprise?       @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  journauxAudit JournalAudit[]
+
+  @@index([entrepriseId])
+  @@map("users")
+}
+
+model Employe {
+  id            Int               @id @default(autoincrement())
+  matricule     String            @db.VarChar(50)
+  prenom        String            @db.VarChar(100)
+  nom           String            @db.VarChar(100)
+  email         String?           @db.VarChar(100)
+  telephone     String?           @db.VarChar(20)
+  adresse       String?           @db.VarChar(255)
+  dateEmbauche  DateTime
+  statutEmploi  StatutEmploi
+  typeContrat   TypeContrat
+  salaireBase   Decimal           @db.Decimal(15, 2)
+  allocations   Decimal           @default(0.0) @db.Decimal(15, 2)
+  deductions    Decimal           @default(0.0) @db.Decimal(15, 2)
+  estActif      Boolean           @default(true)
+  entrepriseId  Int
+
+  // Relations
+  entreprise    Entreprise        @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  bulletins     Bulletin[]
+  journauxAudit JournalAudit[]
+
+  @@unique([entrepriseId, matricule])
+  @@index([entrepriseId, estActif])
+  @@index([statutEmploi])
+  @@index([typeContrat])
+  @@map("employees")
+}
+
+model Bulletin {
+  id              Int               @id @default(autoincrement())
+  numeroBulletin  String            @unique @db.VarChar(50)
+  periodeDebut    DateTime
+  periodeFin      DateTime
+  salaireBase     Decimal           @db.Decimal(15, 2)
+  allocations     Decimal           @default(0.0) @db.Decimal(15, 2)
+  deductions      Decimal           @default(0.0) @db.Decimal(15, 2)
+  totalAPayer     Decimal           @db.Decimal(15, 2)
+  statutPaiement  StatutPaiement    @default(EN_ATTENTE)
+  dateGeneration  DateTime          @default(now())
+  cycleId         Int
+  employeId       Int
+
+  // Relations
+  cycle           CyclePaie         @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  employe         Employe           @relation(fields: [employeId], references: [id], onDelete: NoAction)
+  paiements       Paiement[]
+  journauxAudit   JournalAudit[]
+
+  @@unique([cycleId, employeId])
+  @@index([statutPaiement])
+  @@map("payslips")
+}
+
+model CyclePaie {
+  id            Int               @id @default(autoincrement())
+  periodeDebut  DateTime
+  periodeFin    DateTime
+  typeCycle     TypeCyclePaie
+  estFerme      Boolean           @default(false)
+  dateCreation  DateTime          @default(now())
+  entrepriseId  Int
+
+  // Relations
+  entreprise    Entreprise        @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  bulletins     Bulletin[]
+  journauxAudit JournalAudit[]
+
+  @@unique([entrepriseId, periodeDebut, periodeFin])
+  @@map("pay_cycles")
+}
+
+model Paiement {
+  id            Int               @id @default(autoincrement())
+  montant       Decimal           @db.Decimal(15, 2)
+  datePaiement  DateTime          @default(now())
+  modePaiement  ModePaiement
+  statut        StatutPaiement    @default(EN_ATTENTE)
+  reference     String?           @db.VarChar(100)
+  bulletinId    Int
+  entrepriseId  Int
+
+  // Relations
+  bulletin      Bulletin          @relation(fields: [bulletinId], references: [id], onDelete: Cascade)
+  entreprise    Entreprise        @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  journauxAudit JournalAudit[]
+
+  @@index([statut])
+  @@map("payments")
+}
+
+model Rapport {
+  id            Int               @id @default(autoincrement())
+  typeRapport   TypeRapport
+  contenu       Json
+  dateGeneration DateTime         @default(now())
+  entrepriseId  Int
+
+  // Relations
+  entreprise    Entreprise        @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+
+  @@map("reports")
+}
+
+model JournalAudit {
+  id            Int               @id @default(autoincrement())
+  action        ActionAudit
+  details       Json
+  dateAction    DateTime          @default(now())
+  utilisateurId Int?
+  entrepriseId  Int?
+  employeId     Int?
+  bulletinId    Int?
+  paiementId    Int?
+    cyclePaieId   Int?
+
+  // Relations
+  utilisateur   Utilisateur?      @relation(fields: [utilisateurId], references: [id], onDelete: SetNull)
+  entreprise    Entreprise?       @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  employe       Employe?          @relation(fields: [employeId], references: [id], onDelete: SetNull)
+  bulletin      Bulletin?         @relation(fields: [bulletinId], references: [id], onDelete: SetNull)
+  paiement      Paiement?         @relation(fields: [paiementId], references: [id], onDelete: SetNull)
+    cyclePaie     CyclePaie?        @relation(fields: [cyclePaieId], references: [id], onDelete: SetNull)
+
+    @@index([utilisateurId])
+    @@index([entrepriseId])
+    @@index([employeId])
+    @@index([bulletinId])
+    @@index([paiementId])
+    @@map("audit_logs")
+}
+
+model TableauDeBord {
+  id            Int               @id @default(autoincrement())
+  nom           String            @db.VarChar(100)
+  configuration Json
+  entrepriseId  Int
+
+  // Relations
+  entreprise    Entreprise        @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+
+  @@map("dashboards")
+}
+
+model ParametreEntreprise {
+  id            Int               @id @default(autoincrement())
+  cle           String            @db.VarChar(100)
+  valeur        String            @db.VarChar(255)
+  entrepriseId  Int
+
+  // Relations
+  entreprise    Entreprise        @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+
+  @@unique([entrepriseId, cle])
+  @@map("company_settings")
+}
+
+// ==========================================
+// ENUMS
+// ==========================================
+
+enum RoleUtilisateur {
+  SUPER_ADMIN
+  ADMIN_ENTREPRISE
+  CAISSIER
+  EMPLOYE
+}
+
+enum StatutEmploi {
+  ACTIF
+  CONGE
+  LICENCIE
+  RETRAITE
+}
+
+enum TypeContrat {
+  CDI
+  CDD
+  INTERIM
+  STAGE
+}
+
+enum StatutPaiement {
+  EN_ATTENTE
+  PAYE
+  ECHEC
+}
+
+enum TypeCyclePaie {
+  MENSUEL
+  HEBDOMADAIRE
+  QUINZAINE
+}
+
+enum ModePaiement {
+  ESPECES
+  CHEQUE
+  VIREMENT
+  WAVE
+  ORANGE_MONEY
+}
+
+enum TypeRapport {
+  BULLETINS
+  EMPLOYES
+  PAIEMENTS
+  STATISTIQUES
+}
+
+enum ActionAudit {
+  CREATION
+  MODIFICATION
+  SUPPRESSION
+  CONNEXION
+  DECONNEXION
+  EXPORTATION
+  GENERATION
+}

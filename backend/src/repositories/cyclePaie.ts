@@ -1,0 +1,38 @@
+import { PrismaClient, Prisma } from '@prisma/client';
+import { mnprisma } from '../config/db.js';
+import type { CyclePaie } from "@prisma/client";
+import type { InterfaceRepository } from './InterfaceRepository.js';
+
+
+
+export class cyclePaieRepository implements InterfaceRepository<CyclePaie> {
+
+  async findByEntreprise(entrepriseId: number): Promise< CyclePaie []> {
+    return mnprisma.cyclePaie.findMany({ where: { entrepriseId }, include: { entreprise: true, bulletins: true } });
+  }
+
+  async setEstFerme(id: number, estFerme: boolean): Promise<CyclePaie> {
+    return mnprisma.cyclePaie.update({ where: { id }, data: { estFerme } });
+  }
+
+  async create(data: Omit<CyclePaie, "id">) : Promise<CyclePaie>{
+    return mnprisma.cyclePaie.create({ data });
+  }
+
+  async findById(id: number) : Promise<CyclePaie | null> {
+  return mnprisma.cyclePaie.findUnique({ where: { id }, include: { entreprise: true, bulletins: true } });
+  }
+
+  async findAll() : Promise<CyclePaie[]> {
+  return mnprisma.cyclePaie.findMany({ include: { entreprise: true, bulletins: true } });
+  }
+
+  async update(id: number, data: Partial <Omit<CyclePaie,"id">>) : Promise<CyclePaie> {
+    return mnprisma.cyclePaie.update({ where: { id }, data });
+  }
+
+  async delete(id: number) : Promise<void> {
+    await mnprisma.cyclePaie.delete({ where: { id } });
+  }
+
+};
