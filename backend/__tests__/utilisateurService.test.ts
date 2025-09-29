@@ -1,26 +1,35 @@
+import { jest } from '@jest/globals';
 import { UtilisateurService, createUtilisateurService } from '../src/service/utilisateurService.js';
-import { utilisateurRepository } from '../src/repositories/utilisateur.js';
+import type { IUserRepository } from '../src/interfaces/IUserRepository.js';
 import { Logger } from '../src/utils/logger.js';
 import { ValidationError, NotFoundError } from '../src/errors/CustomError.js';
+import { RoleUtilisateur } from '@prisma/client';
 
-// Mock du repository
-jest.mock('../src/repositories/utilisateur.js');
-const mockUtilisateurRepository = utilisateurRepository as jest.MockedClass<typeof utilisateurRepository>;
+import type { Utilisateur } from '@prisma/client';
+
+// Mock du repository utilisateur
+const mockRepository: jest.Mocked<Pick<IUserRepository, keyof IUserRepository>> = {
+  create: jest.fn(),
+  findAll: jest.fn(),
+  findById: jest.fn(),
+  findByEmail: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+};
 
 // Mock du logger
 jest.mock('../src/utils/logger.js');
 const mockLogger = Logger as jest.Mocked<typeof Logger>;
+mockLogger.info = jest.fn();
+mockLogger.warn = jest.fn();
+mockLogger.error = jest.fn();
 
 describe('UtilisateurService', () => {
   let utilisateurService: UtilisateurService;
-  let mockRepository: jest.Mocked<utilisateurRepository>;
 
   beforeEach(() => {
     // Reset des mocks
     jest.clearAllMocks();
-
-    // Créer une instance mock du repository
-    mockRepository = new mockUtilisateurRepository() as jest.Mocked<utilisateurRepository>;
 
     // Créer le service avec le repository mock
     utilisateurService = new UtilisateurService(mockRepository);
@@ -41,9 +50,9 @@ describe('UtilisateurService', () => {
         id: 1,
         ...validUserData,
         motDePasse: 'hashedPassword',
-        role: 'EMPLOYE',
+        role: 'EMPLOYE' as RoleUtilisateur,
         estActif: true,
-        entrepriseId: undefined
+        entrepriseId: null
       };
 
       mockRepository.findByEmail.mockResolvedValue(null);
@@ -66,7 +75,7 @@ describe('UtilisateurService', () => {
 
     it('devrait lever une ValidationError si l\'email existe déjà', async () => {
       // Arrange
-      const existingUser = { id: 1, email: validUserData.email };
+      const existingUser = { id: 1, email: validUserData.email, nom: 'Existing', motDePasse: 'hashed', role: 'EMPLOYE' as RoleUtilisateur, estActif: true, entrepriseId: null };
       mockRepository.findByEmail.mockResolvedValue(existingUser);
 
       // Act & Assert
@@ -97,7 +106,7 @@ describe('UtilisateurService', () => {
     it('devrait récupérer un utilisateur par ID', async () => {
       // Arrange
       const userId = 1;
-      const expectedUser = { id: userId, email: 'test@example.com' };
+      const expectedUser = { id: userId, email: 'test@example.com', nom: 'Test', motDePasse: 'hashed', role: 'EMPLOYE' as RoleUtilisateur, estActif: true, entrepriseId: null };
       mockRepository.findById.mockResolvedValue(expectedUser);
 
       // Act
@@ -134,8 +143,8 @@ describe('UtilisateurService', () => {
     it('devrait récupérer tous les utilisateurs', async () => {
       // Arrange
       const expectedUsers = [
-        { id: 1, email: 'user1@example.com' },
-        { id: 2, email: 'user2@example.com' }
+        { id: 1, email: 'user1@example.com', nom: 'User1', motDePasse: 'hashed1', role: 'EMPLOYE' as RoleUtilisateur, estActif: true, entrepriseId: null },
+        { id: 2, email: 'user2@example.com', nom: 'User2', motDePasse: 'hashed2', role: 'EMPLOYE' as RoleUtilisateur, estActif: true, entrepriseId: null }
       ];
       mockRepository.findAll.mockResolvedValue(expectedUsers);
 
@@ -156,7 +165,7 @@ describe('UtilisateurService', () => {
     it('devrait mettre à jour un utilisateur avec succès', async () => {
       // Arrange
       const userId = 1;
-      const existingUser = { id: userId, email: 'test@example.com' };
+      const existingUser = { id: userId, email: 'test@example.com', nom: 'Test', motDePasse: 'hashed', role: 'EMPLOYE' as RoleUtilisateur, estActif: true, entrepriseId: null };
       const updatedUser = { ...existingUser, ...updateData };
 
       mockRepository.findById.mockResolvedValue(existingUser);
@@ -174,7 +183,7 @@ describe('UtilisateurService', () => {
     it('devrait lever une NotFoundError si l\'utilisateur n\'existe pas', async () => {
       // Arrange
       const userId = 999;
-      mockRepository.findById.mockResolvedValue(null);
+      mockRepository.update.mockResolvedValue(null);
 
       // Act & Assert
       await expect(utilisateurService.updateUtilisateur(userId, updateData))
@@ -187,7 +196,7 @@ describe('UtilisateurService', () => {
     it('devrait supprimer un utilisateur avec succès', async () => {
       // Arrange
       const userId = 1;
-      const existingUser = { id: userId, email: 'test@example.com' };
+      const existingUser = { id: userId, email: 'test@example.com', nom: 'Test', motDePasse: 'hashed', role: 'EMPLOYE' as RoleUtilisateur, estActif: true, entrepriseId: null };
 
       mockRepository.findById.mockResolvedValue(existingUser);
       mockRepository.delete.mockResolvedValue(undefined);

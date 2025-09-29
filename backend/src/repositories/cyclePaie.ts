@@ -1,6 +1,6 @@
 import { PrismaClient, Prisma } from '@prisma/client';
 import { mnprisma } from '../config/db.js';
-import type { CyclePaie } from "@prisma/client";
+import type { CyclePaie, StatutCyclePaie } from "@prisma/client";
 import type { InterfaceRepository } from './InterfaceRepository.js';
 
 
@@ -11,8 +11,8 @@ export class cyclePaieRepository implements InterfaceRepository<CyclePaie> {
     return mnprisma.cyclePaie.findMany({ where: { entrepriseId }, include: { entreprise: true, bulletins: true } });
   }
 
-  async setEstFerme(id: number, estFerme: boolean): Promise<CyclePaie> {
-    return mnprisma.cyclePaie.update({ where: { id }, data: { estFerme } });
+  async setStatut(id: number, statut: StatutCyclePaie): Promise<CyclePaie> {
+    return mnprisma.cyclePaie.update({ where: { id }, data: { statut } });
   }
 
   async create(data: Omit<CyclePaie, "id">) : Promise<CyclePaie>{
