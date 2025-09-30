@@ -7,7 +7,23 @@ const entrepriseService = new EntrepriseService();
 export class EntrepriseController {
   async create(req: Request, res: Response) {
     try {
-      const data = entrepriseSchema.parse(req.body);
+      // Handle file upload - logo is handled by multer, so we don't need req.body.logo
+      let logoPath = null;
+      if (req.file) {
+        logoPath = `/assets/images/logos/${req.file.filename}`;
+      }
+
+      // Remove logo from req.body if it exists (it might be a File object from FormData)
+      const { logo, estActive, ...bodyData } = req.body;
+
+      // Convert estActive string to boolean if needed
+      const estActiveBool = estActive === 'true' || estActive === true;
+
+      const data = entrepriseSchema.parse({
+        ...bodyData,
+        estActive: estActiveBool,
+        logo: logoPath
+      });
       const entreprise = await entrepriseService.createEntreprise(data);
       res.status(201).json({ message: 'Entreprise créée avec succès.', entreprise });
     } catch (err: any) {
@@ -21,7 +37,7 @@ export class EntrepriseController {
 
   async getAll(req: Request, res: Response) {
     try {
-      const entreprises = await entrepriseService.getAllEntreprises();
+      const entreprises = await entrepriseService.getAllEntreprises(req.user);
       res.json({ message: 'Liste des entreprises récupérée avec succès.', entreprises });
     } catch (err: any) {
       res.status(500).json({ error: `Impossible de récupérer les entreprises : ${err.message}` });
@@ -44,7 +60,24 @@ export class EntrepriseController {
   async update(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      const data = entrepriseSchema.partial().parse(req.body);
+
+      // Handle file upload - logo is handled by multer, so we don't need req.body.logo
+      let logoPath = undefined;
+      if (req.file) {
+        logoPath = `/assets/images/logos/${req.file.filename}`;
+      }
+
+      // Remove logo from req.body if it exists (it might be a File object from FormData)
+      const { logo, estActive, ...bodyData } = req.body;
+
+      // Convert estActive string to boolean if needed
+      const estActiveBool = estActive === 'true' || estActive === true;
+
+      const data = entrepriseSchema.partial().parse({
+        ...bodyData,
+        ...(estActive !== undefined && { estActive: estActiveBool }),
+        ...(logoPath !== undefined && { logo: logoPath })
+      });
       const entreprise = await entrepriseService.updateEntreprise(id, data);
       res.json({ message: 'Entreprise mise à jour avec succès.', entreprise });
     } catch (err: any) {

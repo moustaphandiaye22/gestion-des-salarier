@@ -21,7 +21,7 @@ export class EmployeController {
 
   async getAll(req: Request, res: Response) {
     try {
-      const employes = await employeService.getAllEmployes();
+      const employes = await employeService.getAllEmployes(req.user);
       res.json({ message: 'Liste des employés récupérée avec succès.', employes });
     } catch (err: any) {
       res.status(500).json({ error: `Impossible de récupérer les employés : ${err.message}` });

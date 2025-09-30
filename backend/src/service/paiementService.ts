@@ -20,8 +20,11 @@ export class PaiementService {
    return await this.paiementRepository.findById(id);
   }
 
-  async getAllPaiements() {
-   return await this.paiementRepository.findAll();
+  async getAllPaiements(user?: any) {
+    if (user) {
+      return this.paiementRepository.findAllByUser(user);
+    }
+    return this.paiementRepository.findAll();
   }
 
   async updatePaiement(id: number, data: any) {

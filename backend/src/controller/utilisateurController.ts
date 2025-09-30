@@ -9,7 +9,14 @@ export class UtilisateurController {
 
   create = asyncHandler(async (req: Request, res: Response) => {
     Logger.info('Requête de création d\'utilisateur reçue', { email: req.body.email });
-    const utilisateur = await this.utilisateurService.createUtilisateur(req.body);
+
+    // Pour les admin entreprise, forcer l'entrepriseId à leur propre entreprise
+    let userData = { ...req.body };
+    if (req.user?.profil === 'ADMIN_ENTREPRISE' && req.user.entrepriseId) {
+      userData.entrepriseId = req.user.entrepriseId;
+    }
+
+    const utilisateur = await this.utilisateurService.createUtilisateur(userData);
     res.status(201).json({
       message: 'Utilisateur créé avec succès.',
       utilisateur
@@ -18,7 +25,18 @@ export class UtilisateurController {
 
   getAll = asyncHandler(async (req: Request, res: Response) => {
     Logger.info('Requête de récupération de tous les utilisateurs reçue');
-    const utilisateurs = await this.utilisateurService.getAllUtilisateurs();
+    let utilisateurs: any[] = [];
+
+    // Filtrer selon le rôle de l'utilisateur connecté
+    if (req.user?.profil === 'SUPER_ADMIN') {
+      utilisateurs = await this.utilisateurService.getAllUtilisateurs();
+    } else if (req.user?.profil === 'ADMIN_ENTREPRISE' && req.user.entrepriseId) {
+      utilisateurs = await this.utilisateurService.getUtilisateursByEntreprise(req.user.entrepriseId);
+    } else {
+      // Pour les autres rôles, ne rien retourner ou lever une erreur
+      utilisateurs = [];
+    }
+
     res.json({
       message: 'Liste des utilisateurs récupérée avec succès.',
       utilisateurs

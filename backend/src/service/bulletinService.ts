@@ -32,7 +32,10 @@ export class BulletinService {
     return this.bulletinRepository.findById(id);
   }
 
-  async getAllBulletins() {
+  async getAllBulletins(user?: any) {
+    if (user) {
+      return this.bulletinRepository.findAllByUser(user);
+    }
     return this.bulletinRepository.findAll();
   }
 

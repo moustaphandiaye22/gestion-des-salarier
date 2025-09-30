@@ -26,6 +26,26 @@ export class paiementRepository implements InterfaceRepository  <Paiement>{
   return mnprisma.paiement.findMany({ include: { bulletin: true, entreprise: true } });
   }
 
+  async findAllByUser(user: any) : Promise <Paiement[]> {
+    // Super Admin voit tous les paiements
+    if (user.profil === 'SUPER_ADMIN') {
+      return mnprisma.paiement.findMany({
+        include: { bulletin: true, entreprise: true }
+      });
+    }
+
+    // Admin d'Entreprise voit seulement les paiements de son entreprise
+    if (user.profil === 'ADMIN_ENTREPRISE' && user.entrepriseId) {
+      return mnprisma.paiement.findMany({
+        where: { entrepriseId: user.entrepriseId },
+        include: { bulletin: true, entreprise: true }
+      });
+    }
+
+    // Autres rôles n'ont pas accès aux paiements
+    return [];
+  }
+
 
   async update(id: number, data: Partial<Omit<Paiement, "id">>) : Promise <Paiement> {
     return mnprisma.paiement.update({ where: { id }, data });

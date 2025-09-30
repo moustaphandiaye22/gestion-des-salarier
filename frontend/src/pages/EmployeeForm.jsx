@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardHeader, CardBody, Input, Select, Button } from "../components/ui";
-import { employesApi, entreprisesApi } from "../utils/api";
+import { employesApi, entreprisesApi, professionsApi } from "../utils/api";
 
 // Validation functions matching backend validators
 function validateMatricule(value) {
@@ -70,6 +70,22 @@ function validateDeductions(value) {
   return null;
 }
 
+function validateSalaireHoraire(value, typeSalaire) {
+  if (typeSalaire !== 'HONORAIRES') return null; // only required for honoraires
+  if (!value) return "Le salaire horaire est obligatoire pour les honoraires.";
+  const num = parseFloat(value);
+  if (isNaN(num) || num < 0) return "Le salaire horaire doit être positif.";
+  return null;
+}
+
+function validateTauxJournalier(value, typeSalaire) {
+  if (typeSalaire !== 'JOURNALIER') return null; // only required for journalier
+  if (!value) return "Le taux journalier est obligatoire pour les journaliers.";
+  const num = parseFloat(value);
+  if (isNaN(num) || num < 0) return "Le taux journalier doit être positif.";
+  return null;
+}
+
 function validateEntrepriseId(value) {
   if (!value) return "L'entreprise est obligatoire.";
   return null;
@@ -102,15 +118,22 @@ export default function EmployeeForm() {
     dateEmbauche: "",
     statutEmploi: "ACTIF",
     typeContrat: "CDI",
+    typeSalaire: "MENSUEL",
     salaireBase: "",
+    salaireHoraire: "",
+    tauxJournalier: "",
     allocations: "",
     deductions: "",
     estActif: true,
     entrepriseId: "",
+    professionId: "",
   });
   const [generatedMatricule, setGeneratedMatricule] = useState("");
   const [errors, setErrors] = useState({});
   const [entreprises, setEntreprises] = useState([]);
+  const [professions, setProfessions] = useState([]);
+  const [professionSearch, setProfessionSearch] = useState("");
+  const [showProfessionDropdown, setShowProfessionDropdown] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -170,6 +193,13 @@ export default function EmployeeForm() {
   }, []);
 
   useEffect(() => {
+    professionsApi
+      .list()
+      .then((data) => setProfessions(Array.isArray(data) ? data : []))
+      .catch(() => setProfessions([]));
+  }, []);
+
+  useEffect(() => {
     if (!isEdit) return;
     let mounted = true;
     employesApi
@@ -186,12 +216,20 @@ export default function EmployeeForm() {
           dateEmbauche: data.dateEmbauche ? new Date(data.dateEmbauche).toISOString().split('T')[0] : "",
           statutEmploi: data.statutEmploi || "ACTIF",
           typeContrat: data.typeContrat || "CDI",
+          typeSalaire: data.typeSalaire || "MENSUEL",
           salaireBase: data.salaireBase || "",
+          salaireHoraire: data.salaireHoraire || "",
+          tauxJournalier: data.tauxJournalier || "",
           allocations: data.allocations || "",
           deductions: data.deductions || "",
           estActif: data.estActif ?? true,
           entrepriseId: data.entrepriseId || "",
+          professionId: data.professionId || "",
         });
+        // Set the profession search for display
+        if (data.profession) {
+          setProfessionSearch(data.profession.nom);
+        }
         // Generate matricule for edit mode as well
         const genMatricule = generateMatricule(data.entrepriseId, entreprises);
         setGeneratedMatricule(genMatricule);
@@ -199,6 +237,19 @@ export default function EmployeeForm() {
       .catch((err) => setError(err?.response?.data?.message || err.message));
     return () => (mounted = false);
   }, [id, isEdit, entreprises]);
+
+  // Close profession dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (!event.target.closest('.profession-dropdown')) {
+        setShowProfessionDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -213,6 +264,8 @@ export default function EmployeeForm() {
       adresse: validateAdresse(form.adresse),
       dateEmbauche: validateDateEmbauche(form.dateEmbauche),
       salaireBase: validateSalaireBase(form.salaireBase),
+      salaireHoraire: validateSalaireHoraire(form.salaireHoraire, form.typeSalaire),
+      tauxJournalier: validateTauxJournalier(form.tauxJournalier, form.typeSalaire),
       allocations: validateAllocations(form.allocations),
       deductions: validateDeductions(form.deductions),
       entrepriseId: validateEntrepriseId(form.entrepriseId),
@@ -233,17 +286,21 @@ export default function EmployeeForm() {
         matricule: form.matricule,
         prenom: form.prenom,
         nom: form.nom,
-        email: form.email || undefined,
-        telephone: form.telephone || undefined,
-        adresse: form.adresse || undefined,
-        dateEmbauche: new Date(form.dateEmbauche),
+        email: form.email || null,
+        telephone: form.telephone || null,
+        adresse: form.adresse || null,
+        dateEmbauche: new Date(form.dateEmbauche + 'T00:00:00.000Z'),
         statutEmploi: form.statutEmploi,
         typeContrat: form.typeContrat,
+        typeSalaire: form.typeSalaire,
         salaireBase: parseFloat(form.salaireBase),
-        allocations: form.allocations ? parseFloat(form.allocations) : undefined,
-        deductions: form.deductions ? parseFloat(form.deductions) : undefined,
+        salaireHoraire: form.salaireHoraire ? parseFloat(form.salaireHoraire) : null,
+        tauxJournalier: form.tauxJournalier ? parseFloat(form.tauxJournalier) : null,
+        allocations: form.allocations ? parseFloat(form.allocations) : 0,
+        deductions: form.deductions ? parseFloat(form.deductions) : 0,
         estActif: form.estActif,
         entrepriseId: parseInt(form.entrepriseId),
+        professionId: form.professionId ? parseInt(form.professionId) : null,
       };
       if (isEdit) await employesApi.update(id, payload);
       else await employesApi.create(payload);
@@ -334,6 +391,11 @@ export default function EmployeeForm() {
                 <option value="INTERIM">Intérim</option>
                 <option value="STAGE">Stage</option>
               </Select>
+              <Select label="Type de salaire" value={form.typeSalaire} onChange={(e) => update("typeSalaire", e.target.value)} required>
+                <option value="MENSUEL">Mensuel</option>
+                <option value="HONORAIRES">Honoraires</option>
+                <option value="JOURNALIER">Journalier</option>
+              </Select>
               <div>
                 <Input
                   label="Salaire de base"
@@ -344,6 +406,30 @@ export default function EmployeeForm() {
                   error={errors.salaireBase}
                 />
               </div>
+              {form.typeSalaire === 'HONORAIRES' && (
+                <div>
+                  <Input
+                    label="Salaire horaire"
+                    type="number"
+                    step="0.01"
+                    value={form.salaireHoraire}
+                    onChange={(e) => update("salaireHoraire", e.target.value)}
+                    error={errors.salaireHoraire}
+                  />
+                </div>
+              )}
+              {form.typeSalaire === 'JOURNALIER' && (
+                <div>
+                  <Input
+                    label="Taux journalier"
+                    type="number"
+                    step="0.01"
+                    value={form.tauxJournalier}
+                    onChange={(e) => update("tauxJournalier", e.target.value)}
+                    error={errors.tauxJournalier}
+                  />
+                </div>
+              )}
               <div>
                 <Input
                   label="Allocations"
@@ -370,6 +456,50 @@ export default function EmployeeForm() {
                   <option key={ent.id} value={ent.id}>{ent.nom}</option>
                 ))}
               </Select>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Profession</label>
+                <div className="relative profession-dropdown">
+                  <input
+                    type="text"
+                    value={professionSearch}
+                    onChange={(e) => {
+                      setProfessionSearch(e.target.value);
+                      setShowProfessionDropdown(true);
+                    }}
+                    onFocus={() => setShowProfessionDropdown(true)}
+                    placeholder="Rechercher une profession..."
+                    className="w-full rounded-md border border-gray-300 py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  {showProfessionDropdown && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                      {professions
+                        .filter(prof => prof.nom.toLowerCase().includes(professionSearch.toLowerCase()) && prof.estActive)
+                        .map((prof) => (
+                          <div
+                            key={prof.id}
+                            className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => {
+                              setForm(prev => ({ ...prev, professionId: prof.id }));
+                              setProfessionSearch(prof.nom);
+                              setShowProfessionDropdown(false);
+                            }}
+                          >
+                            <div className="font-medium text-gray-900">{prof.nom}</div>
+                            {prof.description && (
+                              <div className="text-sm text-gray-500">{prof.description}</div>
+                            )}
+                            {prof.categorie && (
+                              <div className="text-xs text-blue-600">{prof.categorie}</div>
+                            )}
+                          </div>
+                        ))}
+                      {professions.filter(prof => prof.nom.toLowerCase().includes(professionSearch.toLowerCase()) && prof.estActive).length === 0 && (
+                        <div className="px-3 py-2 text-gray-500">Aucune profession trouvée</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className="flex items-center gap-2 mt-4 md:col-span-2">
                 <input
                   type="checkbox"

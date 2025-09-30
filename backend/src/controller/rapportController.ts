@@ -16,7 +16,7 @@ export class RapportController {
 
   async getAll(req: Request, res: Response) {
     try {
-      const rapports = await rapportService.getAllRapports();
+      const rapports = await rapportService.getAllRapports(req.user);
       res.json(rapports);
     } catch (err: any) {
       res.status(500).json({ error: err.message });

@@ -148,14 +148,14 @@ export class AuthService implements IAuthService {
   }
 
   private generateTokens(utilisateur: Utilisateur) {
-    const accessToken = AuthUtils.generateAccessToken({
+    const payload = {
       email: utilisateur.email,
-      profil: utilisateur.role
-    });
-    const refreshToken = AuthUtils.generateRefreshToken({
-      email: utilisateur.email,
-      profil: utilisateur.role
-    });
+      profil: utilisateur.role,
+      ...(utilisateur.entrepriseId && { entrepriseId: utilisateur.entrepriseId })
+    };
+
+    const accessToken = AuthUtils.generateAccessToken(payload);
+    const refreshToken = AuthUtils.generateRefreshToken(payload);
 
     return { accessToken, refreshToken };
   }

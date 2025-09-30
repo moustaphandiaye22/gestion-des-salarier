@@ -22,7 +22,7 @@ export class CyclePaieController {
 
   async getAll(req: Request, res: Response) {
     try {
-      const cycles = await cyclePaieService.getAllCyclesPaie();
+      const cycles = await cyclePaieService.getAllCyclesPaie(req.user);
       res.json({ message: 'Liste des cycles de paie récupérée avec succès.', cycles });
     } catch (err: any) {
       res.status(500).json({ error: `Impossible de récupérer les cycles de paie : ${err.message}` });

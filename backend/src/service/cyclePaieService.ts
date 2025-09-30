@@ -22,8 +22,11 @@ export class CyclePaieService {
    return await this.cyclePaieRepository.findById(id);
   }
 
-  async getAllCyclesPaie() {
-   return await this.cyclePaieRepository.findAll();
+  async getAllCyclesPaie(user?: any) {
+    if (user) {
+      return this.cyclePaieRepository.findAllByUser(user);
+    }
+    return this.cyclePaieRepository.findAll();
   }
 
   async updateCyclePaie(id: number, data: any) {

@@ -24,6 +24,7 @@ model Entreprise {
   adresse        String?            @db.VarChar(255)
   telephone      String?            @db.VarChar(20)
   email          String?            @db.VarChar(100)
+  logo           String?            @db.VarChar(255) // Chemin vers le logo de l'entreprise
   estActive      Boolean            @default(true)
   dateCreation   DateTime           @default(now())
 
@@ -36,6 +37,7 @@ model Entreprise {
   journauxAudit  JournalAudit[]
   tableauxDeBord TableauDeBord[]
   parametres     ParametreEntreprise[]
+  licences       Licence[]
 
   @@unique([nom])
   @@index([estActive])
@@ -70,14 +72,19 @@ model Employe {
   dateEmbauche  DateTime
   statutEmploi  StatutEmploi
   typeContrat   TypeContrat
+  typeSalaire   TypeSalaire       @default(MENSUEL)
   salaireBase   Decimal           @db.Decimal(15, 2)
+  salaireHoraire Decimal?         @db.Decimal(15, 2) // Pour les honoraires
+  tauxJournalier Decimal?         @db.Decimal(15, 2) // Pour les journaliers
   allocations   Decimal           @default(0.0) @db.Decimal(15, 2)
   deductions    Decimal           @default(0.0) @db.Decimal(15, 2)
+  professionId  Int?
   estActif      Boolean           @default(true)
   entrepriseId  Int
 
   // Relations
   entreprise    Entreprise        @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  profession    Profession?       @relation(fields: [professionId], references: [id])
   bulletins     Bulletin[]
   journauxAudit JournalAudit[]
 
@@ -85,6 +92,7 @@ model Employe {
   @@index([entrepriseId, estActif])
   @@index([statutEmploi])
   @@index([typeContrat])
+  @@index([professionId])
   @@map("employees")
 }
 
@@ -219,9 +227,54 @@ model ParametreEntreprise {
   @@map("company_settings")
 }
 
-// ==========================================
-// ENUMS
-// ==========================================
+model ParametreGlobal {
+  id            Int               @id @default(autoincrement())
+  cle           String            @db.VarChar(100)
+  valeur        String            @db.VarChar(255)
+  description   String?           @db.Text
+  categorie     String?           @db.VarChar(50)
+  estModifiable Boolean           @default(true)
+  dateCreation  DateTime          @default(now())
+  dateModification DateTime       @updatedAt
+
+  @@unique([cle])
+  @@map("global_settings")
+}
+
+model Licence {
+  id            Int               @id @default(autoincrement())
+  nom           String            @db.VarChar(100)
+  description   String?           @db.Text
+  typeLicence   TypeLicence
+  statut        StatutLicence     @default(ACTIVE)
+  dateDebut     DateTime
+  dateFin       DateTime?
+  limiteUtilisateurs Int?         @default(-1) // -1 = illimité
+  limiteEntreprises  Int?         @default(-1) // -1 = illimité
+  prix          Decimal?          @db.Decimal(10, 2)
+  entrepriseId  Int?
+
+  // Relations
+  entreprise    Entreprise?       @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+
+  @@unique([nom])
+  @@map("licenses")
+}
+
+model Profession {
+  id            Int               @id @default(autoincrement())
+  nom           String            @db.VarChar(100)
+  description   String?           @db.Text
+  categorie     String?           @db.VarChar(50) // Ex: Technique, Commercial, Administratif
+  estActive     Boolean           @default(true)
+
+  // Relations
+  employes      Employe[]
+
+  @@unique([nom])
+  @@index([categorie])
+  @@map("professions")
+}
 
 enum RoleUtilisateur {
   SUPER_ADMIN
@@ -242,6 +295,12 @@ enum TypeContrat {
   CDD
   INTERIM
   STAGE
+}
+
+enum TypeSalaire {
+  MENSUEL
+  HONORAIRES
+  JOURNALIER
 }
 
 enum StatutPaiement {
@@ -290,4 +349,18 @@ enum ActionAudit {
   DECONNEXION
   EXPORTATION
   GENERATION
+}
+
+enum TypeLicence {
+  STANDARD
+  PREMIUM
+  ENTERPRISE
+  TRIAL
+}
+
+enum StatutLicence {
+  ACTIVE
+  EXPIREE
+  SUSPENDUE
+  ANNULEE
 }

@@ -16,7 +16,10 @@ export class ParametreEntrepriseService {
     return result;
   }
 
-  async getAllParametresEntreprise() {
+  async getAllParametresEntreprise(user?: any) {
+    if (user) {
+      return this.parametreEntrepriseRepository.findAllByUser(user);
+    }
     return this.parametreEntrepriseRepository.findAll();
   }
 

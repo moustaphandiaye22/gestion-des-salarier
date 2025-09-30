@@ -28,6 +28,7 @@ export interface IUtilisateurService {
   createUtilisateur(data: CreateUtilisateurData): Promise<Utilisateur>;
   getUtilisateur(id: number): Promise<Utilisateur | null>;
   getAllUtilisateurs(): Promise<Utilisateur[]>;
+  getUtilisateursByEntreprise(entrepriseId: number): Promise<Utilisateur[]>;
   updateUtilisateur(id: number, data: UpdateUtilisateurData): Promise<Utilisateur | null>;
   deleteUtilisateur(id: number): Promise<void>;
 }
@@ -109,6 +110,18 @@ export class UtilisateurService implements IUtilisateurService {
       return utilisateurs;
     } catch (error: any) {
       Logger.error('Erreur lors de la récupération des utilisateurs', error);
+      throw new InternalServerError('Impossible de récupérer la liste des utilisateurs');
+    }
+  }
+
+  async getUtilisateursByEntreprise(entrepriseId: number): Promise<Utilisateur[]> {
+    try {
+      Logger.info('Récupération des utilisateurs par entreprise', { entrepriseId });
+      const utilisateurs = await this.userRepository.findByEntreprise(entrepriseId);
+      Logger.info('Utilisateurs récupérés avec succès', { count: utilisateurs.length, entrepriseId });
+      return utilisateurs;
+    } catch (error: any) {
+      Logger.error('Erreur lors de la récupération des utilisateurs par entreprise', error, { entrepriseId });
       throw new InternalServerError('Impossible de récupérer la liste des utilisateurs');
     }
   }

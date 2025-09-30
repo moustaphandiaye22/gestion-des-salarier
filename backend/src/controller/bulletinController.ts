@@ -23,7 +23,7 @@ export class BulletinController {
 
   async getAll(req: Request, res: Response) {
     try {
-      const bulletins = await bulletinService.getAllBulletins();
+      const bulletins = await bulletinService.getAllBulletins(req.user);
       res.json({ message: 'Liste des bulletins récupérée avec succès.', bulletins });
     } catch (err: any) {
       res.status(500).json({ error: `Impossible de récupérer les bulletins : ${err.message}` });

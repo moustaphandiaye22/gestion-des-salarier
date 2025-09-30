@@ -8,6 +8,7 @@ const JWT_REFRESH_SECRET = config.JWT_REFRESH_SECRET;
 export interface JwtPayload {
   email: string;
   profil?: string;
+  entrepriseId?: number;
 }
 
 export class AuthUtils {

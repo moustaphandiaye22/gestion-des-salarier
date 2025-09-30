@@ -116,4 +116,18 @@ export class utilisateurRepository implements IUserRepository {
       throw new InternalServerError('Impossible de rechercher l\'utilisateur par email');
     }
   }
+
+  async findByEntreprise(entrepriseId: number): Promise<Utilisateur[]> {
+    try {
+      Logger.info('Recherche d\'utilisateurs par entreprise', { entrepriseId });
+      const utilisateurs = await mnprisma.utilisateur.findMany({
+        where: { entrepriseId }
+      });
+      Logger.info('Utilisateurs trouvés par entreprise', { entrepriseId, count: utilisateurs.length });
+      return utilisateurs;
+    } catch (error: any) {
+      Logger.error('Erreur lors de la recherche par entreprise', error, { entrepriseId });
+      throw new InternalServerError('Impossible de récupérer les utilisateurs par entreprise');
+    }
+  }
 }
