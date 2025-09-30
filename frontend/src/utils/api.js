@@ -173,35 +173,55 @@ function toQuery(params = {}) {
 
 // Domain APIs mapping your backend routes (normalized to data shapes)
 export const employesApi = {
-  list: (params) => api.get(`/api/employes${toQuery(params)}`).then((r) => r.data?.employes || []),
-  get: (id) => api.get(`/api/employes/${id}`).then((r) => r.data?.employe || null),
-  create: (payload) => api.post(`/api/employes`, payload).then((r) => r.data?.employe || null),
-  update: (id, payload) => api.put(`/api/employes/${id}`, payload).then((r) => r.data?.employe || null),
+  list: (params) => api.get(`/api/employes${toQuery(params)}`).then((r) => r.data?.employes || r.data || []),
+  get: (id) => api.get(`/api/employes/${id}`).then((r) => r.data?.employe || r.data || null),
+  create: (payload) => api.post(`/api/employes`, payload).then((r) => r.data?.employe || r.data || null),
+  update: (id, payload) => api.put(`/api/employes/${id}`, payload).then((r) => r.data?.employe || r.data || null),
   remove: (id) => api.delete(`/api/employes/${id}`).then((r) => r.data),
 };
 
 export const entreprisesApi = {
-  list: (params) => api.get(`/api/entreprises${toQuery(params)}`).then((r) => r.data?.entreprises || []),
-  get: (id) => api.get(`/api/entreprises/${id}`).then((r) => r.data?.entreprise || null),
-  create: (payload) => api.post(`/api/entreprises`, payload).then((r) => r.data?.entreprise || null),
-  update: (id, payload) => api.put(`/api/entreprises/${id}`, payload).then((r) => r.data?.entreprise || null),
+  list: (params) => api.get(`/api/entreprises${toQuery(params)}`).then((r) => r.data?.entreprises || r.data || []),
+  get: (id) => api.get(`/api/entreprises/${id}`).then((r) => r.data?.entreprise || r.data || null),
+  create: (payload) => {
+    if (payload instanceof FormData) {
+      return api.post(`/api/entreprises`, payload, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }).then((r) => r.data?.entreprise || r.data || null);
+    } else {
+      return api.post(`/api/entreprises`, payload).then((r) => r.data?.entreprise || r.data || null);
+    }
+  },
+  update: (id, payload) => {
+    if (payload instanceof FormData) {
+      return api.put(`/api/entreprises/${id}`, payload, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }).then((r) => r.data?.entreprise || r.data || null);
+    } else {
+      return api.put(`/api/entreprises/${id}`, payload).then((r) => r.data?.entreprise || r.data || null);
+    }
+  },
   remove: (id) => api.delete(`/api/entreprises/${id}`).then((r) => r.data),
 };
 
 export const bulletinsApi = {
-  list: (params) => api.get(`/api/bulletins${toQuery(params)}`).then((r) => r.data?.bulletins || []),
-  get: (id) => api.get(`/api/bulletins/${id}`).then((r) => r.data?.bulletin || null),
-  create: (payload) => api.post(`/api/bulletins`, payload).then((r) => r.data?.bulletin || null),
-  update: (id, payload) => api.put(`/api/bulletins/${id}`, payload).then((r) => r.data?.bulletin || null),
+  list: (params) => api.get(`/api/bulletins${toQuery(params)}`).then((r) => r.data?.bulletins || r.data || []),
+  get: (id) => api.get(`/api/bulletins/${id}`).then((r) => r.data?.bulletin || r.data || null),
+  create: (payload) => api.post(`/api/bulletins`, payload).then((r) => r.data?.bulletin || r.data || null),
+  update: (id, payload) => api.put(`/api/bulletins/${id}`, payload).then((r) => r.data?.bulletin || r.data || null),
   remove: (id) => api.delete(`/api/bulletins/${id}`).then((r) => r.data),
   downloadPdf: (id) => api.get(`/api/bulletins/${id}/pdf`, { responseType: 'blob' }).then((r) => r.data),
 };
 
 export const paiementsApi = {
-  list: (params) => api.get(`/api/paiements${toQuery(params)}`).then((r) => r.data?.paiements || []),
-  get: (id) => api.get(`/api/paiements/${id}`).then((r) => r.data?.paiement || null),
-  create: (payload) => api.post(`/api/paiements`, payload).then((r) => r.data?.paiement || null),
-  update: (id, payload) => api.put(`/api/paiements/${id}`, payload).then((r) => r.data?.paiement || null),
+  list: (params) => api.get(`/api/paiements${toQuery(params)}`).then((r) => r.data?.paiements || r.data || []),
+  get: (id) => api.get(`/api/paiements/${id}`).then((r) => r.data?.paiement || r.data || null),
+  create: (payload) => api.post(`/api/paiements`, payload).then((r) => r.data?.paiement || r.data || null),
+  update: (id, payload) => api.put(`/api/paiements/${id}`, payload).then((r) => r.data?.paiement || r.data || null),
   remove: (id) => api.delete(`/api/paiements/${id}`).then((r) => r.data),
 };
 
@@ -243,11 +263,44 @@ export const journauxAuditApi = {
 };
 
 export const utilisateursApi = {
-  list: (params) => api.get(`/api/utilisateurs${toQuery(params)}`).then((r) => r.data?.utilisateurs || []),
-  get: (id) => api.get(`/api/utilisateurs/${id}`).then((r) => r.data?.utilisateur || null),
-  create: (payload) => api.post(`/api/utilisateurs`, payload).then((r) => r.data?.utilisateur || null),
-  update: (id, payload) => api.put(`/api/utilisateurs/${id}`, payload).then((r) => r.data?.utilisateur || null),
+  list: (params) => api.get(`/api/utilisateurs${toQuery(params)}`).then((r) => r.data?.utilisateurs || r.data || []),
+  get: (id) => api.get(`/api/utilisateurs/${id}`).then((r) => r.data?.utilisateur || r.data || null),
+  create: (payload) => api.post(`/api/utilisateurs`, payload).then((r) => r.data?.utilisateur || r.data || null),
+  update: (id, payload) => api.put(`/api/utilisateurs/${id}`, payload).then((r) => r.data?.utilisateur || r.data || null),
   remove: (id) => api.delete(`/api/utilisateurs/${id}`).then((r) => r.data),
+};
+
+export const parametresGlobauxApi = {
+  list: (params) => api.get(`/api/parametres-globaux${toQuery(params)}`).then((r) => r.data?.parametres || []),
+  get: (id) => api.get(`/api/parametres-globaux/${id}`).then((r) => r.data?.parametre || null),
+  getByKey: (cle) => api.get(`/api/parametres-globaux/cle/${cle}`).then((r) => r.data?.parametre || null),
+  getValue: (cle) => api.get(`/api/parametres-globaux/valeur/${cle}`).then((r) => r.data?.valeur || null),
+  getByCategory: (categorie) => api.get(`/api/parametres-globaux/categorie/${categorie}`).then((r) => r.data?.parametres || []),
+  create: (payload) => api.post(`/api/parametres-globaux`, payload).then((r) => r.data?.parametre || null),
+  update: (id, payload) => api.put(`/api/parametres-globaux/${id}`, payload).then((r) => r.data?.parametre || null),
+  remove: (id) => api.delete(`/api/parametres-globaux/${id}`).then((r) => r.data),
+};
+
+export const professionsApi = {
+  list: (params) => api.get(`/api/professions${toQuery(params)}`).then((r) => r.data?.professions || r.data || []),
+  get: (id) => api.get(`/api/professions/${id}`).then((r) => r.data?.profession || r.data || null),
+  create: (payload) => api.post(`/api/professions`, payload).then((r) => r.data?.profession || r.data || null),
+  update: (id, payload) => api.put(`/api/professions/${id}`, payload).then((r) => r.data?.profession || r.data || null),
+  remove: (id) => api.delete(`/api/professions/${id}`).then((r) => r.data),
+};
+
+export const licencesApi = {
+  list: (params) => api.get(`/api/licences${toQuery(params)}`).then((r) => r.data?.licences || r.data || []),
+  get: (id) => api.get(`/api/licences/${id}`).then((r) => r.data?.licence || r.data || null),
+  getByNom: (nom) => api.get(`/api/licences/nom/${nom}`).then((r) => r.data?.licence || r.data || null),
+  getByEntreprise: (entrepriseId) => api.get(`/api/licences/entreprise/${entrepriseId}`).then((r) => r.data?.licences || r.data || []),
+  getByStatut: (statut) => api.get(`/api/licences/statut/${statut}`).then((r) => r.data?.licences || r.data || []),
+  getByType: (typeLicence) => api.get(`/api/licences/type/${typeLicence}`).then((r) => r.data?.licences || r.data || []),
+  create: (payload) => api.post(`/api/licences`, payload).then((r) => r.data?.licence || r.data || null),
+  update: (id, payload) => api.put(`/api/licences/${id}`, payload).then((r) => r.data?.licence || r.data || null),
+  remove: (id) => api.delete(`/api/licences/${id}`).then((r) => r.data),
+  assignToEntreprise: (id, entrepriseId) => api.post(`/api/licences/${id}/assign`, { entrepriseId }).then((r) => r.data?.licence || r.data || null),
+  revokeFromEntreprise: (id) => api.post(`/api/licences/${id}/revoke`).then((r) => r.data?.licence || r.data || null),
 };
 
 export default api;

@@ -27,6 +27,26 @@ export class cyclePaieRepository implements InterfaceRepository<CyclePaie> {
   return mnprisma.cyclePaie.findMany({ include: { entreprise: true, bulletins: true } });
   }
 
+  async findAllByUser(user: any) : Promise<CyclePaie[]> {
+    // Super Admin voit tous les cycles de paie
+    if (user.profil === 'SUPER_ADMIN') {
+      return mnprisma.cyclePaie.findMany({
+        include: { entreprise: true, bulletins: true }
+      });
+    }
+
+    // Admin d'Entreprise voit seulement les cycles de son entreprise
+    if (user.profil === 'ADMIN_ENTREPRISE' && user.entrepriseId) {
+      return mnprisma.cyclePaie.findMany({
+        where: { entrepriseId: user.entrepriseId },
+        include: { entreprise: true, bulletins: true }
+      });
+    }
+
+    // Autres rôles n'ont pas accès aux cycles de paie
+    return [];
+  }
+
   async update(id: number, data: Partial <Omit<CyclePaie,"id">>) : Promise<CyclePaie> {
     return mnprisma.cyclePaie.update({ where: { id }, data });
   }

@@ -31,6 +31,30 @@ export class bulletinRepository implements InterfaceRepository<Bulletin> {
   return mnprisma.bulletin.findMany({ include: { employe: true, cycle: true, paiements: true } });
   }
 
+  async findAllByUser(user: any) : Promise<Bulletin[]> {
+    // Super Admin voit tous les bulletins
+    if (user.profil === 'SUPER_ADMIN') {
+      return mnprisma.bulletin.findMany({
+        include: { employe: true, cycle: true, paiements: true }
+      });
+    }
+
+    // Admin d'Entreprise voit seulement les bulletins de son entreprise
+    if (user.profil === 'ADMIN_ENTREPRISE' && user.entrepriseId) {
+      return mnprisma.bulletin.findMany({
+        where: {
+          employe: {
+            entrepriseId: user.entrepriseId
+          }
+        },
+        include: { employe: true, cycle: true, paiements: true }
+      });
+    }
+
+    // Autres rôles n'ont pas accès aux bulletins
+    return [];
+  }
+
   async update(id: number, data: Partial <Omit<Bulletin,"id">>) {
     return mnprisma.bulletin.update({ where: { id }, data });
   }

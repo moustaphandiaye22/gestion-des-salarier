@@ -11,271 +11,369 @@ async function main() {
     return await bcrypt.hash(password, 10);
   };
 
-  // Create Entreprises
-  const entreprise1 = await prisma.entreprise.create({
-    data: {
-      nom: 'TechCorp Senegal',
-      description: 'Entreprise technologique leader au Sénégal',
-      adresse: 'Dakar, Plateau',
-      telephone: '+221 33 123 45 67',
-      email: 'contact@techcorp.sn',
-      estActive: true,
+  // Check if entreprises already exist to avoid unique constraint error
+  const existingEntreprises = await prisma.entreprise.findMany({
+    where: {
+      nom: {
+        in: ['TechCorp Senegal', 'AgriSolutions Mali'],
+      },
     },
   });
 
-  const entreprise2 = await prisma.entreprise.create({
-    data: {
-      nom: 'AgriSolutions Mali',
-      description: 'Solutions agricoles pour l\'Afrique de l\'Ouest',
-      adresse: 'Bamako, ACI 2000',
-      telephone: '+223 20 12 34 56',
-      email: 'info@agrisolutions.ml',
-      estActive: true,
-    },
-  });
+  let entreprise1, entreprise2;
+
+  if (existingEntreprises.length === 0) {
+    entreprise1 = await prisma.entreprise.create({
+      data: {
+        nom: 'TechCorp Senegal',
+        description: 'Entreprise technologique leader au Sénégal',
+        adresse: 'Dakar, Plateau',
+        telephone: '+221 33 123 45 67',
+        email: 'contact@techcorp.sn',
+        estActive: true,
+      },
+    });
+
+    entreprise2 = await prisma.entreprise.create({
+      data: {
+        nom: 'AgriSolutions Mali',
+        description: 'Solutions agricoles pour l\'Afrique de l\'Ouest',
+        adresse: 'Bamako, ACI 2000',
+        telephone: '+223 20 12 34 56',
+        email: 'info@agrisolutions.ml',
+        estActive: true,
+      },
+    });
+  } else {
+    entreprise1 = existingEntreprises.find(e => e.nom === 'TechCorp Senegal');
+    entreprise2 = existingEntreprises.find(e => e.nom === 'AgriSolutions Mali');
+  }
 
   console.log('Entreprises created');
 
-  // Create Utilisateurs
-  const hashedPasswordAdmin = await hashPassword('admin123');
-  const hashedPasswordEmploye = await hashPassword('employe123');
-
-  const user1 = await prisma.utilisateur.create({
-    data: {
-      nom: 'Admin TechCorp',
-      email: 'admin@techcorp.sn',
-      motDePasse: hashedPasswordAdmin,
-      role: 'ADMIN_ENTREPRISE',
-      estActif: true,
-      entrepriseId: entreprise1.id,
+  // Check if utilisateurs already exist
+  const existingUsers = await prisma.utilisateur.findMany({
+    where: {
+      email: {
+        in: ['admin@techcorp.sn', 'employe@techcorp.sn', 'admin@agrisolutions.ml', 'Request failed with status code 400'],
+      },
     },
   });
 
-  const user2 = await prisma.utilisateur.create({
-    data: {
-      nom: 'Employe TechCorp',
-      email: 'employe@techcorp.sn',
-      motDePasse: hashedPasswordEmploye,
-      role: 'EMPLOYE',
-      estActif: true,
-      entrepriseId: entreprise1.id,
-    },
-  });
+  let user1, user2, user3, superAdmin;
 
-  const user3 = await prisma.utilisateur.create({
-    data: {
-      nom: 'Admin AgriSolutions',
-      email: 'admin@agrisolutions.ml',
-      motDePasse: hashedPasswordAdmin,
-      role: 'ADMIN_ENTREPRISE',
-      estActif: true,
-      entrepriseId: entreprise2.id,
-    },
-  });
+  if (existingUsers.length === 0) {
+    // Create Utilisateurs
+    const hashedPasswordAdmin = await hashPassword('admin123');
+    const hashedPasswordEmploye = await hashPassword('employe123');
+
+    user1 = await prisma.utilisateur.create({
+      data: {
+        nom: 'Admin TechCorp',
+        email: 'admin@techcorp.sn',
+        motDePasse: hashedPasswordAdmin,
+        role: 'ADMIN_ENTREPRISE',
+        estActif: true,
+        entrepriseId: entreprise1.id,
+      },
+    });
+
+    user2 = await prisma.utilisateur.create({
+      data: {
+        nom: 'Employe TechCorp',
+        email: 'employe@techcorp.sn',
+        motDePasse: hashedPasswordEmploye,
+        role: 'EMPLOYE',
+        estActif: true,
+        entrepriseId: entreprise1.id,
+      },
+    });
+
+    user3 = await prisma.utilisateur.create({
+      data: {
+        nom: 'Admin AgriSolutions',
+        email: 'admin@agrisolutions.ml',
+        motDePasse: hashedPasswordAdmin,
+        role: 'ADMIN_ENTREPRISE',
+        estActif: true,
+        entrepriseId: entreprise2.id,
+      },
+    });
+
+    // Create Super Admin
+    const superAdminPassword = await hashPassword('superadmin123');
+    superAdmin = await prisma.utilisateur.create({
+      data: {
+        nom: 'Super Administrateur',
+        email: 'superadmin@payrollplatform.com',
+        motDePasse: superAdminPassword,
+        role: 'SUPER_ADMIN',
+        estActif: true,
+        // No entrepriseId for super admin
+      },
+    });
+  } else {
+    user1 = existingUsers.find(u => u.email === 'admin@techcorp.sn');
+    user2 = existingUsers.find(u => u.email === 'employe@techcorp.sn');
+    user3 = existingUsers.find(u => u.email === 'admin@agrisolutions.ml');
+    superAdmin = existingUsers.find(u => u.email === 'superadmin@payrollplatform.com');
+  }
 
   console.log('Utilisateurs created');
 
-  // Create Employes for Entreprise 1
-  const employe1 = await prisma.employe.create({
-    data: {
-      matricule: 'TC001',
-      prenom: 'Mamadou',
-      nom: 'Diallo',
-      email: 'mamadou.diallo@techcorp.sn',
-      telephone: '+221 77 123 45 67',
-      adresse: 'Dakar, Yoff',
-      dateEmbauche: new Date('2023-01-15'),
-      statutEmploi: 'ACTIF',
-      typeContrat: 'CDI',
-      salaireBase: 500000.00,
-      allocations: 50000.00,
-      deductions: 0.00,
-      estActif: true,
-      entrepriseId: entreprise1.id,
+  // Check if employes already exist
+  const existingEmployes = await prisma.employe.findMany({
+    where: {
+      matricule: {
+        in: ['TC001', 'TC002', 'TC003', 'AS001', 'AS002'],
+      },
     },
   });
 
-  const employe2 = await prisma.employe.create({
-    data: {
-      matricule: 'TC002',
-      prenom: 'Fatou',
-      nom: 'Sow',
-      email: 'fatou.sow@techcorp.sn',
-      telephone: '+221 76 234 56 78',
-      adresse: 'Dakar, Plateau',
-      dateEmbauche: new Date('2023-03-01'),
-      statutEmploi: 'ACTIF',
-      typeContrat: 'CDI',
-      salaireBase: 450000.00,
-      allocations: 45000.00,
-      deductions: 0.00,
-      estActif: true,
-      entrepriseId: entreprise1.id,
-    },
-  });
+  let employe1, employe2, employe3, employe4, employe5;
 
-  const employe3 = await prisma.employe.create({
-    data: {
-      matricule: 'TC003',
-      prenom: 'Ibrahima',
-      nom: 'Ba',
-      email: 'ibrahima.ba@techcorp.sn',
-      telephone: '+221 78 345 67 89',
-      adresse: 'Dakar, Medina',
-      dateEmbauche: new Date('2023-05-10'),
-      statutEmploi: 'ACTIF',
-      typeContrat: 'CDD',
-      salaireBase: 400000.00,
-      allocations: 40000.00,
-      deductions: 0.00,
-      estActif: true,
-      entrepriseId: entreprise1.id,
-    },
-  });
+  if (existingEmployes.length === 0) {
+    // Create Employes for Entreprise 1
+    employe1 = await prisma.employe.create({
+      data: {
+        matricule: 'TC001',
+        prenom: 'Mamadou',
+        nom: 'Diallo',
+        email: 'mamadou.diallo@techcorp.sn',
+        telephone: '+221 77 123 45 67',
+        adresse: 'Dakar, Yoff',
+        dateEmbauche: new Date('2023-01-15'),
+        statutEmploi: 'ACTIF',
+        typeContrat: 'CDI',
+        salaireBase: 500000.00,
+        allocations: 50000.00,
+        deductions: 0.00,
+        estActif: true,
+        entrepriseId: entreprise1.id,
+      },
+    });
 
-  // Create Employes for Entreprise 2
-  const employe4 = await prisma.employe.create({
-    data: {
-      matricule: 'AS001',
-      prenom: 'Aminata',
-      nom: 'Traore',
-      email: 'aminata.traore@agrisolutions.ml',
-      telephone: '+223 70 12 34 56',
-      adresse: 'Bamako, Koulikoro',
-      dateEmbauche: new Date('2023-02-20'),
-      statutEmploi: 'ACTIF',
-      typeContrat: 'CDI',
-      salaireBase: 350000.00,
-      allocations: 35000.00,
-      deductions: 0.00,
-      estActif: true,
-      entrepriseId: entreprise2.id,
-    },
-  });
+    employe2 = await prisma.employe.create({
+      data: {
+        matricule: 'TC002',
+        prenom: 'Fatou',
+        nom: 'Sow',
+        email: 'fatou.sow@techcorp.sn',
+        telephone: '+221 76 234 56 78',
+        adresse: 'Dakar, Plateau',
+        dateEmbauche: new Date('2023-03-01'),
+        statutEmploi: 'ACTIF',
+        typeContrat: 'CDI',
+        salaireBase: 450000.00,
+        allocations: 45000.00,
+        deductions: 0.00,
+        estActif: true,
+        entrepriseId: entreprise1.id,
+      },
+    });
 
-  const employe5 = await prisma.employe.create({
-    data: {
-      matricule: 'AS002',
-      prenom: 'Souleymane',
-      nom: 'Coulibaly',
-      email: 'souleymane.coulibaly@agrisolutions.ml',
-      telephone: '+223 71 23 45 67',
-      adresse: 'Bamako, ACI 2000',
-      dateEmbauche: new Date('2023-04-05'),
-      statutEmploi: 'ACTIF',
-      typeContrat: 'CDI',
-      salaireBase: 380000.00,
-      allocations: 38000.00,
-      deductions: 0.00,
-      estActif: true,
-      entrepriseId: entreprise2.id,
-    },
-  });
+    employe3 = await prisma.employe.create({
+      data: {
+        matricule: 'TC003',
+        prenom: 'Ibrahima',
+        nom: 'Ba',
+        email: 'ibrahima.ba@techcorp.sn',
+        telephone: '+221 78 345 67 89',
+        adresse: 'Dakar, Medina',
+        dateEmbauche: new Date('2023-05-10'),
+        statutEmploi: 'ACTIF',
+        typeContrat: 'CDD',
+        salaireBase: 400000.00,
+        allocations: 40000.00,
+        deductions: 0.00,
+        estActif: true,
+        entrepriseId: entreprise1.id,
+      },
+    });
+
+    // Create Employes for Entreprise 2
+    employe4 = await prisma.employe.create({
+      data: {
+        matricule: 'AS001',
+        prenom: 'Aminata',
+        nom: 'Traore',
+        email: 'aminata.traore@agrisolutions.ml',
+        telephone: '+223 70 12 34 56',
+        adresse: 'Bamako, Koulikoro',
+        dateEmbauche: new Date('2023-02-20'),
+        statutEmploi: 'ACTIF',
+        typeContrat: 'CDI',
+        salaireBase: 350000.00,
+        allocations: 35000.00,
+        deductions: 0.00,
+        estActif: true,
+        entrepriseId: entreprise2.id,
+      },
+    });
+
+    employe5 = await prisma.employe.create({
+      data: {
+        matricule: 'AS002',
+        prenom: 'Souleymane',
+        nom: 'Coulibaly',
+        email: 'souleymane.coulibaly@agrisolutions.ml',
+        telephone: '+223 71 23 45 67',
+        adresse: 'Bamako, ACI 2000',
+        dateEmbauche: new Date('2023-04-05'),
+        statutEmploi: 'ACTIF',
+        typeContrat: 'CDI',
+        salaireBase: 380000.00,
+        allocations: 38000.00,
+        deductions: 0.00,
+        estActif: true,
+        entrepriseId: entreprise2.id,
+      },
+    });
+  } else {
+    employe1 = existingEmployes.find(e => e.matricule === 'TC001');
+    employe2 = existingEmployes.find(e => e.matricule === 'TC002');
+    employe3 = existingEmployes.find(e => e.matricule === 'TC003');
+    employe4 = existingEmployes.find(e => e.matricule === 'AS001');
+    employe5 = existingEmployes.find(e => e.matricule === 'AS002');
+  }
 
   console.log('Employes created');
 
-  // Create CyclePaie
-  const cycle1 = await prisma.cyclePaie.create({
-    data: {
+  // Check if cycles already exist
+  const existingCycles = await prisma.cyclePaie.findMany({
+    where: {
       nom: 'Cycle Paie Janvier 2024',
-      description: 'Cycle de paie pour le mois de janvier 2024',
-      dateDebut: new Date('2024-01-01'),
-      dateFin: new Date('2024-01-31'),
-      statut: 'OUVERT',
-      frequence: 'MENSUEL',
-      entrepriseId: entreprise1.id,
     },
   });
 
-  const cycle2 = await prisma.cyclePaie.create({
-    data: {
-      nom: 'Cycle Paie Janvier 2024',
-      description: 'Cycle de paie pour le mois de janvier 2024',
-      dateDebut: new Date('2024-01-01'),
-      dateFin: new Date('2024-01-31'),
-      statut: 'OUVERT',
-      frequence: 'MENSUEL',
-      entrepriseId: entreprise2.id,
-    },
-  });
+  let cycle1, cycle2;
+
+  if (existingCycles.length === 0) {
+    // Create CyclePaie
+    cycle1 = await prisma.cyclePaie.create({
+      data: {
+        nom: 'Cycle Paie Janvier 2024',
+        description: 'Cycle de paie pour le mois de janvier 2024',
+        dateDebut: new Date('2024-01-01'),
+        dateFin: new Date('2024-01-31'),
+        statut: 'OUVERT',
+        frequence: 'MENSUEL',
+        entrepriseId: entreprise1.id,
+      },
+    });
+
+    cycle2 = await prisma.cyclePaie.create({
+      data: {
+        nom: 'Cycle Paie Janvier 2024',
+        description: 'Cycle de paie pour le mois de janvier 2024',
+        dateDebut: new Date('2024-01-01'),
+        dateFin: new Date('2024-01-31'),
+        statut: 'OUVERT',
+        frequence: 'MENSUEL',
+        entrepriseId: entreprise2.id,
+      },
+    });
+  } else {
+    cycle1 = existingCycles.find(c => c.entrepriseId === entreprise1.id);
+    cycle2 = existingCycles.find(c => c.entrepriseId === entreprise2.id);
+  }
 
   console.log('Cycles de paie created');
 
-  // Create Bulletins
-  const bulletin1 = await prisma.bulletin.create({
-    data: {
-      numeroBulletin: 'BL-TC001-202401',
-      periodeDebut: new Date('2024-01-01'),
-      periodeFin: new Date('2024-01-31'),
-      salaireBase: 500000.00,
-      allocations: 50000.00,
-      deductions: 0.00,
-      totalAPayer: 550000.00,
-      statutPaiement: 'PAYE',
-      cycleId: cycle1.id,
-      employeId: employe1.id,
+  // Check if bulletins already exist
+  const existingBulletins = await prisma.bulletin.findMany({
+    where: {
+      numeroBulletin: {
+        in: ['BL-TC001-202401', 'BL-TC002-202401', 'BL-TC003-202401', 'BL-AS001-202401', 'BL-AS002-202401'],
+      },
     },
   });
 
-  const bulletin2 = await prisma.bulletin.create({
-    data: {
-      numeroBulletin: 'BL-TC002-202401',
-      periodeDebut: new Date('2024-01-01'),
-      periodeFin: new Date('2024-01-31'),
-      salaireBase: 450000.00,
-      allocations: 45000.00,
-      deductions: 0.00,
-      totalAPayer: 495000.00,
-      statutPaiement: 'PAYE',
-      cycleId: cycle1.id,
-      employeId: employe2.id,
-    },
-  });
+  let bulletin1, bulletin2, bulletin3, bulletin4, bulletin5;
 
-  const bulletin3 = await prisma.bulletin.create({
-    data: {
-      numeroBulletin: 'BL-TC003-202401',
-      periodeDebut: new Date('2024-01-01'),
-      periodeFin: new Date('2024-01-31'),
-      salaireBase: 400000.00,
-      allocations: 40000.00,
-      deductions: 0.00,
-      totalAPayer: 440000.00,
-      statutPaiement: 'EN_ATTENTE',
-      cycleId: cycle1.id,
-      employeId: employe3.id,
-    },
-  });
+  if (existingBulletins.length === 0) {
+    // Create Bulletins
+    bulletin1 = await prisma.bulletin.create({
+      data: {
+        numeroBulletin: 'BL-TC001-202401',
+        periodeDebut: new Date('2024-01-01'),
+        periodeFin: new Date('2024-01-31'),
+        salaireBase: 500000.00,
+        allocations: 50000.00,
+        deductions: 0.00,
+        totalAPayer: 550000.00,
+        statutPaiement: 'PAYE',
+        cycleId: cycle1.id,
+        employeId: employe1.id,
+      },
+    });
 
-  const bulletin4 = await prisma.bulletin.create({
-    data: {
-      numeroBulletin: 'BL-AS001-202401',
-      periodeDebut: new Date('2024-01-01'),
-      periodeFin: new Date('2024-01-31'),
-      salaireBase: 350000.00,
-      allocations: 35000.00,
-      deductions: 0.00,
-      totalAPayer: 385000.00,
-      statutPaiement: 'PAYE',
-      cycleId: cycle2.id,
-      employeId: employe4.id,
-    },
-  });
+    bulletin2 = await prisma.bulletin.create({
+      data: {
+        numeroBulletin: 'BL-TC002-202401',
+        periodeDebut: new Date('2024-01-01'),
+        periodeFin: new Date('2024-01-31'),
+        salaireBase: 450000.00,
+        allocations: 45000.00,
+        deductions: 0.00,
+        totalAPayer: 495000.00,
+        statutPaiement: 'PAYE',
+        cycleId: cycle1.id,
+        employeId: employe2.id,
+      },
+    });
 
-  const bulletin5 = await prisma.bulletin.create({
-    data: {
-      numeroBulletin: 'BL-AS002-202401',
-      periodeDebut: new Date('2024-01-01'),
-      periodeFin: new Date('2024-01-31'),
-      salaireBase: 380000.00,
-      allocations: 38000.00,
-      deductions: 0.00,
-      totalAPayer: 418000.00,
-      statutPaiement: 'EN_ATTENTE',
-      cycleId: cycle2.id,
-      employeId: employe5.id,
-    },
-  });
+    bulletin3 = await prisma.bulletin.create({
+      data: {
+        numeroBulletin: 'BL-TC003-202401',
+        periodeDebut: new Date('2024-01-01'),
+        periodeFin: new Date('2024-01-31'),
+        salaireBase: 400000.00,
+        allocations: 40000.00,
+        deductions: 0.00,
+        totalAPayer: 440000.00,
+        statutPaiement: 'EN_ATTENTE',
+        cycleId: cycle1.id,
+        employeId: employe3.id,
+      },
+    });
+
+    bulletin4 = await prisma.bulletin.create({
+      data: {
+        numeroBulletin: 'BL-AS001-202401',
+        periodeDebut: new Date('2024-01-01'),
+        periodeFin: new Date('2024-01-31'),
+        salaireBase: 350000.00,
+        allocations: 35000.00,
+        deductions: 0.00,
+        totalAPayer: 385000.00,
+        statutPaiement: 'PAYE',
+        cycleId: cycle2.id,
+        employeId: employe4.id,
+      },
+    });
+
+    bulletin5 = await prisma.bulletin.create({
+      data: {
+        numeroBulletin: 'BL-AS002-202401',
+        periodeDebut: new Date('2024-01-01'),
+        periodeFin: new Date('2024-01-31'),
+        salaireBase: 380000.00,
+        allocations: 38000.00,
+        deductions: 0.00,
+        totalAPayer: 418000.00,
+        statutPaiement: 'EN_ATTENTE',
+        cycleId: cycle2.id,
+        employeId: employe5.id,
+      },
+    });
+  } else {
+    bulletin1 = existingBulletins.find(b => b.numeroBulletin === 'BL-TC001-202401');
+    bulletin2 = existingBulletins.find(b => b.numeroBulletin === 'BL-TC002-202401');
+    bulletin3 = existingBulletins.find(b => b.numeroBulletin === 'BL-TC003-202401');
+    bulletin4 = existingBulletins.find(b => b.numeroBulletin === 'BL-AS001-202401');
+    bulletin5 = existingBulletins.find(b => b.numeroBulletin === 'BL-AS002-202401');
+  }
 
   console.log('Bulletins created');
 
@@ -414,48 +512,316 @@ async function main() {
 
   console.log('Tableaux de bord created');
 
-  // Create ParametreEntreprise
-  await prisma.parametreEntreprise.create({
-    data: {
-      cle: 'devise',
-      valeur: 'XOF',
-      entrepriseId: entreprise1.id,
+  // Check if company parameters already exist
+  const existingCompanyParams = await prisma.parametreEntreprise.findMany({
+    where: {
+      OR: [
+        { entrepriseId: entreprise1.id, cle: 'devise' },
+        { entrepriseId: entreprise1.id, cle: 'langue' },
+        { entrepriseId: entreprise1.id, cle: 'frequence_paie' },
+        { entrepriseId: entreprise2.id, cle: 'devise' },
+        { entrepriseId: entreprise2.id, cle: 'langue' },
+      ],
     },
   });
 
-  await prisma.parametreEntreprise.create({
-    data: {
-      cle: 'langue',
-      valeur: 'fr',
-      entrepriseId: entreprise1.id,
-    },
-  });
+  if (existingCompanyParams.length === 0) {
+    // Create ParametreEntreprise
+    await prisma.parametreEntreprise.create({
+      data: {
+        cle: 'devise',
+        valeur: 'XOF',
+        entrepriseId: entreprise1.id,
+      },
+    });
 
-  await prisma.parametreEntreprise.create({
-    data: {
-      cle: 'frequence_paie',
-      valeur: 'mensuelle',
-      entrepriseId: entreprise1.id,
-    },
-  });
+    await prisma.parametreEntreprise.create({
+      data: {
+        cle: 'langue',
+        valeur: 'fr',
+        entrepriseId: entreprise1.id,
+      },
+    });
 
-  await prisma.parametreEntreprise.create({
-    data: {
-      cle: 'devise',
-      valeur: 'XOF',
-      entrepriseId: entreprise2.id,
-    },
-  });
+    await prisma.parametreEntreprise.create({
+      data: {
+        cle: 'frequence_paie',
+        valeur: 'mensuelle',
+        entrepriseId: entreprise1.id,
+      },
+    });
 
-  await prisma.parametreEntreprise.create({
-    data: {
-      cle: 'langue',
-      valeur: 'fr',
-      entrepriseId: entreprise2.id,
-    },
-  });
+    await prisma.parametreEntreprise.create({
+      data: {
+        cle: 'devise',
+        valeur: 'XOF',
+        entrepriseId: entreprise2.id,
+      },
+    });
+
+    await prisma.parametreEntreprise.create({
+      data: {
+        cle: 'langue',
+        valeur: 'fr',
+        entrepriseId: entreprise2.id,
+      },
+    });
+  }
 
   console.log('Parametres entreprise created');
+
+  // Check if global parameters already exist
+  const existingGlobalParams = await prisma.parametreGlobal.findMany({
+    where: {
+      cle: {
+        in: ['app_name', 'app_version', 'max_file_size', 'session_timeout', 'support_email', 'maintenance_mode'],
+      },
+    },
+  });
+
+  if (existingGlobalParams.length === 0) {
+    // Create ParametresGlobaux
+    await prisma.parametreGlobal.create({
+      data: {
+        cle: 'app_name',
+        valeur: 'Payroll Platform',
+        description: 'Nom de l\'application',
+        categorie: 'GENERAL',
+      },
+    });
+
+    await prisma.parametreGlobal.create({
+      data: {
+        cle: 'app_version',
+        valeur: '1.0.0',
+        description: 'Version actuelle de l\'application',
+        categorie: 'GENERAL',
+      },
+    });
+
+    await prisma.parametreGlobal.create({
+      data: {
+        cle: 'max_file_size',
+        valeur: '10485760',
+        description: 'Taille maximale des fichiers en octets (10MB)',
+        categorie: 'UPLOAD',
+      },
+    });
+
+    await prisma.parametreGlobal.create({
+      data: {
+        cle: 'session_timeout',
+        valeur: '3600',
+        description: 'Timeout de session en secondes (1 heure)',
+        categorie: 'SECURITY',
+      },
+    });
+
+    await prisma.parametreGlobal.create({
+      data: {
+        cle: 'support_email',
+        valeur: 'support@payrollplatform.com',
+        description: 'Email de support technique',
+        categorie: 'SUPPORT',
+      },
+    });
+
+    await prisma.parametreGlobal.create({
+      data: {
+        cle: 'maintenance_mode',
+        valeur: 'false',
+        description: 'Mode maintenance activé/désactivé',
+        categorie: 'MAINTENANCE',
+      },
+    });
+  }
+
+  console.log('Parametres globaux created');
+
+  // Check if licences already exist
+  const existingLicences = await prisma.licence.findMany({
+    where: {
+      nom: {
+        in: ['Licence Standard TechCorp', 'Licence Premium AgriSolutions', 'Licence Entreprise Demo', 'Licence Standard Expirée'],
+      },
+    },
+  });
+
+  if (existingLicences.length === 0) {
+    // Create Licences
+    await prisma.licence.create({
+      data: {
+        nom: 'Licence Standard TechCorp',
+        description: 'Licence standard pour TechCorp Senegal',
+        typeLicence: 'STANDARD',
+        statut: 'ACTIVE',
+        dateDebut: new Date('2024-01-01'),
+        dateFin: new Date('2024-12-31'),
+        limiteUtilisateurs: 50,
+        entrepriseId: entreprise1.id,
+      },
+    });
+
+    await prisma.licence.create({
+      data: {
+        nom: 'Licence Premium AgriSolutions',
+        description: 'Licence premium pour AgriSolutions Mali',
+        typeLicence: 'PREMIUM',
+        statut: 'ACTIVE',
+        dateDebut: new Date('2024-01-01'),
+        dateFin: new Date('2024-12-31'),
+        limiteUtilisateurs: 100,
+        entrepriseId: entreprise2.id,
+      },
+    });
+
+    await prisma.licence.create({
+      data: {
+        nom: 'Licence Entreprise Demo',
+        description: 'Licence entreprise pour démonstration',
+        typeLicence: 'ENTERPRISE',
+        statut: 'SUSPENDUE',
+        dateDebut: new Date('2024-06-01'),
+        dateFin: new Date('2025-05-31'),
+        limiteUtilisateurs: 500,
+        // Not assigned to any company yet
+      },
+    });
+
+    await prisma.licence.create({
+      data: {
+        nom: 'Licence Standard Expirée',
+        description: 'Licence expirée pour test',
+        typeLicence: 'STANDARD',
+        statut: 'EXPIRED',
+        dateDebut: new Date('2023-01-01'),
+        dateFin: new Date('2023-12-31'),
+        limiteUtilisateurs: 25,
+        entrepriseId: entreprise1.id,
+      },
+    });
+  }
+
+  console.log('Licences created');
+
+  // Check if professions already exist
+  const existingProfessions = await prisma.profession.findMany({
+    where: {
+      nom: {
+        in: ['Développeur', 'Designer', 'Chef de Projet', 'Ingénieur Agricole', 'Technicien', 'Manager', 'Analyste', 'Consultant'],
+      },
+    },
+  });
+
+  if (existingProfessions.length === 0) {
+    // Create Professions
+    await prisma.profession.create({
+      data: {
+        nom: 'Développeur',
+        description: 'Développement d\'applications web et mobiles',
+        categorie: 'Technique',
+        estActive: true,
+      },
+    });
+
+    await prisma.profession.create({
+      data: {
+        nom: 'Designer',
+        description: 'Conception d\'interfaces utilisateur et expérience utilisateur',
+        categorie: 'Créatif',
+        estActive: true,
+      },
+    });
+
+    await prisma.profession.create({
+      data: {
+        nom: 'Chef de Projet',
+        description: 'Gestion et coordination de projets',
+        categorie: 'Management',
+        estActive: true,
+      },
+    });
+
+    await prisma.profession.create({
+      data: {
+        nom: 'Ingénieur Agricole',
+        description: 'Expertise technique en agriculture et agroalimentaire',
+        categorie: 'Agriculture',
+        estActive: true,
+      },
+    });
+
+    await prisma.profession.create({
+      data: {
+        nom: 'Technicien',
+        description: 'Support technique et maintenance',
+        categorie: 'Technique',
+        estActive: true,
+      },
+    });
+
+    await prisma.profession.create({
+      data: {
+        nom: 'Manager',
+        description: 'Management d\'équipes et gestion opérationnelle',
+        categorie: 'Management',
+        estActive: true,
+      },
+    });
+
+    await prisma.profession.create({
+      data: {
+        nom: 'Analyste',
+        description: 'Analyse de données et business intelligence',
+        categorie: 'Analyse',
+        estActive: true,
+      },
+    });
+
+    await prisma.profession.create({
+      data: {
+        nom: 'Consultant',
+        description: 'Conseil et expertise métier',
+        categorie: 'Conseil',
+        estActive: true,
+      },
+    });
+  }
+
+  console.log('Professions created');
+
+  // Update some employees with profession IDs
+  if (employe1 && existingProfessions.length > 0) {
+    const devProfession = existingProfessions.find(p => p.nom === 'Développeur');
+    if (devProfession) {
+      await prisma.employe.update({
+        where: { id: employe1.id },
+        data: { professionId: devProfession.id },
+      });
+    }
+  }
+
+  if (employe2 && existingProfessions.length > 0) {
+    const designerProfession = existingProfessions.find(p => p.nom === 'Designer');
+    if (designerProfession) {
+      await prisma.employe.update({
+        where: { id: employe2.id },
+        data: { professionId: designerProfession.id },
+      });
+    }
+  }
+
+  if (employe4 && existingProfessions.length > 0) {
+    const agriProfession = existingProfessions.find(p => p.nom === 'Ingénieur Agricole');
+    if (agriProfession) {
+      await prisma.employe.update({
+        where: { id: employe4.id },
+        data: { professionId: agriProfession.id },
+      });
+    }
+  }
+
+  console.log('Employee professions updated');
 
   console.log('Seeding completed successfully!');
 }

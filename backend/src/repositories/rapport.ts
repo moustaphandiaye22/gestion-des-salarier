@@ -19,6 +19,23 @@ export class rapportRepository implements InterfaceRepository<Rapport> {
     return mnprisma.rapport.findMany();
   }
 
+  async findAllByUser(user: any): Promise<Rapport[]> {
+    // Super Admin voit tous les rapports
+    if (user.profil === 'SUPER_ADMIN') {
+      return mnprisma.rapport.findMany();
+    }
+
+    // Admin d'Entreprise voit seulement les rapports de son entreprise
+    if (user.profil === 'ADMIN_ENTREPRISE' && user.entrepriseId) {
+      return mnprisma.rapport.findMany({
+        where: { entrepriseId: user.entrepriseId }
+      });
+    }
+
+    // Autres rôles n'ont pas accès aux rapports
+    return [];
+  }
+
   async update(id: number, data: Partial<Omit<Rapport, "id">> & { contenu?: any }): Promise<Rapport> {
     return mnprisma.rapport.update({ where: { id }, data });
   }

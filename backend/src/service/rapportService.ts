@@ -16,7 +16,10 @@ export class RapportService {
     return result;
   }
 
-  async getAllRapports() {
+  async getAllRapports(user?: any) {
+    if (user) {
+      return this.rapportRepository.findAllByUser(user);
+    }
     return this.rapportRepository.findAll();
   }
 

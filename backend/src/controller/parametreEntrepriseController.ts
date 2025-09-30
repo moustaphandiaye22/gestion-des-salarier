@@ -22,7 +22,7 @@ export class ParametreEntrepriseController {
 
   async getAll(req: Request, res: Response) {
     try {
-      const parametres = await parametreEntrepriseService.getAllParametresEntreprise();
+      const parametres = await parametreEntrepriseService.getAllParametresEntreprise(req.user);
       res.json({ message: 'Liste des paramètres récupérée avec succès.', parametres });
     } catch (err: any) {
       res.status(500).json({ error: `Impossible de récupérer les paramètres : ${err.message}` });

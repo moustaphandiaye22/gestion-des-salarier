@@ -29,13 +29,23 @@ export function AuthProvider({ children }) {
     async login({ email, motDePasse }) {
       const data = await authApi.login({ email, motDePasse });
       const utilisateur = data?.utilisateur;
-      setUser({ email: utilisateur?.email, role: utilisateur?.role });
+      setUser({
+        email: utilisateur?.email,
+        role: utilisateur?.role,
+        entrepriseId: utilisateur?.entrepriseId,
+        entreprise: utilisateur?.entreprise
+      });
       return utilisateur;
     },
     async register(payload) {
       const data = await authApi.register(payload);
       const utilisateur = data?.utilisateur;
-      setUser({ email: utilisateur?.email, role: utilisateur?.role });
+      setUser({
+        email: utilisateur?.email,
+        role: utilisateur?.role,
+        entrepriseId: utilisateur?.entrepriseId,
+        entreprise: utilisateur?.entreprise
+      });
       return utilisateur;
     },
     async logout() {

@@ -17,9 +17,12 @@ import Paiements from "./pages/Paiements";
 import Bulletins from "./pages/Bulletins";
 import CyclesPaie from "./pages/CyclesPaie";
 import ParametreEntreprise from "./pages/ParametreEntreprise";
+import ParametresGlobaux from "./pages/ParametresGlobaux";
+import Licences from "./pages/Licences";
 import Rapports from "./pages/Rapports";
 import JournalAudit from "./pages/JournalAudit";
 import Utilisateurs from "./pages/Utilisateurs";
+import Professions from "./pages/Professions";
 
 function App() {
   return (
@@ -136,6 +139,28 @@ function App() {
       />
 
       <Route
+        path="/parametres-globaux"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <ParametresGlobaux />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/licences"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Licences />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/rapports"
         element={
           <ProtectedRoute>
@@ -163,6 +188,17 @@ function App() {
           <ProtectedRoute>
             <MainLayout>
               <Utilisateurs />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/professions"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Professions />
             </MainLayout>
           </ProtectedRoute>
         }

@@ -6,7 +6,7 @@ export const requireRole = (allowedRoles: string[]) => {
       return res.status(401).json({ error: 'Utilisateur non authentifié' });
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    if (!allowedRoles.includes(req.user.profil)) {
       return res.status(403).json({ error: 'Accès refusé : rôle insuffisant' });
     }
 
@@ -20,7 +20,7 @@ export const requireOwnershipOrAdmin = (req: Request, res: Response, next: NextF
   }
 
   const userId = Number(req.params.id);
-  const isAdmin = req.user.role === 'ADMIN';
+  const isAdmin = req.user.profil === 'ADMIN_ENTREPRISE' || req.user.profil === 'SUPER_ADMIN';
   const isOwner = req.user.id === userId;
 
   if (!isAdmin && !isOwner) {
@@ -28,4 +28,27 @@ export const requireOwnershipOrAdmin = (req: Request, res: Response, next: NextF
   }
 
   next();
+};
+
+export const requireSuperAdmin = requireRole(['SUPER_ADMIN']);
+export const requireAdminOrSuper = requireRole(['ADMIN_ENTREPRISE', 'SUPER_ADMIN']);
+export const requireCompanyAccess = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Utilisateur non authentifié' });
+  }
+
+  // Super admin can access all
+  if (req.user.profil === 'SUPER_ADMIN') {
+    return next();
+  }
+
+  // Admin can only access their own company
+  if (req.user.profil === 'ADMIN_ENTREPRISE' && req.user.entrepriseId) {
+    const companyId = Number(req.params.id) || req.user.entrepriseId;
+    if (req.user.entrepriseId === companyId) {
+      return next();
+    }
+  }
+
+  return res.status(403).json({ error: 'Accès refusé : vous ne pouvez accéder qu\'à votre entreprise' });
 };
