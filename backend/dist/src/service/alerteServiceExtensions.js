@@ -57,7 +57,7 @@ export class AlerteServiceExtensions {
                 type: 'PRODUCTIVITE_FAIBLE',
                 severite: 'MOYENNE',
                 tableauDeBordId: 1,
-                entrepriseId: isSuperAdmin ? 1 : entrepriseId,
+                entrepriseId: isSuperAdmin ? null : entrepriseId,
                 utilisateurId: 1
             });
         }
@@ -72,7 +72,7 @@ export class AlerteServiceExtensions {
                 type: 'COUT_ELEVE',
                 severite: 'ELEVEE',
                 tableauDeBordId: 1,
-                entrepriseId: isSuperAdmin ? 1 : entrepriseId,
+                entrepriseId: isSuperAdmin ? null : entrepriseId,
                 utilisateurId: 1
             });
         }

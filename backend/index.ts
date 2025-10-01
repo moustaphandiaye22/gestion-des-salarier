@@ -19,8 +19,7 @@ import cyclePaieRoutes from './src/routes/cyclePaieRoutes.js';
 import parametreEntrepriseRoutes from './src/routes/parametreEntrepriseRoutes.js';
 import parametreGlobalRoutes from './src/routes/parametreGlobalRoutes.js';
 import rapportRoutes from './src/routes/rapportRoutes.js';
-import tableauDeBordRoutes from './src/routes/tableauDeBordRoutes.js';
-import dashboardEnhancedRoutes from './src/routes/dashboardEnhancedRoutes.js';
+
 import journalAuditRoutes from './src/routes/journalAuditRoutes.js';
 import licenceRoutes from './src/routes/licenceRoutes.js';
 import professionRoutes from './src/routes/professionRoutes.js';
@@ -61,8 +60,7 @@ app.use('/api/cycles-paie', authenticateToken, cyclePaieRoutes);
 app.use('/api/parametres-entreprise', authenticateToken, parametreEntrepriseRoutes);
 app.use('/api/parametres-globaux', authenticateToken, parametreGlobalRoutes);
 app.use('/api/rapports', authenticateToken, rapportRoutes);
-app.use('/api/tableaux-de-bord', authenticateToken, tableauDeBordRoutes);
-app.use('/api/dashboard', authenticateToken, dashboardEnhancedRoutes);
+
 app.use('/api/journaux-audit', authenticateToken, journalAuditRoutes);
 app.use('/api/licences', authenticateToken, licenceRoutes);
 app.use('/api/professions', authenticateToken, professionRoutes);

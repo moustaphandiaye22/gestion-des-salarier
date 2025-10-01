@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardBody, Table, Button } from "../components/ui";
 import { bulletinsApi } from "../utils/api";
+import { useAuth } from "../context/AuthContext";
 import { PlusIcon } from "@heroicons/react/24/outline";
 
 export default function Bulletins() {
+  const { selectedCompanyId } = useAuth();
   const [rows, setRows] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,7 +25,7 @@ export default function Bulletins() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [selectedCompanyId]);
 
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-gray-50">

@@ -20,9 +20,9 @@ export class EmployeService {
    return this.employeRepository.findById(id); 
   }
 
-    async getAllEmployes(user?: any) {
+  async getAllEmployes(user?: any, entrepriseId?: number) {
     if (user) {
-      return this.employeRepository.findAllByUser(user);
+      return this.employeRepository.findAllByUser(user, entrepriseId);
     }
     return this.employeRepository.findAll();
   }
@@ -48,5 +48,28 @@ export class EmployeService {
 
   async setStatus(id: number, statutEmploi: StatutEmploi) {
         return this.employeRepository.setStatus(id, statutEmploi);
+  }
+
+  async bulkCreateEmployes(employes: any[]) {
+    const results = {
+      success: [] as any[],
+      errors: [] as {index: number, errors: any}[]
+    };
+
+    for (let i = 0; i < employes.length; i++) {
+      const data = employes[i];
+      const parsed = employeSchema.safeParse(data);
+      if (!parsed.success) {
+        results.errors.push({index: i, errors: parsed.error.issues});
+        continue;
+      }
+      try {
+        const created = await this.employeRepository.create(data);
+        results.success.push(created);
+      } catch (err) {
+        results.errors.push({index: i, errors: [{message: (err as Error).message}]});
+      }
+    }
+    return results;
   }
 }

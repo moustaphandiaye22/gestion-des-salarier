@@ -5,6 +5,16 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
     setEstActive(id: number, estActive: boolean): Promise<Entreprise>;
     create(data: Omit<Entreprise, "id">): Promise<Entreprise>;
     findById(id: number): Promise<({
+        paiements: {
+            id: number;
+            entrepriseId: number;
+            statut: import("@prisma/client").$Enums.StatutPaiement;
+            montant: Prisma.Decimal;
+            datePaiement: Date;
+            modePaiement: import("@prisma/client").$Enums.ModePaiement;
+            reference: string | null;
+            bulletinId: number;
+        }[];
         utilisateurs: {
             id: number;
             nom: string;
@@ -47,16 +57,6 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             createdAt: Date;
             updatedAt: Date;
         }[];
-        paiements: {
-            id: number;
-            entrepriseId: number;
-            statut: import("@prisma/client").$Enums.StatutPaiement;
-            montant: Prisma.Decimal;
-            datePaiement: Date;
-            modePaiement: import("@prisma/client").$Enums.ModePaiement;
-            reference: string | null;
-            bulletinId: number;
-        }[];
     } & {
         id: number;
         nom: string;
@@ -64,11 +64,21 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
         telephone: string | null;
         adresse: string | null;
         description: string | null;
+        dateCreation: Date;
         logo: string | null;
         estActive: boolean;
-        dateCreation: Date;
     }) | null>;
     findAll(): Promise<({
+        paiements: {
+            id: number;
+            entrepriseId: number;
+            statut: import("@prisma/client").$Enums.StatutPaiement;
+            montant: Prisma.Decimal;
+            datePaiement: Date;
+            modePaiement: import("@prisma/client").$Enums.ModePaiement;
+            reference: string | null;
+            bulletinId: number;
+        }[];
         utilisateurs: {
             id: number;
             nom: string;
@@ -111,16 +121,6 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             createdAt: Date;
             updatedAt: Date;
         }[];
-        paiements: {
-            id: number;
-            entrepriseId: number;
-            statut: import("@prisma/client").$Enums.StatutPaiement;
-            montant: Prisma.Decimal;
-            datePaiement: Date;
-            modePaiement: import("@prisma/client").$Enums.ModePaiement;
-            reference: string | null;
-            bulletinId: number;
-        }[];
     } & {
         id: number;
         nom: string;
@@ -128,11 +128,21 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
         telephone: string | null;
         adresse: string | null;
         description: string | null;
+        dateCreation: Date;
         logo: string | null;
         estActive: boolean;
-        dateCreation: Date;
     })[]>;
     findAllByUser(user: any): Promise<({
+        paiements: {
+            id: number;
+            entrepriseId: number;
+            statut: import("@prisma/client").$Enums.StatutPaiement;
+            montant: Prisma.Decimal;
+            datePaiement: Date;
+            modePaiement: import("@prisma/client").$Enums.ModePaiement;
+            reference: string | null;
+            bulletinId: number;
+        }[];
         utilisateurs: {
             id: number;
             nom: string;
@@ -175,16 +185,6 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             createdAt: Date;
             updatedAt: Date;
         }[];
-        paiements: {
-            id: number;
-            entrepriseId: number;
-            statut: import("@prisma/client").$Enums.StatutPaiement;
-            montant: Prisma.Decimal;
-            datePaiement: Date;
-            modePaiement: import("@prisma/client").$Enums.ModePaiement;
-            reference: string | null;
-            bulletinId: number;
-        }[];
     } & {
         id: number;
         nom: string;
@@ -192,9 +192,9 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
         telephone: string | null;
         adresse: string | null;
         description: string | null;
+        dateCreation: Date;
         logo: string | null;
         estActive: boolean;
-        dateCreation: Date;
     })[]>;
     update(id: number, data: Partial<Entreprise>): Promise<{
         id: number;
@@ -203,9 +203,9 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
         telephone: string | null;
         adresse: string | null;
         description: string | null;
+        dateCreation: Date;
         logo: string | null;
         estActive: boolean;
-        dateCreation: Date;
     }>;
     delete(id: number): Promise<void>;
 }

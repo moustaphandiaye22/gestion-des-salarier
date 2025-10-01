@@ -9,7 +9,7 @@ export declare class employeRepository implements InterfaceRepository<Employe> {
     create(data: Omit<Employe, "id">): Promise<Employe>;
     findById(id: number): Promise<Employe | null>;
     findAll(): Promise<Employe[]>;
-    findAllByUser(user: any): Promise<Employe[]>;
+    findAllByUser(user: any, entrepriseId?: number): Promise<Employe[]>;
     update(id: number, data: Partial<Omit<Employe, "id">>): Promise<Employe>;
     delete(id: number): Promise<void>;
 }

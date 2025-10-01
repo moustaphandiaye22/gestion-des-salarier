@@ -28,9 +28,15 @@ export class employeRepository {
     async findAll() {
         return mnprisma.employe.findMany({ include: { entreprise: true, bulletins: true, profession: true } });
     }
-    async findAllByUser(user) {
-        // Super Admin voit tous les employés
+    async findAllByUser(user, entrepriseId) {
+        // Super Admin voit tous les employés, ou seulement ceux de l'entreprise sélectionnée
         if (user.profil === 'SUPER_ADMIN') {
+            if (entrepriseId) {
+                return mnprisma.employe.findMany({
+                    where: { entrepriseId },
+                    include: { entreprise: true, bulletins: true, profession: true }
+                });
+            }
             return mnprisma.employe.findMany({
                 include: { entreprise: true, bulletins: true, profession: true }
             });

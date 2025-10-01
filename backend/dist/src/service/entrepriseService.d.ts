@@ -8,11 +8,21 @@ export declare class EntrepriseService {
         telephone: string | null;
         adresse: string | null;
         description: string | null;
+        dateCreation: Date;
         logo: string | null;
         estActive: boolean;
-        dateCreation: Date;
     }>;
     getEntreprise(id: number): Promise<({
+        paiements: {
+            id: number;
+            entrepriseId: number;
+            statut: import("@prisma/client").$Enums.StatutPaiement;
+            montant: import("@prisma/client/runtime/library").Decimal;
+            datePaiement: Date;
+            modePaiement: import("@prisma/client").$Enums.ModePaiement;
+            reference: string | null;
+            bulletinId: number;
+        }[];
         utilisateurs: {
             id: number;
             nom: string;
@@ -55,16 +65,6 @@ export declare class EntrepriseService {
             createdAt: Date;
             updatedAt: Date;
         }[];
-        paiements: {
-            id: number;
-            entrepriseId: number;
-            statut: import("@prisma/client").$Enums.StatutPaiement;
-            montant: import("@prisma/client/runtime/library").Decimal;
-            datePaiement: Date;
-            modePaiement: import("@prisma/client").$Enums.ModePaiement;
-            reference: string | null;
-            bulletinId: number;
-        }[];
     } & {
         id: number;
         nom: string;
@@ -72,11 +72,21 @@ export declare class EntrepriseService {
         telephone: string | null;
         adresse: string | null;
         description: string | null;
+        dateCreation: Date;
         logo: string | null;
         estActive: boolean;
-        dateCreation: Date;
     }) | null>;
     getAllEntreprises(user?: any): Promise<({
+        paiements: {
+            id: number;
+            entrepriseId: number;
+            statut: import("@prisma/client").$Enums.StatutPaiement;
+            montant: import("@prisma/client/runtime/library").Decimal;
+            datePaiement: Date;
+            modePaiement: import("@prisma/client").$Enums.ModePaiement;
+            reference: string | null;
+            bulletinId: number;
+        }[];
         utilisateurs: {
             id: number;
             nom: string;
@@ -119,16 +129,6 @@ export declare class EntrepriseService {
             createdAt: Date;
             updatedAt: Date;
         }[];
-        paiements: {
-            id: number;
-            entrepriseId: number;
-            statut: import("@prisma/client").$Enums.StatutPaiement;
-            montant: import("@prisma/client/runtime/library").Decimal;
-            datePaiement: Date;
-            modePaiement: import("@prisma/client").$Enums.ModePaiement;
-            reference: string | null;
-            bulletinId: number;
-        }[];
     } & {
         id: number;
         nom: string;
@@ -136,9 +136,9 @@ export declare class EntrepriseService {
         telephone: string | null;
         adresse: string | null;
         description: string | null;
+        dateCreation: Date;
         logo: string | null;
         estActive: boolean;
-        dateCreation: Date;
     })[]>;
     updateEntreprise(id: number, data: any): Promise<{
         id: number;
@@ -147,9 +147,9 @@ export declare class EntrepriseService {
         telephone: string | null;
         adresse: string | null;
         description: string | null;
+        dateCreation: Date;
         logo: string | null;
         estActive: boolean;
-        dateCreation: Date;
     }>;
     deleteEntreprise(id: number): Promise<void>;
 }

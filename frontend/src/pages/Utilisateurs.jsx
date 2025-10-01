@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog } from "../components/ui";
 import { utilisateursApi } from "../utils/api";
+import { useAuth } from "../context/AuthContext";
 import { TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 export default function Utilisateurs() {
+  const { selectedCompanyId } = useAuth();
   const [rows, setRows] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -24,7 +26,7 @@ export default function Utilisateurs() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [selectedCompanyId]);
 
   async function handleDelete() {
     if (!toDelete) return;

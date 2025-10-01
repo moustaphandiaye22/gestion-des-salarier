@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import { NavLink, Link, useLocation } from "react-router-dom";
 import { Button } from "../components/ui";
 import { useAuth } from "../context/AuthContext";
-import { entreprisesApi } from "../utils/api";
+import { entreprisesApi, API_BASE_URL } from "../utils/api";
 import {
   HomeIcon,
   UsersIcon,
@@ -25,7 +25,6 @@ function cx(...cls) {
 
 const NAV = [
    { to: "/dashboard", label: "Tableau de bord", icon: ChartPieIcon },
-   { to: "/dashboard-enhanced", label: "Dashboard Analytique", icon: ChartPieIcon },
    { to: "/employees", label: "Employés", icon: UsersIcon },
   { to: "/entreprises", label: "Entreprises", icon: BuildingOfficeIcon },
   { to: "/paiements", label: "Paiements", icon: BanknotesIcon },
@@ -41,48 +40,77 @@ const NAV = [
 ];
 
 export default function MainLayout({ children }) {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, selectedCompanyId, setSelectedCompanyId } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [companyLogo, setCompanyLogo] = useState("/img/logo-ct.png");
+  const [companyName, setCompanyName] = useState("SalairePro");
   const [loading, setLoading] = useState(false);
+  const [selectedCompanyName, setSelectedCompanyName] = useState(null);
+  const [companies, setCompanies] = useState([]);
 
-  // Fetch company logo when user is authenticated
+  // Fetch company logo and name when user is authenticated
   useEffect(() => {
-    async function loadCompanyLogo() {
+    async function loadCompanyInfo() {
       if (isAuthenticated) {
-        // Check if super admin has selected a specific company
-        const selectedCompanyId = localStorage.getItem('selectedCompanyId');
-
         if (user?.role === 'SUPER_ADMIN' && selectedCompanyId) {
           try {
             const entreprise = await entreprisesApi.get(parseInt(selectedCompanyId));
+            setSelectedCompanyName(entreprise.nom);
             if (entreprise?.logo) {
-              setCompanyLogo(entreprise.logo);
+              // Use full backend URL for static assets
+              const logoPath = entreprise.logo.startsWith('images/') ? API_BASE_URL + '/assets/' + entreprise.logo : API_BASE_URL + entreprise.logo;
+              setCompanyLogo(logoPath);
+              setCompanyName(entreprise.nom);
             } else {
-              setCompanyLogo("/img/logo-ct.png");
+              setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
+              setCompanyName("SalairePro");
             }
           } catch (error) {
-            console.error('Error loading selected company logo:', error);
-            setCompanyLogo("/img/logo-ct.png");
+            console.error('Error loading selected company info:', error);
+            setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
+            setCompanyName("SalairePro");
           }
         } else if (user?.entrepriseId && user?.role !== 'SUPER_ADMIN') {
           try {
             const entreprise = await entreprisesApi.get(user.entrepriseId);
             if (entreprise?.logo) {
-              setCompanyLogo(entreprise.logo);
+              // Use full backend URL for static assets
+              const logoPath = entreprise.logo.startsWith('images/') ? API_BASE_URL + '/assets/' + entreprise.logo : API_BASE_URL + entreprise.logo;
+              setCompanyLogo(logoPath);
+              setCompanyName(entreprise.nom);
+            } else {
+              setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
+              setCompanyName("SalairePro");
             }
           } catch (error) {
-            console.error('Error loading company logo:', error);
-            setCompanyLogo("/img/logo-ct.png");
+            console.error('Error loading company info:', error);
+            setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
+            setCompanyName("SalairePro");
           }
         } else {
-          setCompanyLogo("/img/logo-ct.png"); // default logo for super admin
+          setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg"); // default logo for super admin
+          setCompanyName("SalairePro");
         }
       }
     }
 
-    loadCompanyLogo();
+    loadCompanyInfo();
+  }, [isAuthenticated, user, selectedCompanyId]);
+
+  // Load companies list for super admin
+  useEffect(() => {
+    async function loadCompanies() {
+      if (isAuthenticated && user?.role === 'SUPER_ADMIN') {
+        try {
+          const data = await entreprisesApi.list();
+          setCompanies(data);
+        } catch (error) {
+          console.error('Error loading companies:', error);
+        }
+      }
+    }
+    loadCompanies();
   }, [isAuthenticated, user]);
 
   const currentTitle = useMemo(() => {
@@ -135,7 +163,7 @@ export default function MainLayout({ children }) {
         <div className="flex items-center gap-3 px-6 py-4 border-b border-surface-200">
           <img src={companyLogo} alt="Logo" className="h-8 w-8" />
           <div>
-            <h1 className="text-lg font-bold text-primary-900">SalairePro</h1>
+            <h1 className="text-lg font-bold text-primary-900">{companyName}</h1>
             <p className="text-xs text-surface-500">Gestion intelligente</p>
           </div>
         </div>
@@ -147,26 +175,64 @@ export default function MainLayout({ children }) {
         <div className="p-4 border-t border-surface-200">
           {isAuthenticated && (
             <div className="space-y-3">
-              {/* Super admin company context indicator */}
-              {user?.role === 'SUPER_ADMIN' && localStorage.getItem('selectedCompanyId') && (
+              {/* Super admin company selector */}
+              {user?.role === 'SUPER_ADMIN' && (
                 <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <p className="text-xs font-medium text-blue-900">Entreprise sélectionnée</p>
+                    <p className="text-xs font-medium text-blue-900">Sélection d'entreprise</p>
                   </div>
-                  <p className="text-sm font-medium text-blue-900 truncate">
-                    {localStorage.getItem('selectedCompanyName')}
-                  </p>
-                  <button
-                    onClick={() => {
-                      localStorage.removeItem('selectedCompanyId');
-                      localStorage.removeItem('selectedCompanyName');
-                      window.location.reload();
+                  {selectedCompanyId && selectedCompanyName && (
+                    <p className="text-sm font-medium text-blue-900 truncate mb-2">
+                      Actuellement: {selectedCompanyName}
+                    </p>
+                  )}
+                  <select
+                    className="w-full p-2 rounded border border-blue-300 text-sm"
+                    value={selectedCompanyId || ""}
+                    onChange={async (e) => {
+                      const newId = e.target.value;
+                      setSelectedCompanyId(newId || null);
+                      if (newId) {
+                        try {
+                          const entreprise = await entreprisesApi.get(parseInt(newId));
+                          setSelectedCompanyName(entreprise.nom);
+                          setCompanyLogo(
+                            entreprise.logo.startsWith('images/')
+                              ? API_BASE_URL + '/assets/' + entreprise.logo
+                              : API_BASE_URL + entreprise.logo
+                          );
+                          setCompanyName(entreprise.nom);
+                        } catch (error) {
+                          console.error('Error loading selected company info:', error);
+                        }
+                      } else {
+                        setSelectedCompanyName(null);
+                        setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
+                        setCompanyName("SalairePro");
+                      }
                     }}
-                    className="text-xs text-blue-600 hover:text-blue-800 mt-1"
                   >
-                    Retour à l'administration
-                  </button>
+                    <option value="">-- Toutes les entreprises --</option>
+                    {companies.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.nom}
+                      </option>
+                    ))}
+                  </select>
+                  {selectedCompanyId && (
+                    <button
+                      onClick={() => {
+                        setSelectedCompanyId(null);
+                        setSelectedCompanyName(null);
+                        setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
+                        setCompanyName("SalairePro");
+                      }}
+                      className="text-xs text-blue-600 hover:text-blue-800 mt-2 block"
+                    >
+                      Retour à l'administration globale
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -200,7 +266,7 @@ export default function MainLayout({ children }) {
             <div className="flex items-center gap-3">
               <img src={companyLogo} alt="Logo" className="h-8 w-8" />
               <div>
-                <h1 className="text-lg font-bold text-primary-900">SalairePro</h1>
+                <h1 className="text-lg font-bold text-primary-900">{companyName}</h1>
                 <p className="text-xs text-surface-500">Gestion intelligente</p>
               </div>
             </div>
@@ -213,6 +279,71 @@ export default function MainLayout({ children }) {
           </div>
 
           <NavItems onNavigate={() => setMobileOpen(false)} />
+
+          {/* Footer mobile sidebar */}
+          {isAuthenticated && user?.role === 'SUPER_ADMIN' && (
+            <div className="p-4 border-t border-surface-200">
+              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <p className="text-xs font-medium text-blue-900">Sélection d'entreprise</p>
+                </div>
+                {selectedCompanyId && selectedCompanyName && (
+                  <p className="text-sm font-medium text-blue-900 truncate mb-2">
+                    Actuellement: {selectedCompanyName}
+                  </p>
+                )}
+                <select
+                  className="w-full p-2 rounded border border-blue-300 text-sm"
+                  value={selectedCompanyId || ""}
+                  onChange={async (e) => {
+                    const newId = e.target.value;
+                    setSelectedCompanyId(newId || null);
+                    if (newId) {
+                      try {
+                        const entreprise = await entreprisesApi.get(parseInt(newId));
+                        setSelectedCompanyName(entreprise.nom);
+                        setCompanyLogo(
+                          entreprise.logo.startsWith('images/')
+                            ? API_BASE_URL + '/assets/' + entreprise.logo
+                            : API_BASE_URL + entreprise.logo
+                        );
+                        setCompanyName(entreprise.nom);
+                      } catch (error) {
+                        console.error('Error loading selected company info:', error);
+                      }
+                    } else {
+                      setSelectedCompanyName(null);
+                      setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
+                      setCompanyName("SalairePro");
+                    }
+                    setMobileOpen(false); // Close mobile menu after selection
+                  }}
+                >
+                  <option value="">-- Toutes les entreprises --</option>
+                  {companies.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nom}
+                    </option>
+                  ))}
+                </select>
+                {selectedCompanyId && (
+                  <button
+                    onClick={() => {
+                      setSelectedCompanyId(null);
+                      setSelectedCompanyName(null);
+                      setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
+                      setCompanyName("SalairePro");
+                      setMobileOpen(false);
+                    }}
+                    className="text-xs text-blue-600 hover:text-blue-800 mt-2 block"
+                  >
+                    Retour à l'administration globale
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </aside>
       </div>
 

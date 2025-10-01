@@ -72,6 +72,14 @@ api.interceptors.request.use((config) => {
     config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  // Add selected company ID for super admin
+  const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+  if (selectedCompanyId && !config.params?.entrepriseId) {
+    config.params = config.params || {};
+    config.params.entrepriseId = selectedCompanyId;
+  }
+
   return config;
 });
 
@@ -86,9 +94,10 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Avoid infinite loop for refresh endpoint
+    // Avoid infinite loop for refresh endpoint and auth endpoints that shouldn't retry
     const isRefreshEndpoint = (original.url || "").includes("/api/auth/refresh");
-    if (isRefreshEndpoint) {
+    const isAuthMeEndpoint = (original.url || "").includes("/api/auth/me");
+    if (isRefreshEndpoint || isAuthMeEndpoint) {
       clearTokens();
       return Promise.reject(error);
     }
@@ -181,6 +190,15 @@ export const employesApi = {
   get: (id) => api.get(`/api/employes/${id}`).then((r) => r.data?.employe || r.data || null),
   getLatestBulletin: (employeeId) => api.get(`/api/employes/${employeeId}/latest-bulletin`).then((r) => r.data?.bulletin || r.data || null),
   create: (payload) => api.post(`/api/employes`, payload).then((r) => r.data?.employe || r.data || null),
+  bulkImport: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post(`/api/employes/bulk-import`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }).then((r) => r.data);
+  },
   update: (id, payload) => api.put(`/api/employes/${id}`, payload).then((r) => r.data?.employe || r.data || null),
   remove: (id) => api.delete(`/api/employes/${id}`).then((r) => r.data),
 };
