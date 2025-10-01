@@ -3,10 +3,10 @@ export declare const employeSchema: z.ZodObject<{
     matricule: z.ZodString;
     prenom: z.ZodString;
     nom: z.ZodString;
-    email: z.ZodOptional<z.ZodString>;
-    telephone: z.ZodOptional<z.ZodString>;
-    adresse: z.ZodOptional<z.ZodString>;
-    dateEmbauche: z.ZodDate;
+    email: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    telephone: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    adresse: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    dateEmbauche: z.ZodPipe<z.ZodUnion<readonly [z.ZodDate, z.ZodString]>, z.ZodTransform<Date, string | Date>>;
     statutEmploi: z.ZodEnum<{
         ACTIF: "ACTIF";
         CONGE: "CONGE";
@@ -19,10 +19,18 @@ export declare const employeSchema: z.ZodObject<{
         INTERIM: "INTERIM";
         STAGE: "STAGE";
     }>;
+    typeSalaire: z.ZodDefault<z.ZodEnum<{
+        MENSUEL: "MENSUEL";
+        HONORAIRES: "HONORAIRES";
+        JOURNALIER: "JOURNALIER";
+    }>>;
     salaireBase: z.ZodNumber;
-    allocations: z.ZodOptional<z.ZodNumber>;
-    deductions: z.ZodOptional<z.ZodNumber>;
-    estActif: z.ZodOptional<z.ZodBoolean>;
+    salaireHoraire: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
+    tauxJournalier: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
+    allocations: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
+    deductions: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
+    estActif: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
     entrepriseId: z.ZodNumber;
+    professionId: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
 }, z.core.$strip>;
 //# sourceMappingURL=employe.d.ts.map

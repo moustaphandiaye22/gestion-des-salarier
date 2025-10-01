@@ -45,6 +45,19 @@ export class AuthController {
     const result = await this.authService.logout(refreshToken || '');
     res.json(result);
   });
+
+  getCurrentUser = asyncHandler(async (req: Request, res: Response) => {
+    Logger.info('Requête de récupération de l\'utilisateur actuel reçue');
+    // L'utilisateur est déjà attaché par le middleware d'authentification
+    const utilisateur = (req as any).user;
+    if (!utilisateur) {
+      return res.status(401).json({ message: 'Utilisateur non authentifié' });
+    }
+    res.json({
+      message: 'Utilisateur récupéré avec succès.',
+      utilisateur
+    });
+  });
 }
 
 // Factory function pour créer le controller avec les dépendances

@@ -105,7 +105,7 @@ async function main() {
     superAdmin = await prisma.utilisateur.create({
       data: {
         nom: 'Super Administrateur',
-        email: 'superadmin@payrollplatform.com',
+        email: 'superadmin@pay.com',
         motDePasse: superAdminPassword,
         role: 'SUPER_ADMIN',
         estActif: true,
@@ -116,7 +116,7 @@ async function main() {
     user1 = existingUsers.find(u => u.email === 'admin@techcorp.sn');
     user2 = existingUsers.find(u => u.email === 'employe@techcorp.sn');
     user3 = existingUsers.find(u => u.email === 'admin@agrisolutions.ml');
-    superAdmin = existingUsers.find(u => u.email === 'superadmin@payrollplatform.com');
+    superAdmin = existingUsers.find(u => u.email === 'superadmin@pay.com');
   }
 
   console.log('Utilisateurs created');
@@ -512,6 +512,160 @@ async function main() {
 
   console.log('Tableaux de bord created');
 
+  // Create sample KPI data for testing
+  const sampleKpiData1 = await prisma.kpiData.create({
+    data: {
+      nom: 'NOMBRE_EMPLOYES',
+      valeur: 3,
+      valeurPrecedente: 2,
+      unite: 'employés',
+      typeKpi: 'NOMBRE_EMPLOYES',
+      periode: 'TEMPS_REEL',
+      dateCalcul: new Date(),
+      tableauDeBordId: tableau1.id,
+      entrepriseId: entreprise1.id,
+    },
+  });
+
+  const sampleKpiData2 = await prisma.kpiData.create({
+    data: {
+      nom: 'MASSE_SALARIALE',
+      valeur: 1350000.00,
+      valeurPrecedente: 1200000.00,
+      unite: 'FCFA',
+      typeKpi: 'MASSE_SALARIALE',
+      periode: 'MOIS',
+      dateCalcul: new Date(),
+      tableauDeBordId: tableau1.id,
+      entrepriseId: entreprise1.id,
+    },
+  });
+
+  const sampleKpiData3 = await prisma.kpiData.create({
+    data: {
+      nom: 'NOMBRE_EMPLOYES',
+      valeur: 2,
+      valeurPrecedente: 2,
+      unite: 'employés',
+      typeKpi: 'NOMBRE_EMPLOYES',
+      periode: 'TEMPS_REEL',
+      dateCalcul: new Date(),
+      tableauDeBordId: tableau2.id,
+      entrepriseId: entreprise2.id,
+    },
+  });
+
+  console.log('Sample KPI data created');
+
+  // Create sample alerts
+  const sampleAlerte1 = await prisma.alerte.create({
+    data: {
+      titre: 'Nouveau employé ajouté',
+      message: 'Un nouvel employé a été ajouté au système aujourd\'hui.',
+      type: 'NOUVEAU_EMPLOYE',
+      severite: 'FAIBLE',
+      estLue: false,
+      dateCreation: new Date(),
+      tableauDeBordId: tableau1.id,
+      entrepriseId: entreprise1.id,
+      utilisateurId: user1.id,
+    },
+  });
+
+  const sampleAlerte2 = await prisma.alerte.create({
+    data: {
+      titre: 'Taux de paiement élevé',
+      message: 'Le taux de paiement est excellent ce mois-ci (100%).',
+      type: 'PAIEMENT_ECHEC',
+      severite: 'FAIBLE',
+      estLue: true,
+      dateCreation: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 jours ago
+      dateLecture: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 jour ago
+      tableauDeBordId: tableau1.id,
+      entrepriseId: entreprise1.id,
+      utilisateurId: user1.id,
+    },
+  });
+
+  console.log('Sample alerts created');
+
+  // Create sample widgets
+  const sampleWidget1 = await prisma.widget.create({
+    data: {
+      nom: 'KPI Employés',
+      type: 'KPI_CARD',
+      configuration: {
+        kpiType: 'NOMBRE_EMPLOYES',
+        showTrend: true,
+        color: 'blue'
+      },
+      positionX: 0,
+      positionY: 0,
+      largeur: 3,
+      hauteur: 2,
+      tableauDeBordId: tableau1.id,
+      estVisible: true,
+      ordre: 1,
+      dateCreation: new Date(),
+    },
+  });
+
+  const sampleWidget2 = await prisma.widget.create({
+    data: {
+      nom: 'Graphique Salaires',
+      type: 'LINE_CHART',
+      configuration: {
+        dataSource: 'MASSE_SALARIALE',
+        period: '6months',
+        showLegend: true
+      },
+      positionX: 3,
+      positionY: 0,
+      largeur: 6,
+      hauteur: 4,
+      tableauDeBordId: tableau1.id,
+      estVisible: true,
+      ordre: 2,
+      dateCreation: new Date(),
+    },
+  });
+
+  console.log('Sample widgets created');
+
+  // Create sample exports
+  const sampleExport1 = await prisma.export.create({
+    data: {
+      nom: 'Export Données Analytiques - Janvier 2024',
+      type: 'DONNEES_ANALYTIQUES',
+      format: 'PDF',
+      statut: 'TERMINE',
+      cheminFichier: 'exports/analyse-janvier-2024.pdf',
+      parametres: {
+        dateDebut: '2024-01-01',
+        dateFin: '2024-01-31'
+      },
+      dateCreation: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 jours ago
+      dateFin: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000 + 300000), // 7 jours ago + 5 minutes
+      utilisateurId: user1.id,
+      entrepriseId: entreprise1.id,
+    },
+  });
+
+  const sampleExport2 = await prisma.export.create({
+    data: {
+      nom: 'Export Liste Employés - TechCorp',
+      type: 'LISTE_EMPLOYES',
+      format: 'EXCEL',
+      statut: 'EN_COURS',
+      parametres: {},
+      dateCreation: new Date(),
+      utilisateurId: user1.id,
+      entrepriseId: entreprise1.id,
+    },
+  });
+
+  console.log('Sample exports created');
+
   // Check if company parameters already exist
   const existingCompanyParams = await prisma.parametreEntreprise.findMany({
     where: {
@@ -693,7 +847,7 @@ async function main() {
         nom: 'Licence Standard Expirée',
         description: 'Licence expirée pour test',
         typeLicence: 'STANDARD',
-        statut: 'EXPIRED',
+        statut: 'EXPIREE',
         dateDebut: new Date('2023-01-01'),
         dateFin: new Date('2023-12-31'),
         limiteUtilisateurs: 25,

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog, Input } from "../components/ui";
 import { entreprisesApi, utilisateursApi } from "../utils/api";
-import { TrashIcon, PlusIcon, UserCircleIcon, EyeIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, PlusIcon, UserCircleIcon, EyeIcon, MagnifyingGlassIcon, Squares2X2Icon, ListBulletIcon, BuildingOfficeIcon, UsersIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "../context/AuthContext";
 
 export default function Entreprises() {
@@ -28,6 +28,8 @@ export default function Entreprises() {
   const [createErrors, setCreateErrors] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
+  const [viewMode, setViewMode] = useState('list'); // 'list' or 'card'
+  const [searchTerm, setSearchTerm] = useState("");
 
   async function load() {
     setLoading(true);
@@ -187,6 +189,12 @@ export default function Entreprises() {
     setCreateForm(prev => ({ ...prev, logo: null }));
   }
 
+  // Filter companies based on search term
+  const filteredRows = rows.filter(row =>
+    row.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (row.email && row.email.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-gray-50">
       <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8 py-8">
@@ -194,88 +202,229 @@ export default function Entreprises() {
           <CardHeader
             title="Entreprises"
             actions={
-              user?.role === 'SUPER_ADMIN' ? (
-                <Button
-                  className="flex items-center gap-2"
-                  onClick={() => setShowCreateForm(true)}
-                >
-                  <PlusIcon className="h-5 w-5" />
-                  Ajouter
-                </Button>
-              ) : null
+              <div className="flex items-center gap-4">
+                {user?.role === 'SUPER_ADMIN' && (
+                  <>
+                    {/* Search Bar */}
+                    <div className="relative">
+                      <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        type="text"
+                        placeholder="Rechercher une entreprise..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 w-64"
+                      />
+                    </div>
+
+                    {/* View Toggle */}
+                    <div className="flex items-center bg-gray-100 rounded-lg p-1">
+                      <Button
+                        variant={viewMode === 'list' ? 'primary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setViewMode('list')}
+                        className="flex items-center gap-1"
+                      >
+                        <ListBulletIcon className="h-4 w-4" />
+                        Liste
+                      </Button>
+                      <Button
+                        variant={viewMode === 'card' ? 'primary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setViewMode('card')}
+                        className="flex items-center gap-1"
+                      >
+                        <Squares2X2Icon className="h-4 w-4" />
+                        Cartes
+                      </Button>
+                    </div>
+                  </>
+                )}
+
+                {user?.role === 'SUPER_ADMIN' && (
+                  <Button
+                    className="flex items-center gap-2"
+                    onClick={() => setShowCreateForm(true)}
+                  >
+                    <PlusIcon className="h-5 w-5" />
+                    Ajouter
+                  </Button>
+                )}
+              </div>
             }
           />
           <CardBody>
             {error && <div className="mb-4 rounded bg-red-50 p-3 ring-1 ring-red-200 text-sm text-red-800">{error}</div>}
             <div className="max-h-[calc(100vh-12rem)] overflow-y-auto">
-              <Table
-                head={[
-                  "Nom",
-                  "Email",
-                  "Téléphone",
-                  "Adresse",
-                  "Secteur",
-                  "Employés",
-                  "Actif",
-                  "Création",
-                  "Stats",
-                  "Actions",
-                ]}
-                rows={rows}
-                renderRow={(row) => (
-                  <tr key={row.id}>
-                    <td className="px-2 py-2 text-sm text-gray-900 font-medium">{row.nom}</td>
-                    <td className="px-2 py-2 text-sm text-gray-700 hidden sm:table-cell">{row.email || '-'}</td>
-                    <td className="px-2 py-2 text-sm text-gray-700 hidden md:table-cell">{row.telephone || '-'}</td>
-                    <td className="px-2 py-2 text-sm text-gray-700 hidden lg:table-cell">{row.adresse || '-'}</td>
-                    <td className="px-2 py-2 text-sm text-gray-700 hidden xl:table-cell">{row.secteurActivite || '-'}</td>
-                    <td className="px-2 py-2 text-sm text-gray-700 text-center">{row.nombreEmployes || 0}</td>
-                    <td className="px-2 py-2 text-sm text-gray-700 text-center">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        row.estActif ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {row.estActif ? 'Oui' : 'Non'}
-                      </span>
-                    </td>
-                    <td className="px-2 py-2 text-sm text-gray-700 hidden md:table-cell">
-                      {row.dateCreation ? new Date(row.dateCreation).toLocaleDateString() : '-'}
-                    </td>
-                    <td className="px-2 py-2 text-sm text-gray-700 hidden lg:table-cell">
-                      <div className="text-xs space-y-1">
-                        <div>E: {Array.isArray(row.employes) ? row.employes.length : 0}</div>
-                        <div>C: {Array.isArray(row.cyclesPaie) ? row.cyclesPaie.length : 0}</div>
-                        <div>P: {Array.isArray(row.paiements) ? row.paiements.length : 0}</div>
-                        <div>U: {Array.isArray(row.utilisateurs) ? row.utilisateurs.length : 0}</div>
-                      </div>
-                    </td>
-                    <td className="px-2 py-2 text-sm">
-                      <div className="flex gap-1">
-                        {user?.role === 'SUPER_ADMIN' && (
+              {viewMode === 'list' ? (
+                <Table
+                  head={[
+                    "Logo",
+                    "Nom",
+                    "Email",
+                    "Téléphone",
+                    "Adresse",
+                    "Secteur",
+                    "Employés",
+                    "Actif",
+                    "Création",
+                    "Stats",
+                    "Actions",
+                  ]}
+                  rows={filteredRows}
+                  renderRow={(row) => (
+                    <tr key={row.id}>
+                      <td className="px-2 py-2 text-sm">
+                        {row.logo ? (
+                          <img
+                            src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/uploads/${row.logo}`}
+                            alt={`Logo ${row.nom}`}
+                            className="w-8 h-8 object-cover rounded-lg border border-gray-200"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <BuildingOfficeIcon className="w-4 h-4 text-gray-500" />
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-2 py-2 text-sm text-gray-900 font-medium">{row.nom}</td>
+                      <td className="px-2 py-2 text-sm text-gray-700 hidden sm:table-cell">{row.email || '-'}</td>
+                      <td className="px-2 py-2 text-sm text-gray-700 hidden md:table-cell">{row.telephone || '-'}</td>
+                      <td className="px-2 py-2 text-sm text-gray-700 hidden lg:table-cell">{row.adresse || '-'}</td>
+                      <td className="px-2 py-2 text-sm text-gray-700 hidden xl:table-cell">{row.secteurActivite || '-'}</td>
+                      <td className="px-2 py-2 text-sm text-gray-700 text-center">{row.nombreEmployes || 0}</td>
+                      <td className="px-2 py-2 text-sm text-gray-700 text-center">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          row.estActif ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {row.estActif ? 'Oui' : 'Non'}
+                        </span>
+                      </td>
+                      <td className="px-2 py-2 text-sm text-gray-700 hidden md:table-cell">
+                        {row.dateCreation ? new Date(row.dateCreation).toLocaleDateString() : '-'}
+                      </td>
+                      <td className="px-2 py-2 text-sm text-gray-700 hidden lg:table-cell">
+                        <div className="text-xs space-y-1">
+                          <div>E: {Array.isArray(row.employes) ? row.employes.length : 0}</div>
+                          <div>C: {Array.isArray(row.cyclesPaie) ? row.cyclesPaie.length : 0}</div>
+                          <div>P: {Array.isArray(row.paiements) ? row.paiements.length : 0}</div>
+                          <div>U: {Array.isArray(row.utilisateurs) ? row.utilisateurs.length : 0}</div>
+                        </div>
+                      </td>
+                      <td className="px-2 py-2 text-sm">
+                        <div className="flex gap-1">
+                          {user?.role === 'SUPER_ADMIN' && (
+                            <Button
+                              variant="outline"
+                              onClick={() => handleCompanyAccess(row)}
+                              className="text-xs px-2 py-1"
+                              title="Accéder à cette entreprise"
+                            >
+                              <EyeIcon className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button
                             variant="outline"
-                            onClick={() => handleCompanyAccess(row)}
+                            onClick={() => loadCompanyUsers(row.id)}
                             className="text-xs px-2 py-1"
-                            title="Accéder à cette entreprise"
+                            title="Voir les utilisateurs"
                           >
-                            <EyeIcon className="h-4 w-4" />
+                            <UserCircleIcon className="h-4 w-4" />
                           </Button>
-                        )}
-                        <Button
-                          variant="outline"
-                          onClick={() => loadCompanyUsers(row.id)}
-                          className="text-xs px-2 py-1"
-                          title="Voir les utilisateurs"
-                        >
-                          <UserCircleIcon className="h-4 w-4" />
-                        </Button>
-                        <Button variant="danger" onClick={() => setToDelete(row)} className="text-xs px-2 py-1">
-                          <TrashIcon className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              />
+                          <Button variant="danger" onClick={() => setToDelete(row)} className="text-xs px-2 py-1">
+                            <TrashIcon className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                />
+              ) : (
+                // Card View
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredRows.map((row) => (
+                    <Card key={row.id} className="hover:shadow-lg transition-shadow">
+                      <CardBody className="p-4">
+                        <div className="flex items-start gap-3 mb-3">
+                          {row.logo ? (
+                            <img
+                              src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/uploads/${row.logo}`}
+                              alt={`Logo ${row.nom}`}
+                              className="w-12 h-12 object-cover rounded-lg border border-gray-200 flex-shrink-0"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div className={`w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 ${row.logo ? 'hidden' : ''}`}>
+                            <BuildingOfficeIcon className="w-6 h-6 text-gray-500" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-medium text-gray-900 truncate">{row.nom}</h3>
+                            <p className="text-xs text-gray-500 truncate">{row.email || 'Pas d\'email'}</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 mb-4">
+                          <div className="flex items-center gap-2 text-xs text-gray-600">
+                            <UsersIcon className="w-4 h-4" />
+                            <span>{row.nombreEmployes || 0} employés</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-gray-600">
+                            <CurrencyDollarIcon className="w-4 h-4" />
+                            <span>{Array.isArray(row.paiements) ? row.paiements.length : 0} paiements</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                              row.estActif ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {row.estActif ? 'Actif' : 'Inactif'}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {row.dateCreation ? new Date(row.dateCreation).toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' }) : ''}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          {user?.role === 'SUPER_ADMIN' && (
+                            <Button
+                              variant="outline"
+                              onClick={() => handleCompanyAccess(row)}
+                              className="flex-1 text-xs"
+                              title="Accéder à cette entreprise"
+                            >
+                              <EyeIcon className="h-4 w-4 mr-1" />
+                              Accéder
+                            </Button>
+                          )}
+                          <Button
+                            variant="outline"
+                            onClick={() => loadCompanyUsers(row.id)}
+                            className="flex-1 text-xs"
+                            title="Voir les utilisateurs"
+                          >
+                            <UserCircleIcon className="h-4 w-4 mr-1" />
+                            Utilisateurs
+                          </Button>
+                          <Button
+                            variant="danger"
+                            onClick={() => setToDelete(row)}
+                            className="text-xs px-2"
+                            title="Supprimer"
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
             {loading && <p className="mt-3 text-sm text-gray-600">Chargement...</p>}
           </CardBody>

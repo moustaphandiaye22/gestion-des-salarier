@@ -19,7 +19,7 @@ export class PaiementController {
     }
     async getAll(req, res) {
         try {
-            const paiements = await paiementService.getAllPaiements();
+            const paiements = await paiementService.getAllPaiements(req.user);
             res.json({ message: 'Liste des paiements récupérée avec succès.', paiements });
         }
         catch (err) {

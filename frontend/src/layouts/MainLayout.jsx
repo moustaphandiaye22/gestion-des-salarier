@@ -24,8 +24,9 @@ function cx(...cls) {
 }
 
 const NAV = [
-  { to: "/dashboard", label: "Tableau de bord", icon: ChartPieIcon },
-  { to: "/employees", label: "Employés", icon: UsersIcon },
+   { to: "/dashboard", label: "Tableau de bord", icon: ChartPieIcon },
+   { to: "/dashboard-enhanced", label: "Dashboard Analytique", icon: ChartPieIcon },
+   { to: "/employees", label: "Employés", icon: UsersIcon },
   { to: "/entreprises", label: "Entreprises", icon: BuildingOfficeIcon },
   { to: "/paiements", label: "Paiements", icon: BanknotesIcon },
   { to: "/bulletins", label: "Bulletins", icon: DocumentTextIcon },
@@ -134,8 +135,8 @@ export default function MainLayout({ children }) {
         <div className="flex items-center gap-3 px-6 py-4 border-b border-surface-200">
           <img src={companyLogo} alt="Logo" className="h-8 w-8" />
           <div>
-            <h1 className="text-lg font-bold text-primary-900">Gestion</h1>
-            <p className="text-xs text-surface-500">Salariés</p>
+            <h1 className="text-lg font-bold text-primary-900">SalairePro</h1>
+            <p className="text-xs text-surface-500">Gestion intelligente</p>
           </div>
         </div>
 
@@ -199,8 +200,8 @@ export default function MainLayout({ children }) {
             <div className="flex items-center gap-3">
               <img src={companyLogo} alt="Logo" className="h-8 w-8" />
               <div>
-                <h1 className="text-lg font-bold text-primary-900">Gestion</h1>
-                <p className="text-xs text-surface-500">Salariés</p>
+                <h1 className="text-lg font-bold text-primary-900">SalairePro</h1>
+                <p className="text-xs text-surface-500">Gestion intelligente</p>
               </div>
             </div>
             <button

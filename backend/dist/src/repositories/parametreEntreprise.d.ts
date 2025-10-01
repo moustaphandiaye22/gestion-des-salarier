@@ -4,6 +4,7 @@ export declare class parametreEntrepriseRepository implements InterfaceRepositor
     create(data: Omit<ParametreEntreprise, "id">): Promise<ParametreEntreprise>;
     findById(id: number): Promise<ParametreEntreprise | null>;
     findAll(): Promise<ParametreEntreprise[]>;
+    findAllByUser(user: any): Promise<ParametreEntreprise[]>;
     update(id: number, data: Partial<Omit<ParametreEntreprise, "id">>): Promise<ParametreEntreprise>;
     delete(id: number): Promise<void>;
     findByCle(cle: string): Promise<ParametreEntreprise[]>;

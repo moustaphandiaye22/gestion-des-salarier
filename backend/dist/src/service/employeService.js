@@ -14,7 +14,10 @@ export class EmployeService {
     async getEmploye(id) {
         return this.employeRepository.findById(id);
     }
-    async getAllEmployes() {
+    async getAllEmployes(user) {
+        if (user) {
+            return this.employeRepository.findAllByUser(user);
+        }
         return this.employeRepository.findAll();
     }
     async updateEmploye(id, data) {

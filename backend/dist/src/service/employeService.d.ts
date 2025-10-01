@@ -8,16 +8,20 @@ export declare class EmployeService {
         email: string | null;
         estActif: boolean;
         entrepriseId: number;
-        adresse: string | null;
-        telephone: string | null;
         matricule: string;
         prenom: string;
+        telephone: string | null;
+        adresse: string | null;
         dateEmbauche: Date;
         statutEmploi: import("@prisma/client").$Enums.StatutEmploi;
         typeContrat: import("@prisma/client").$Enums.TypeContrat;
+        typeSalaire: import("@prisma/client").$Enums.TypeSalaire;
         salaireBase: import("@prisma/client/runtime/library").Decimal;
+        salaireHoraire: import("@prisma/client/runtime/library").Decimal | null;
+        tauxJournalier: import("@prisma/client/runtime/library").Decimal | null;
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
+        professionId: number | null;
     }>;
     getEmploye(id: number): Promise<{
         id: number;
@@ -25,33 +29,41 @@ export declare class EmployeService {
         email: string | null;
         estActif: boolean;
         entrepriseId: number;
-        adresse: string | null;
-        telephone: string | null;
         matricule: string;
         prenom: string;
+        telephone: string | null;
+        adresse: string | null;
         dateEmbauche: Date;
         statutEmploi: import("@prisma/client").$Enums.StatutEmploi;
         typeContrat: import("@prisma/client").$Enums.TypeContrat;
+        typeSalaire: import("@prisma/client").$Enums.TypeSalaire;
         salaireBase: import("@prisma/client/runtime/library").Decimal;
+        salaireHoraire: import("@prisma/client/runtime/library").Decimal | null;
+        tauxJournalier: import("@prisma/client/runtime/library").Decimal | null;
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
+        professionId: number | null;
     } | null>;
-    getAllEmployes(): Promise<{
+    getAllEmployes(user?: any): Promise<{
         id: number;
         nom: string;
         email: string | null;
         estActif: boolean;
         entrepriseId: number;
-        adresse: string | null;
-        telephone: string | null;
         matricule: string;
         prenom: string;
+        telephone: string | null;
+        adresse: string | null;
         dateEmbauche: Date;
         statutEmploi: import("@prisma/client").$Enums.StatutEmploi;
         typeContrat: import("@prisma/client").$Enums.TypeContrat;
+        typeSalaire: import("@prisma/client").$Enums.TypeSalaire;
         salaireBase: import("@prisma/client/runtime/library").Decimal;
+        salaireHoraire: import("@prisma/client/runtime/library").Decimal | null;
+        tauxJournalier: import("@prisma/client/runtime/library").Decimal | null;
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
+        professionId: number | null;
     }[]>;
     updateEmploye(id: number, data: any): Promise<{
         id: number;
@@ -59,16 +71,20 @@ export declare class EmployeService {
         email: string | null;
         estActif: boolean;
         entrepriseId: number;
-        adresse: string | null;
-        telephone: string | null;
         matricule: string;
         prenom: string;
+        telephone: string | null;
+        adresse: string | null;
         dateEmbauche: Date;
         statutEmploi: import("@prisma/client").$Enums.StatutEmploi;
         typeContrat: import("@prisma/client").$Enums.TypeContrat;
+        typeSalaire: import("@prisma/client").$Enums.TypeSalaire;
         salaireBase: import("@prisma/client/runtime/library").Decimal;
+        salaireHoraire: import("@prisma/client/runtime/library").Decimal | null;
+        tauxJournalier: import("@prisma/client/runtime/library").Decimal | null;
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
+        professionId: number | null;
     }>;
     deleteEmploye(id: number): Promise<void>;
     filterEmployes(filters: any): Promise<{
@@ -77,16 +93,20 @@ export declare class EmployeService {
         email: string | null;
         estActif: boolean;
         entrepriseId: number;
-        adresse: string | null;
-        telephone: string | null;
         matricule: string;
         prenom: string;
+        telephone: string | null;
+        adresse: string | null;
         dateEmbauche: Date;
         statutEmploi: import("@prisma/client").$Enums.StatutEmploi;
         typeContrat: import("@prisma/client").$Enums.TypeContrat;
+        typeSalaire: import("@prisma/client").$Enums.TypeSalaire;
         salaireBase: import("@prisma/client/runtime/library").Decimal;
+        salaireHoraire: import("@prisma/client/runtime/library").Decimal | null;
+        tauxJournalier: import("@prisma/client/runtime/library").Decimal | null;
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
+        professionId: number | null;
     }[]>;
     setStatus(id: number, statutEmploi: StatutEmploi): Promise<{
         id: number;
@@ -94,16 +114,20 @@ export declare class EmployeService {
         email: string | null;
         estActif: boolean;
         entrepriseId: number;
-        adresse: string | null;
-        telephone: string | null;
         matricule: string;
         prenom: string;
+        telephone: string | null;
+        adresse: string | null;
         dateEmbauche: Date;
         statutEmploi: import("@prisma/client").$Enums.StatutEmploi;
         typeContrat: import("@prisma/client").$Enums.TypeContrat;
+        typeSalaire: import("@prisma/client").$Enums.TypeSalaire;
         salaireBase: import("@prisma/client/runtime/library").Decimal;
+        salaireHoraire: import("@prisma/client/runtime/library").Decimal | null;
+        tauxJournalier: import("@prisma/client/runtime/library").Decimal | null;
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
+        professionId: number | null;
     }>;
 }
 //# sourceMappingURL=employeService.d.ts.map

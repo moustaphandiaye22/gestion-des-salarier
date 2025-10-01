@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { PrismaClient } from '@prisma/client';
+import { createServer } from 'http';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,17 +20,20 @@ import parametreEntrepriseRoutes from './src/routes/parametreEntrepriseRoutes.js
 import parametreGlobalRoutes from './src/routes/parametreGlobalRoutes.js';
 import rapportRoutes from './src/routes/rapportRoutes.js';
 import tableauDeBordRoutes from './src/routes/tableauDeBordRoutes.js';
+import dashboardEnhancedRoutes from './src/routes/dashboardEnhancedRoutes.js';
 import journalAuditRoutes from './src/routes/journalAuditRoutes.js';
 import licenceRoutes from './src/routes/licenceRoutes.js';
 import professionRoutes from './src/routes/professionRoutes.js';
 import { authenticateToken } from './src/middleware/authMiddleware.js';
 import { requireRole } from './src/middleware/rbacMiddleware.js';
+import { websocketService } from './src/service/websocketService.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const prisma = new PrismaClient();
+const server = createServer(app);
 
 // Middleware
 app.use(cors());
@@ -58,6 +62,7 @@ app.use('/api/parametres-entreprise', authenticateToken, parametreEntrepriseRout
 app.use('/api/parametres-globaux', authenticateToken, parametreGlobalRoutes);
 app.use('/api/rapports', authenticateToken, rapportRoutes);
 app.use('/api/tableaux-de-bord', authenticateToken, tableauDeBordRoutes);
+app.use('/api/dashboard', authenticateToken, dashboardEnhancedRoutes);
 app.use('/api/journaux-audit', authenticateToken, journalAuditRoutes);
 app.use('/api/licences', authenticateToken, licenceRoutes);
 app.use('/api/professions', authenticateToken, professionRoutes);
@@ -66,15 +71,26 @@ app.use('/api/professions', authenticateToken, professionRoutes);
 import { errorHandler } from './src/middleware/errorMiddleware.js';
 app.use(errorHandler);
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Initialize WebSocket service
+websocketService.initialize(server);
 
+// Start server
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+  console.log(`WebSocket server is ready`);
 });
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   console.log('SIGTERM received, shutting down gracefully');
+  websocketService.cleanup();
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on('SIGINT', async () => {
+  console.log('SIGINT received, shutting down gracefully');
+  websocketService.cleanup();
   await prisma.$disconnect();
   process.exit(0);
 });

@@ -10,8 +10,11 @@ import Register from "./pages/Register";
 
 // Pages
 import Dashboard from "./pages/Dashboard";
+import DashboardEnhanced from "./pages/DashboardEnhanced";
 import EmployeeList from "./pages/EmployeeList";
 import EmployeeForm from "./pages/EmployeeForm";
+import EmployeeDetail from "./pages/EmployeeDetail";
+import PaiementForm from "./pages/PaiementForm";
 import Entreprises from "./pages/Entreprises";
 import Paiements from "./pages/Paiements";
 import Bulletins from "./pages/Bulletins";
@@ -35,7 +38,7 @@ function App() {
         element={
           <ProtectedRoute>
             <MainLayout>
-              <Dashboard />
+              <DashboardEnhanced />
             </MainLayout>
           </ProtectedRoute>
         }
@@ -51,6 +54,18 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+      <Route
+        path="/dashboard-enhanced"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <DashboardEnhanced />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
 
       <Route
         path="/employees"
@@ -82,6 +97,16 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/employees/:id"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <EmployeeDetail />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/entreprises"
@@ -100,6 +125,26 @@ function App() {
           <ProtectedRoute>
             <MainLayout>
               <Paiements />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/paiements/new"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <PaiementForm />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/paiements/:id/edit"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <PaiementForm />
             </MainLayout>
           </ProtectedRoute>
         }
@@ -204,7 +249,7 @@ function App() {
         }
       />
 
-      <Route path="*" element={<Navigate to="/dashboard" />} />
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
 }

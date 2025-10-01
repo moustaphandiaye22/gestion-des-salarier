@@ -12,7 +12,7 @@ export declare class ParametreEntrepriseService {
         cle: string;
         valeur: string;
     }>;
-    getAllParametresEntreprise(): Promise<{
+    getAllParametresEntreprise(user?: any): Promise<{
         id: number;
         entrepriseId: number;
         cle: string;

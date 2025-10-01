@@ -14,8 +14,11 @@ export class EntrepriseService {
     async getEntreprise(id) {
         return await this.entrepriseRepository.findById(id);
     }
-    async getAllEntreprises() {
-        return await this.entrepriseRepository.findAll();
+    async getAllEntreprises(user) {
+        if (user) {
+            return this.entrepriseRepository.findAllByUser(user);
+        }
+        return this.entrepriseRepository.findAll();
     }
     async updateEntreprise(id, data) {
         const parsed = entrepriseSchema.partial().safeParse(data);

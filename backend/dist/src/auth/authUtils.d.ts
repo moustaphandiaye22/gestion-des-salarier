@@ -1,6 +1,7 @@
 export interface JwtPayload {
     email: string;
     profil?: string;
+    entrepriseId?: number;
 }
 export declare class AuthUtils {
     static hashPassword(password: string): Promise<string>;

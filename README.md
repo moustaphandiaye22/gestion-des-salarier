@@ -1,4 +1,4 @@
-# Gestion des Salariés Multi-Entreprises
+# SalairePro Multi-Entreprises
 
 ## 📋 Description
 

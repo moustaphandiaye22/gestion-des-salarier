@@ -5,49 +5,14 @@ export declare class EntrepriseService {
         id: number;
         nom: string;
         email: string | null;
-        description: string | null;
-        adresse: string | null;
         telephone: string | null;
+        adresse: string | null;
+        description: string | null;
+        logo: string | null;
         estActive: boolean;
         dateCreation: Date;
     }>;
     getEntreprise(id: number): Promise<({
-        employes: {
-            id: number;
-            nom: string;
-            email: string | null;
-            estActif: boolean;
-            entrepriseId: number;
-            adresse: string | null;
-            telephone: string | null;
-            matricule: string;
-            prenom: string;
-            dateEmbauche: Date;
-            statutEmploi: import("@prisma/client").$Enums.StatutEmploi;
-            typeContrat: import("@prisma/client").$Enums.TypeContrat;
-            salaireBase: import("@prisma/client/runtime/library").Decimal;
-            allocations: import("@prisma/client/runtime/library").Decimal;
-            deductions: import("@prisma/client/runtime/library").Decimal;
-        }[];
-        cyclesPaie: {
-            id: number;
-            entrepriseId: number;
-            dateCreation: Date;
-            periodeDebut: Date;
-            periodeFin: Date;
-            typeCycle: import("@prisma/client").$Enums.TypeCyclePaie;
-            estFerme: boolean;
-        }[];
-        paiements: {
-            id: number;
-            entrepriseId: number;
-            bulletinId: number;
-            montant: import("@prisma/client/runtime/library").Decimal;
-            datePaiement: Date;
-            modePaiement: import("@prisma/client").$Enums.ModePaiement;
-            statut: import("@prisma/client").$Enums.StatutPaiement;
-            reference: string | null;
-        }[];
         utilisateurs: {
             id: number;
             nom: string;
@@ -57,53 +22,61 @@ export declare class EntrepriseService {
             estActif: boolean;
             entrepriseId: number | null;
         }[];
+        employes: {
+            id: number;
+            nom: string;
+            email: string | null;
+            estActif: boolean;
+            entrepriseId: number;
+            matricule: string;
+            prenom: string;
+            telephone: string | null;
+            adresse: string | null;
+            dateEmbauche: Date;
+            statutEmploi: import("@prisma/client").$Enums.StatutEmploi;
+            typeContrat: import("@prisma/client").$Enums.TypeContrat;
+            typeSalaire: import("@prisma/client").$Enums.TypeSalaire;
+            salaireBase: import("@prisma/client/runtime/library").Decimal;
+            salaireHoraire: import("@prisma/client/runtime/library").Decimal | null;
+            tauxJournalier: import("@prisma/client/runtime/library").Decimal | null;
+            allocations: import("@prisma/client/runtime/library").Decimal;
+            deductions: import("@prisma/client/runtime/library").Decimal;
+            professionId: number | null;
+        }[];
+        cyclesPaie: {
+            id: number;
+            nom: string;
+            entrepriseId: number;
+            description: string | null;
+            dateDebut: Date;
+            dateFin: Date;
+            statut: import("@prisma/client").$Enums.StatutCyclePaie;
+            frequence: import("@prisma/client").$Enums.FrequencePaie;
+            createdAt: Date;
+            updatedAt: Date;
+        }[];
+        paiements: {
+            id: number;
+            entrepriseId: number;
+            statut: import("@prisma/client").$Enums.StatutPaiement;
+            montant: import("@prisma/client/runtime/library").Decimal;
+            datePaiement: Date;
+            modePaiement: import("@prisma/client").$Enums.ModePaiement;
+            reference: string | null;
+            bulletinId: number;
+        }[];
     } & {
         id: number;
         nom: string;
         email: string | null;
-        description: string | null;
-        adresse: string | null;
         telephone: string | null;
+        adresse: string | null;
+        description: string | null;
+        logo: string | null;
         estActive: boolean;
         dateCreation: Date;
     }) | null>;
-    getAllEntreprises(): Promise<({
-        employes: {
-            id: number;
-            nom: string;
-            email: string | null;
-            estActif: boolean;
-            entrepriseId: number;
-            adresse: string | null;
-            telephone: string | null;
-            matricule: string;
-            prenom: string;
-            dateEmbauche: Date;
-            statutEmploi: import("@prisma/client").$Enums.StatutEmploi;
-            typeContrat: import("@prisma/client").$Enums.TypeContrat;
-            salaireBase: import("@prisma/client/runtime/library").Decimal;
-            allocations: import("@prisma/client/runtime/library").Decimal;
-            deductions: import("@prisma/client/runtime/library").Decimal;
-        }[];
-        cyclesPaie: {
-            id: number;
-            entrepriseId: number;
-            dateCreation: Date;
-            periodeDebut: Date;
-            periodeFin: Date;
-            typeCycle: import("@prisma/client").$Enums.TypeCyclePaie;
-            estFerme: boolean;
-        }[];
-        paiements: {
-            id: number;
-            entrepriseId: number;
-            bulletinId: number;
-            montant: import("@prisma/client/runtime/library").Decimal;
-            datePaiement: Date;
-            modePaiement: import("@prisma/client").$Enums.ModePaiement;
-            statut: import("@prisma/client").$Enums.StatutPaiement;
-            reference: string | null;
-        }[];
+    getAllEntreprises(user?: any): Promise<({
         utilisateurs: {
             id: number;
             nom: string;
@@ -113,13 +86,57 @@ export declare class EntrepriseService {
             estActif: boolean;
             entrepriseId: number | null;
         }[];
+        employes: {
+            id: number;
+            nom: string;
+            email: string | null;
+            estActif: boolean;
+            entrepriseId: number;
+            matricule: string;
+            prenom: string;
+            telephone: string | null;
+            adresse: string | null;
+            dateEmbauche: Date;
+            statutEmploi: import("@prisma/client").$Enums.StatutEmploi;
+            typeContrat: import("@prisma/client").$Enums.TypeContrat;
+            typeSalaire: import("@prisma/client").$Enums.TypeSalaire;
+            salaireBase: import("@prisma/client/runtime/library").Decimal;
+            salaireHoraire: import("@prisma/client/runtime/library").Decimal | null;
+            tauxJournalier: import("@prisma/client/runtime/library").Decimal | null;
+            allocations: import("@prisma/client/runtime/library").Decimal;
+            deductions: import("@prisma/client/runtime/library").Decimal;
+            professionId: number | null;
+        }[];
+        cyclesPaie: {
+            id: number;
+            nom: string;
+            entrepriseId: number;
+            description: string | null;
+            dateDebut: Date;
+            dateFin: Date;
+            statut: import("@prisma/client").$Enums.StatutCyclePaie;
+            frequence: import("@prisma/client").$Enums.FrequencePaie;
+            createdAt: Date;
+            updatedAt: Date;
+        }[];
+        paiements: {
+            id: number;
+            entrepriseId: number;
+            statut: import("@prisma/client").$Enums.StatutPaiement;
+            montant: import("@prisma/client/runtime/library").Decimal;
+            datePaiement: Date;
+            modePaiement: import("@prisma/client").$Enums.ModePaiement;
+            reference: string | null;
+            bulletinId: number;
+        }[];
     } & {
         id: number;
         nom: string;
         email: string | null;
-        description: string | null;
-        adresse: string | null;
         telephone: string | null;
+        adresse: string | null;
+        description: string | null;
+        logo: string | null;
         estActive: boolean;
         dateCreation: Date;
     })[]>;
@@ -127,9 +144,10 @@ export declare class EntrepriseService {
         id: number;
         nom: string;
         email: string | null;
-        description: string | null;
-        adresse: string | null;
         telephone: string | null;
+        adresse: string | null;
+        description: string | null;
+        logo: string | null;
         estActive: boolean;
         dateCreation: Date;
     }>;

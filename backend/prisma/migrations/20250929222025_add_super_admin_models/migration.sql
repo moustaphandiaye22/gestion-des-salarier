@@ -70,8 +70,6 @@ CREATE TABLE `licenses` (
 -- CreateIndex
 CREATE UNIQUE INDEX `pay_cycles_entrepriseId_nom_key` ON `pay_cycles`(`entrepriseId`, `nom`);
 
--- AddForeignKey
-ALTER TABLE `audit_logs` ADD CONSTRAINT `audit_logs_entrepriseId_fkey` FOREIGN KEY (`entrepriseId`) REFERENCES `companies`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `licenses` ADD CONSTRAINT `licenses_entrepriseId_fkey` FOREIGN KEY (`entrepriseId`) REFERENCES `companies`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

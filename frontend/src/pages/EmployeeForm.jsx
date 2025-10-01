@@ -334,7 +334,7 @@ export default function EmployeeForm() {
                   value={form.prenom}
                   onChange={(e) => update("prenom", e.target.value)}
                   error={errors.prenom}
-                  
+
                 />
               </div>
               <div>
@@ -450,6 +450,46 @@ export default function EmployeeForm() {
                   error={errors.deductions}
                 />
               </div>
+              {(form.salaireBase || form.allocations || form.deductions) && (
+                <div className="md:col-span-2 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h3 className="text-lg font-semibold text-blue-900 mb-3">Aperçu du salaire</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white p-3 rounded border">
+                      <div className="text-sm text-gray-600">Salaire brut</div>
+                      <div className="text-xl font-bold text-gray-900">
+                        {form.salaireBase ? `${parseFloat(form.salaireBase).toLocaleString('fr-FR')} FCFA` : '0 FCFA'}
+                      </div>
+                    </div>
+                    <div className="bg-white p-3 rounded border">
+                      <div className="text-sm text-gray-600">Allocations</div>
+                      <div className="text-xl font-bold text-green-600">
+                        +{form.allocations ? `${parseFloat(form.allocations).toLocaleString('fr-FR')} FCFA` : '0 FCFA'}
+                      </div>
+                    </div>
+                    <div className="bg-white p-3 rounded border">
+                      <div className="text-sm text-gray-600">Déductions</div>
+                      <div className="text-xl font-bold text-red-600">
+                        -{form.deductions ? `${parseFloat(form.deductions).toLocaleString('fr-FR')} FCFA` : '0 FCFA'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 bg-green-100 p-3 rounded border border-green-300">
+                    <div className="text-sm text-green-800">Salaire net estimé</div>
+                    <div className="text-2xl font-bold text-green-900">
+                      {(() => {
+                        const brut = parseFloat(form.salaireBase) || 0;
+                        const alloc = parseFloat(form.allocations) || 0;
+                        const deduc = parseFloat(form.deductions) || 0;
+                        const net = brut + alloc - deduc;
+                        return net >= 0 ? `${net.toLocaleString('fr-FR')} FCFA` : 'Calcul impossible';
+                      })()}
+                    </div>
+                    <div className="text-xs text-green-700 mt-1">
+                      Ce calcul est une estimation. Le salaire réel peut varier selon les règles fiscales et sociales.
+                    </div>
+                  </div>
+                </div>
+              )}
               <Select label="Entreprise" value={form.entrepriseId} onChange={(e) => update("entrepriseId", e.target.value)} error={errors.entrepriseId} >
                 <option value="">Sélectionner une entreprise</option>
                 {entreprises.map((ent) => (

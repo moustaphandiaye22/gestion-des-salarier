@@ -13,6 +13,23 @@ export class entrepriseRepository {
     async findAll() {
         return mnprisma.entreprise.findMany({ include: { employes: true, cyclesPaie: true, paiements: true, utilisateurs: true } });
     }
+    async findAllByUser(user) {
+        // Super Admin voit toutes les entreprises
+        if (user.profil === 'SUPER_ADMIN') {
+            return mnprisma.entreprise.findMany({
+                include: { employes: true, cyclesPaie: true, paiements: true, utilisateurs: true }
+            });
+        }
+        // Admin d'Entreprise voit seulement sa propre entreprise
+        if (user.profil === 'ADMIN_ENTREPRISE' && user.entrepriseId) {
+            return mnprisma.entreprise.findMany({
+                where: { id: user.entrepriseId },
+                include: { employes: true, cyclesPaie: true, paiements: true, utilisateurs: true }
+            });
+        }
+        // Autres rôles n'ont pas accès à la liste des entreprises
+        return [];
+    }
     async update(id, data) {
         return mnprisma.entreprise.update({ where: { id }, data });
     }

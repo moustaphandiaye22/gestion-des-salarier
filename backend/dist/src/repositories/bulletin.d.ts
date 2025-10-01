@@ -8,9 +8,9 @@ export declare class bulletinRepository implements InterfaceRepository<Bulletin>
     create(data: Omit<Bulletin, "id">): Promise<Bulletin>;
     findById(id: number): Promise<Bulletin | null>;
     findAll(): Promise<Bulletin[]>;
+    findAllByUser(user: any): Promise<Bulletin[]>;
     update(id: number, data: Partial<Omit<Bulletin, "id">>): Promise<{
         id: number;
-        employeId: number;
         salaireBase: Prisma.Decimal;
         allocations: Prisma.Decimal;
         deductions: Prisma.Decimal;
@@ -21,6 +21,7 @@ export declare class bulletinRepository implements InterfaceRepository<Bulletin>
         statutPaiement: import("@prisma/client").$Enums.StatutPaiement;
         dateGeneration: Date;
         cycleId: number;
+        employeId: number;
     }>;
     delete(id: number): Promise<void>;
 }

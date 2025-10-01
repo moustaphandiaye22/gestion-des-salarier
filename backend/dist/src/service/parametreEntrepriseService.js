@@ -14,7 +14,10 @@ export class ParametreEntrepriseService {
             throw new Error(`Aucun paramètre trouvé avec l'identifiant ${id}.`);
         return result;
     }
-    async getAllParametresEntreprise() {
+    async getAllParametresEntreprise(user) {
+        if (user) {
+            return this.parametreEntrepriseRepository.findAllByUser(user);
+        }
         return this.parametreEntrepriseRepository.findAll();
     }
     async updateParametreEntreprise(id, data) {

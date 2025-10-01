@@ -144,6 +144,10 @@ export const authApi = {
     setTokens({ accessToken, refreshToken });
     return { utilisateur };
   },
+  async getCurrentUser() {
+    const res = await api.get("/api/auth/me");
+    return res.data;
+  },
   async refresh() {
     const token = getRefreshToken();
     const res = await axios.post(`${API_BASE_URL}/api/auth/refresh`, { refreshToken: token });
@@ -210,6 +214,7 @@ export const entreprisesApi = {
 
 export const bulletinsApi = {
   list: (params) => api.get(`/api/bulletins${toQuery(params)}`).then((r) => r.data?.bulletins || r.data || []),
+  listByEntreprise: (entrepriseId) => api.get(`/api/bulletins?entrepriseId=${entrepriseId}`).then((r) => r.data?.bulletins || r.data || []),
   get: (id) => api.get(`/api/bulletins/${id}`).then((r) => r.data?.bulletin || r.data || null),
   create: (payload) => api.post(`/api/bulletins`, payload).then((r) => r.data?.bulletin || r.data || null),
   update: (id, payload) => api.put(`/api/bulletins/${id}`, payload).then((r) => r.data?.bulletin || r.data || null),

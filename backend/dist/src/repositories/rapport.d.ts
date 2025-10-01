@@ -6,6 +6,7 @@ export declare class rapportRepository implements InterfaceRepository<Rapport> {
     }): Promise<Rapport>;
     findById(id: number): Promise<Rapport | null>;
     findAll(): Promise<Rapport[]>;
+    findAllByUser(user: any): Promise<Rapport[]>;
     update(id: number, data: Partial<Omit<Rapport, "id">> & {
         contenu?: any;
     }): Promise<Rapport>;

@@ -1,6 +1,8 @@
+import { jest } from '@jest/globals';
 import { AuthService } from '../src/service/authService.js';
 import type { IUserRepository } from '../src/interfaces/IUserRepository.js';
 import { ValidationError, AuthenticationError } from '../src/errors/CustomError.js';
+import { AuthUtils } from '../src/auth/authUtils.js';
 
 // Mock du repository utilisateur
 const mockUserRepository: jest.Mocked<IUserRepository> = {
@@ -8,6 +10,7 @@ const mockUserRepository: jest.Mocked<IUserRepository> = {
   findAll: jest.fn(),
   findById: jest.fn(),
   findByEmail: jest.fn(),
+  findByEntreprise: jest.fn(),
   update: jest.fn(),
   delete: jest.fn(),
 };
@@ -17,6 +20,12 @@ const authService = new AuthService(mockUserRepository);
 describe('AuthService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(AuthUtils, 'verifyPassword').mockResolvedValue(true);
+    jest.spyOn(AuthUtils, 'verifyRefreshToken').mockReturnValue({ email: 'test@example.com' });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('register', () => {
@@ -25,18 +34,17 @@ describe('AuthService', () => {
         email: 'test@example.com',
         motDePasse: 'password123',
         nom: 'Test',
-        prenom: 'User',
         role: 'EMPLOYE' as const,
       };
 
       const mockUser = {
         id: 1,
-        ...userData,
+        nom: 'Test',
+        email: 'test@example.com',
         motDePasse: 'hashedpassword',
+        role: 'EMPLOYE' as const,
         estActif: true,
         entrepriseId: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
 
       mockUserRepository.findByEmail.mockResolvedValue(null);
@@ -63,15 +71,12 @@ describe('AuthService', () => {
 
       mockUserRepository.findByEmail.mockResolvedValue({
         id: 1,
+        nom: 'Existing',
         email: 'existing@example.com',
         motDePasse: 'hashed',
-        nom: 'Existing',
-        prenom: 'User',
-        role: 'EMPLOYE',
+        role: 'EMPLOYE' as const,
         estActif: true,
         entrepriseId: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       });
 
       await expect(authService.register(userData)).rejects.toThrow(ValidationError);
@@ -130,15 +135,13 @@ describe('AuthService', () => {
         email: 'test@example.com',
         motDePasse: '$2a$10$hashedpassword',
         nom: 'Test',
-        prenom: 'User',
         role: 'EMPLOYE' as const,
         estActif: true,
         entrepriseId: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
 
       mockUserRepository.findByEmail.mockResolvedValue(mockUser);
+      jest.spyOn(AuthUtils, 'verifyPassword').mockResolvedValueOnce(false);
 
       await expect(authService.login(loginData)).rejects.toThrow(AuthenticationError);
     });
@@ -156,8 +159,6 @@ describe('AuthService', () => {
         role: 'EMPLOYE' as const,
         estActif: true,
         entrepriseId: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
 
       mockUserRepository.findByEmail.mockResolvedValue(mockUser);
@@ -165,6 +166,16 @@ describe('AuthService', () => {
       const result = await authService.refreshToken(refreshToken);
 
       expect(result.accessToken).toBeDefined();
+    });
+
+    it('devrait rejeter si le refresh token est invalide', async () => {
+      const refreshToken = 'invalid.refresh.token';
+
+      jest.spyOn(AuthUtils, 'verifyRefreshToken').mockImplementationOnce(() => {
+        throw new Error('invalid token');
+      });
+
+      await expect(authService.refreshToken(refreshToken)).rejects.toThrow(AuthenticationError);
     });
   });
 

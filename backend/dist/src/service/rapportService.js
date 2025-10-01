@@ -14,7 +14,10 @@ export class RapportService {
             throw new Error(`Aucun rapport trouvé avec l'identifiant ${id}.`);
         return result;
     }
-    async getAllRapports() {
+    async getAllRapports(user) {
+        if (user) {
+            return this.rapportRepository.findAllByUser(user);
+        }
         return this.rapportRepository.findAll();
     }
     async updateRapport(id, data) {

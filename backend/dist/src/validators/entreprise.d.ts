@@ -4,7 +4,8 @@ export declare const entrepriseSchema: z.ZodObject<{
     description: z.ZodOptional<z.ZodString>;
     adresse: z.ZodOptional<z.ZodString>;
     telephone: z.ZodOptional<z.ZodString>;
-    email: z.ZodOptional<z.ZodString>;
+    email: z.ZodString;
+    logo: z.ZodOptional<z.ZodString>;
     estActive: z.ZodOptional<z.ZodBoolean>;
     dateCreation: z.ZodOptional<z.ZodDate>;
 }, z.core.$strip>;

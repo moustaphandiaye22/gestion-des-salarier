@@ -20,7 +20,7 @@ export class BulletinController {
     }
     async getAll(req, res) {
         try {
-            const bulletins = await bulletinService.getAllBulletins();
+            const bulletins = await bulletinService.getAllBulletins(req.user);
             res.json({ message: 'Liste des bulletins récupérée avec succès.', bulletins });
         }
         catch (err) {
