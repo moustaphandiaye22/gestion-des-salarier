@@ -6,6 +6,7 @@ export declare class paiementRepository implements InterfaceRepository<Paiement>
     create(data: Omit<Paiement, "id">): Promise<Paiement>;
     findById(id: number): Promise<Paiement | null>;
     findAll(): Promise<Paiement[]>;
+    findAllByUser(user: any): Promise<Paiement[]>;
     update(id: number, data: Partial<Omit<Paiement, "id">>): Promise<Paiement>;
     delete(id: number): Promise<void>;
 }

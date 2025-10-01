@@ -5,53 +5,53 @@ export declare class PaiementService {
     createPaiement(data: any): Promise<{
         id: number;
         entrepriseId: number;
-        bulletinId: number;
+        statut: import("@prisma/client").$Enums.StatutPaiement;
         montant: import("@prisma/client/runtime/library").Decimal;
         datePaiement: Date;
         modePaiement: import("@prisma/client").$Enums.ModePaiement;
-        statut: import("@prisma/client").$Enums.StatutPaiement;
         reference: string | null;
+        bulletinId: number;
     }>;
     getPaiement(id: number): Promise<{
         id: number;
         entrepriseId: number;
-        bulletinId: number;
+        statut: import("@prisma/client").$Enums.StatutPaiement;
         montant: import("@prisma/client/runtime/library").Decimal;
         datePaiement: Date;
         modePaiement: import("@prisma/client").$Enums.ModePaiement;
-        statut: import("@prisma/client").$Enums.StatutPaiement;
         reference: string | null;
+        bulletinId: number;
     } | null>;
-    getAllPaiements(): Promise<{
+    getAllPaiements(user?: any): Promise<{
         id: number;
         entrepriseId: number;
-        bulletinId: number;
+        statut: import("@prisma/client").$Enums.StatutPaiement;
         montant: import("@prisma/client/runtime/library").Decimal;
         datePaiement: Date;
         modePaiement: import("@prisma/client").$Enums.ModePaiement;
-        statut: import("@prisma/client").$Enums.StatutPaiement;
         reference: string | null;
+        bulletinId: number;
     }[]>;
     updatePaiement(id: number, data: any): Promise<{
         id: number;
         entrepriseId: number;
-        bulletinId: number;
+        statut: import("@prisma/client").$Enums.StatutPaiement;
         montant: import("@prisma/client/runtime/library").Decimal;
         datePaiement: Date;
         modePaiement: import("@prisma/client").$Enums.ModePaiement;
-        statut: import("@prisma/client").$Enums.StatutPaiement;
         reference: string | null;
+        bulletinId: number;
     }>;
     deletePaiement(id: number): Promise<void>;
     setStatut(id: number, statut: StatutPaiement): Promise<{
         id: number;
         entrepriseId: number;
-        bulletinId: number;
+        statut: import("@prisma/client").$Enums.StatutPaiement;
         montant: import("@prisma/client/runtime/library").Decimal;
         datePaiement: Date;
         modePaiement: import("@prisma/client").$Enums.ModePaiement;
-        statut: import("@prisma/client").$Enums.StatutPaiement;
         reference: string | null;
+        bulletinId: number;
     }>;
 }
 //# sourceMappingURL=paiementService.d.ts.map

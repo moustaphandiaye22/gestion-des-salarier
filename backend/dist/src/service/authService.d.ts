@@ -1,38 +1,13 @@
-export declare class AuthService {
-    private utilisateurRepository;
-    private authRepository;
-    register(data: any): Promise<{
-        utilisateur: {
-            id: number;
-            nom: string;
-            email: string;
-            motDePasse: string;
-            role: import("@prisma/client").$Enums.RoleUtilisateur;
-            estActif: boolean;
-            entrepriseId: number | null;
-        };
-        accessToken: string;
-        refreshToken: string;
-    }>;
-    login(email: string, motDePasse: string): Promise<{
-        utilisateur: {
-            id: number;
-            nom: string;
-            email: string;
-            motDePasse: string;
-            role: import("@prisma/client").$Enums.RoleUtilisateur;
-            estActif: boolean;
-            entrepriseId: number | null;
-        };
-        accessToken: string;
-        refreshToken: string;
-    }>;
-    refreshToken(refreshToken: string): Promise<{
-        accessToken: string;
-    }>;
-    logout(refreshToken: string): Promise<{
-        message: string;
-    }>;
+import type { IAuthService, RegisterData, LoginData, AuthResponse, RefreshResponse, LogoutResponse } from '../interfaces/IAuthService.js';
+import type { IUserRepository } from '../interfaces/IUserRepository.js';
+export declare class AuthService implements IAuthService {
+    private userRepository;
+    constructor(userRepository: IUserRepository);
+    register(data: RegisterData): Promise<AuthResponse>;
+    login(data: LoginData): Promise<AuthResponse>;
+    refreshToken(refreshToken: string): Promise<RefreshResponse>;
+    logout(refreshToken: string): Promise<LogoutResponse>;
+    private generateTokens;
 }
-export declare const authService: AuthService;
+export declare const createAuthService: (userRepository: IUserRepository) => IAuthService;
 //# sourceMappingURL=authService.d.ts.map

@@ -1,0 +1,21 @@
+import { Router } from 'express';
+import { LicenceController } from '../controller/licenceController.js';
+import { requireSuperAdmin } from '../middleware/rbacMiddleware.js';
+import { authenticateToken } from '../middleware/authMiddleware.js';
+const router = Router();
+const licenceController = new LicenceController();
+router.use(authenticateToken);
+router.use(requireSuperAdmin);
+router.post('/', licenceController.create.bind(licenceController));
+router.get('/', licenceController.getAll.bind(licenceController));
+router.get('/:id', licenceController.getById.bind(licenceController));
+router.get('/nom/:nom', licenceController.getByNom.bind(licenceController));
+router.put('/:id', licenceController.update.bind(licenceController));
+router.delete('/:id', licenceController.delete.bind(licenceController));
+router.get('/entreprise/:entrepriseId', licenceController.getByEntreprise.bind(licenceController));
+router.get('/statut/:statut', licenceController.getByStatut.bind(licenceController));
+router.get('/type/:typeLicence', licenceController.getByType.bind(licenceController));
+router.post('/:id/assign', licenceController.assignToEntreprise.bind(licenceController));
+router.post('/:id/revoke', licenceController.revokeFromEntreprise.bind(licenceController));
+export default router;
+//# sourceMappingURL=licenceRoutes.js.map

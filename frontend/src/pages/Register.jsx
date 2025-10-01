@@ -86,7 +86,7 @@ export default function Register() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-900 rounded-2xl mb-4">
             <BuildingOfficeIcon className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Gestion des Salariés</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">SalairePro</h1>
           <p className="text-gray-600">Créer un compte</p>
         </div>
 
@@ -249,7 +249,7 @@ export default function Register() {
         </Card>
 
         <p className="mt-6 text-xs text-gray-500 text-center">
-          © {new Date().getFullYear()} Gestion des Salariés
+          © {new Date().getFullYear()} SalairePro
         </p>
       </div>
     </main>

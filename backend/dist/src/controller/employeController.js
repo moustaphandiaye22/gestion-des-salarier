@@ -19,7 +19,7 @@ export class EmployeController {
     }
     async getAll(req, res) {
         try {
-            const employes = await employeService.getAllEmployes();
+            const employes = await employeService.getAllEmployes(req.user);
             res.json({ message: 'Liste des employés récupérée avec succès.', employes });
         }
         catch (err) {

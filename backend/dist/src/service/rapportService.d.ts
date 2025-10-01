@@ -14,7 +14,7 @@ export declare class RapportService {
         typeRapport: import("@prisma/client").$Enums.TypeRapport;
         contenu: import("@prisma/client/runtime/library").JsonValue;
     }>;
-    getAllRapports(): Promise<{
+    getAllRapports(user?: any): Promise<{
         id: number;
         entrepriseId: number;
         dateGeneration: Date;

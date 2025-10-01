@@ -1,10 +1,12 @@
 import { Router } from 'express';
-import { AuthController } from '../controller/authController.js';
+import { container } from '../config/container.js';
+import { authenticateToken } from '../middleware/authMiddleware.js';
 const router = Router();
-const authController = new AuthController();
-router.post('/register', authController.register);
-router.post('/login', authController.login);
-router.post('/refresh', authController.refreshToken);
-router.post('/logout', authController.logout);
+// Routes
+router.post('/register', container.authController.register);
+router.post('/login', container.authController.login);
+router.get('/me', container.authController.getCurrentUser);
+router.post('/refresh', container.authController.refreshToken);
+router.post('/logout', container.authController.logout);
 export default router;
 //# sourceMappingURL=authRoutes.js.map

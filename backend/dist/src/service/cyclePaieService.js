@@ -1,5 +1,6 @@
 import { cyclePaieRepository } from '../repositories/cyclePaie.js';
 import { cyclePaieSchema } from '../validators/cyclePaie.js';
+import { StatutCyclePaie } from '@prisma/client';
 export class CyclePaieService {
     cyclePaieRepository;
     constructor() {
@@ -14,8 +15,11 @@ export class CyclePaieService {
     async getCyclePaie(id) {
         return await this.cyclePaieRepository.findById(id);
     }
-    async getAllCyclesPaie() {
-        return await this.cyclePaieRepository.findAll();
+    async getAllCyclesPaie(user) {
+        if (user) {
+            return this.cyclePaieRepository.findAllByUser(user);
+        }
+        return this.cyclePaieRepository.findAll();
     }
     async updateCyclePaie(id, data) {
         const parsed = cyclePaieSchema.partial().safeParse(data);
@@ -26,8 +30,8 @@ export class CyclePaieService {
     async deleteCyclePaie(id) {
         return await this.cyclePaieRepository.delete(id);
     }
-    async setEstFerme(id, estFerme) {
-        return await this.cyclePaieRepository.setEstFerme(id, estFerme);
+    async setStatut(id, statut) {
+        return await this.cyclePaieRepository.setStatut(id, statut);
     }
 }
 //# sourceMappingURL=cyclePaieService.js.map

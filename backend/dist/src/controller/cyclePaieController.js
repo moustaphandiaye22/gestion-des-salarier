@@ -19,7 +19,7 @@ export class CyclePaieController {
     }
     async getAll(req, res) {
         try {
-            const cycles = await cyclePaieService.getAllCyclesPaie();
+            const cycles = await cyclePaieService.getAllCyclesPaie(req.user);
             res.json({ message: 'Liste des cycles de paie récupérée avec succès.', cycles });
         }
         catch (err) {

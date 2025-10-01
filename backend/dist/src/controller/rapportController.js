@@ -13,7 +13,7 @@ export class RapportController {
     }
     async getAll(req, res) {
         try {
-            const rapports = await rapportService.getAllRapports();
+            const rapports = await rapportService.getAllRapports(req.user);
             res.json(rapports);
         }
         catch (err) {

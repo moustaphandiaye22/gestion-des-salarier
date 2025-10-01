@@ -18,48 +18,53 @@ datasource db {
 // ==========================================
 
 model Entreprise {
-  id             Int                @id @default(autoincrement())
-  nom            String             @db.VarChar(100)
-  description    String?            @db.Text
-  adresse        String?            @db.VarChar(255)
-  telephone      String?            @db.VarChar(20)
-  email          String?            @db.VarChar(100)
-  logo           String?            @db.VarChar(255) // Chemin vers le logo de l'entreprise
-  estActive      Boolean            @default(true)
-  dateCreation   DateTime           @default(now())
+   id             Int                @id @default(autoincrement())
+   nom            String             @db.VarChar(100)
+   description    String?            @db.Text
+   adresse        String?            @db.VarChar(255)
+   telephone      String?            @db.VarChar(20)
+   email          String?            @db.VarChar(100)
+   logo           String?            @db.VarChar(255) // Chemin vers le logo de l'entreprise
+   estActive      Boolean            @default(true)
+   dateCreation   DateTime           @default(now())
 
-  // Relations
-  utilisateurs   Utilisateur[]
-  employes       Employe[]
-  cyclesPaie     CyclePaie[]
-  paiements      Paiement[]
-  rapports       Rapport[]
-  journauxAudit  JournalAudit[]
-  tableauxDeBord TableauDeBord[]
-  parametres     ParametreEntreprise[]
-  licences       Licence[]
+   // Relations
+   utilisateurs   Utilisateur[]
+   employes       Employe[]
+   cyclesPaie     CyclePaie[]
+   paiements      Paiement[]
+   rapports       Rapport[]
+   journauxAudit  JournalAudit[]
+   tableauxDeBord TableauDeBord[]
+   parametres     ParametreEntreprise[]
+   licences       Licence[]
+   kpis          KpiData[]
+   alertes       Alerte[]
+   exports       Export[]
 
-  @@unique([nom])
-  @@index([estActive])
-  @@map("companies")
-}
+   @@unique([nom])
+   @@index([estActive])
+   @@map("companies")
+ }
 
 model Utilisateur {
-  id            Int               @id @default(autoincrement())
-  nom           String            @db.VarChar(100)
-  email         String            @unique @db.VarChar(100)
-  motDePasse    String            @db.VarChar(255)
-  role          RoleUtilisateur   @default(EMPLOYE)
-  estActif      Boolean           @default(true)
-  entrepriseId  Int?
+   id            Int               @id @default(autoincrement())
+   nom           String            @db.VarChar(100)
+   email         String            @unique @db.VarChar(100)
+   motDePasse    String            @db.VarChar(255)
+   role          RoleUtilisateur   @default(EMPLOYE)
+   estActif      Boolean           @default(true)
+   entrepriseId  Int?
 
-  // Relations
-  entreprise    Entreprise?       @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
-  journauxAudit JournalAudit[]
+   // Relations
+   entreprise    Entreprise?       @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+   journauxAudit JournalAudit[]
+   alertes       Alerte[]
+   exports       Export[]
 
-  @@index([entrepriseId])
-  @@map("users")
-}
+   @@index([entrepriseId])
+   @@map("users")
+ }
 
 model Employe {
   id            Int               @id @default(autoincrement())
@@ -203,16 +208,108 @@ model JournalAudit {
 }
 
 model TableauDeBord {
-  id            Int               @id @default(autoincrement())
-  nom           String            @db.VarChar(100)
-  configuration Json
-  entrepriseId  Int
+   id            Int               @id @default(autoincrement())
+   nom           String            @db.VarChar(100)
+   configuration Json
+   entrepriseId  Int
+   roleRequis    RoleUtilisateur   @default(EMPLOYE)
+   estActif      Boolean           @default(true)
+   dateCreation  DateTime          @default(now())
+   dateModification DateTime      @updatedAt
 
-  // Relations
-  entreprise    Entreprise        @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+   // Relations
+   entreprise    Entreprise        @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+   widgets       Widget[]
+   alertes       Alerte[]
+   kpis          KpiData[]
 
-  @@map("dashboards")
-}
+   @@map("dashboards")
+ }
+
+ model Widget {
+   id                Int               @id @default(autoincrement())
+   nom               String            @db.VarChar(100)
+   type              TypeWidget
+   configuration     Json
+   positionX         Int               @default(0)
+   positionY         Int               @default(0)
+   largeur           Int               @default(4)
+   hauteur           Int               @default(3)
+   tableauDeBordId   Int
+   estVisible        Boolean           @default(true)
+   ordre             Int               @default(0)
+   dateCreation      DateTime          @default(now())
+
+   // Relations
+   tableauDeBord     TableauDeBord     @relation(fields: [tableauDeBordId], references: [id], onDelete: Cascade)
+
+   @@map("widgets")
+ }
+
+ model KpiData {
+   id            Int               @id @default(autoincrement())
+   nom           String            @db.VarChar(100)
+   valeur        Decimal           @db.Decimal(15, 2)
+   valeurPrecedente Decimal        @db.Decimal(15, 2)
+   unite         String            @db.VarChar(20)
+   typeKpi       TypeKpi
+   periode       PeriodeKpi
+   dateCalcul    DateTime          @default(now())
+   tableauDeBordId Int
+   entrepriseId  Int
+
+   // Relations
+   tableauDeBord TableauDeBord     @relation(fields: [tableauDeBordId], references: [id], onDelete: Cascade)
+   entreprise    Entreprise        @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+
+   @@index([tableauDeBordId, dateCalcul])
+   @@index([entrepriseId, typeKpi])
+   @@map("kpi_data")
+ }
+
+ model Alerte {
+   id            Int               @id @default(autoincrement())
+   titre         String            @db.VarChar(200)
+   message       String            @db.Text
+   type          TypeAlerte
+   severite      SeveriteAlerte    @default(MOYENNE)
+   estLue        Boolean           @default(false)
+   dateCreation  DateTime          @default(now())
+   dateLecture   DateTime?
+   tableauDeBordId Int
+   entrepriseId  Int
+   utilisateurId Int?
+
+   // Relations
+   tableauDeBord TableauDeBord     @relation(fields: [tableauDeBordId], references: [id], onDelete: Cascade)
+   entreprise    Entreprise        @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+   utilisateur   Utilisateur?      @relation(fields: [utilisateurId], references: [id], onDelete: SetNull)
+
+   @@index([entrepriseId, estLue])
+   @@index([tableauDeBordId, dateCreation])
+   @@map("alertes")
+ }
+
+ model Export {
+   id            Int               @id @default(autoincrement())
+   nom           String            @db.VarChar(100)
+   type          TypeExport
+   format        FormatExport
+   statut        StatutExport      @default(EN_COURS)
+   cheminFichier String?           @db.VarChar(255)
+   parametres    Json
+   dateCreation  DateTime          @default(now())
+   dateFin       DateTime?
+   utilisateurId Int
+   entrepriseId  Int
+
+   // Relations
+   utilisateur   Utilisateur       @relation(fields: [utilisateurId], references: [id], onDelete: Cascade)
+   entreprise    Entreprise        @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+
+   @@index([entrepriseId, dateCreation])
+   @@map("exports")
+ }
 
 model ParametreEntreprise {
   id            Int               @id @default(autoincrement())
@@ -359,8 +456,90 @@ enum TypeLicence {
 }
 
 enum StatutLicence {
-  ACTIVE
-  EXPIREE
-  SUSPENDUE
-  ANNULEE
-}
+   ACTIVE
+   EXPIREE
+   SUSPENDUE
+   ANNULEE
+ }
+
+ enum TypeWidget {
+   KPI_CARD
+   LINE_CHART
+   BAR_CHART
+   PIE_CHART
+   AREA_CHART
+   TABLE
+   GAUGE
+   METRIC
+   ALERT_LIST
+   EXPORT_BUTTON
+ }
+
+ enum TypeKpi {
+   NOMBRE_EMPLOYES
+   NOMBRE_EMPLOYES_ACTIFS
+   TOTAL_SALAIRE_BASE
+   TOTAL_ALLOCATIONS
+   TOTAL_DEDUCTIONS
+   TOTAL_A_PAYER
+   NOMBRE_BULLETINS
+   NOMBRE_PAIEMENTS
+   NOMBRE_PAIEMENTS_PAYES
+   NOMBRE_CYCLES
+   TAUX_PAIEMENT
+   MASSE_SALARIALE
+   EVOLUTION_SALARIALE
+   TAUX_ABSENTEISME
+   TURNOVER
+ }
+
+ enum PeriodeKpi {
+   HEURE
+   JOUR
+   SEMAINE
+   MOIS
+   TRIMESTRE
+   ANNEE
+   TEMPS_REEL
+ }
+
+ enum TypeAlerte {
+   PAIEMENT_ECHEC
+   RETARD_PAIEMENT
+   SEUIL_DEPASSE
+   NOUVEAU_EMPLOYE
+   EMPLOYE_PARTI
+   CYCLE_FERME
+   LICENCE_EXPIRATION
+   PERFORMANCE
+   SECURITE
+ }
+
+ enum SeveriteAlerte {
+   FAIBLE
+   MOYENNE
+   ELEVEE
+   CRITIQUE
+ }
+
+ enum TypeExport {
+   DONNEES_ANALYTIQUES
+   RAPPORT_SALARIAL
+   LISTE_EMPLOYES
+   BULLETINS_PAIE
+   PAIEMENTS
+   KPI_DASHBOARD
+ }
+
+ enum FormatExport {
+   PDF
+   EXCEL
+   CSV
+   JSON
+ }
+
+ enum StatutExport {
+   EN_COURS
+   TERMINE
+   ECHEC
+ }

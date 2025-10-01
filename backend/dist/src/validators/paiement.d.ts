@@ -1,7 +1,7 @@
 import { z } from 'zod';
 export declare const paiementSchema: z.ZodObject<{
     montant: z.ZodNumber;
-    datePaiement: z.ZodOptional<z.ZodDate>;
+    datePaiement: z.ZodOptional<z.ZodPipe<z.ZodUnion<readonly [z.ZodDate, z.ZodString]>, z.ZodTransform<Date, string | Date>>>;
     modePaiement: z.ZodEnum<{
         ESPECES: "ESPECES";
         CHEQUE: "CHEQUE";

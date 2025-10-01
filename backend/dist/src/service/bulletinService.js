@@ -24,7 +24,10 @@ export class BulletinService {
     async getBulletin(id) {
         return this.bulletinRepository.findById(id);
     }
-    async getAllBulletins() {
+    async getAllBulletins(user) {
+        if (user) {
+            return this.bulletinRepository.findAllByUser(user);
+        }
         return this.bulletinRepository.findAll();
     }
     async updateBulletin(id, data) {

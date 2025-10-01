@@ -1,4 +1,4 @@
-# Frontend - Gestion des Salariés
+# Frontend - SalairePro
 
 ## 📱 Interface Utilisateur
 
@@ -237,7 +237,7 @@ npm run test:ui      # Tests end-to-end
 VITE_API_BASE_URL=http://localhost:3015
 
 # Application
-VITE_APP_NAME="Gestion des Salariés"
+VITE_APP_NAME="SalairePro"
 VITE_APP_VERSION=1.0.0
 ```
 

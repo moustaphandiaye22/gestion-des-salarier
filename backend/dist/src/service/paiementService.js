@@ -14,8 +14,11 @@ export class PaiementService {
     async getPaiement(id) {
         return await this.paiementRepository.findById(id);
     }
-    async getAllPaiements() {
-        return await this.paiementRepository.findAll();
+    async getAllPaiements(user) {
+        if (user) {
+            return this.paiementRepository.findAllByUser(user);
+        }
+        return this.paiementRepository.findAll();
     }
     async updatePaiement(id, data) {
         const parsed = paiementSchema.partial().safeParse(data);

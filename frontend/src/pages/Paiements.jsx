@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog } from "../components/ui";
 import { paiementsApi } from "../utils/api";
-import { TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, PlusIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 
 export default function Paiements() {
   const [rows, setRows] = useState([]);
@@ -44,10 +45,12 @@ export default function Paiements() {
           <CardHeader
             title="Paiements"
             actions={
-              <Button className="flex items-center gap-2">
-                <PlusIcon className="h-5 w-5" />
-                Ajouter
-              </Button>
+              <Link to="/paiements/new">
+                <Button className="flex items-center gap-2">
+                  <PlusIcon className="h-5 w-5" />
+                  Ajouter
+                </Button>
+              </Link>
             }
           />
           <CardBody>
@@ -92,9 +95,16 @@ export default function Paiements() {
                       </span>
                     </td>
                     <td className="px-2 py-2 text-sm">
-                      <Button variant="danger" onClick={() => setToDelete(row)} className="text-xs px-2 py-1">
-                        <TrashIcon className="h-3 w-3" />
-                      </Button>
+                      <div className="flex gap-1">
+                        <Link to={`/paiements/${row.id}/edit`}>
+                          <Button variant="outline" className="text-xs px-2 py-1">
+                            <PencilSquareIcon className="h-3 w-3" />
+                          </Button>
+                        </Link>
+                        <Button variant="danger" onClick={() => setToDelete(row)} className="text-xs px-2 py-1">
+                          <TrashIcon className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 )}

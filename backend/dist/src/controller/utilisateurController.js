@@ -1,68 +1,71 @@
-import { utilisateurService } from '../service/utilisateurService.js';
-import { utilisateurValidator } from '../validators/utilisateur.js';
+import { asyncHandler } from '../middleware/errorMiddleware.js';
+import { Logger } from '../utils/logger.js';
 export class UtilisateurController {
-    async create(req, res) {
-        try {
-            const data = utilisateurValidator.parse(req.body);
-            const utilisateur = await utilisateurService.createUtilisateur(data);
-            res.status(201).json({ message: 'Utilisateur créé avec succès.', utilisateur });
-        }
-        catch (err) {
-            if (err.errors) {
-                res.status(400).json({ error: 'Erreur de validation des données.', details: err.errors });
-            }
-            else {
-                res.status(400).json({ error: `Échec de la création de l'utilisateur : ${err.message}` });
-            }
-        }
+    utilisateurService;
+    constructor(utilisateurService) {
+        this.utilisateurService = utilisateurService;
     }
-    async getAll(req, res) {
-        try {
-            const utilisateurs = await utilisateurService.getAllUtilisateurs();
-            res.json({ message: 'Liste des utilisateurs récupérée avec succès.', utilisateurs });
+    create = asyncHandler(async (req, res) => {
+        Logger.info('Requête de création d\'utilisateur reçue', { email: req.body.email });
+        // Pour les admin entreprise, forcer l'entrepriseId à leur propre entreprise
+        let userData = { ...req.body };
+        if (req.user?.profil === 'ADMIN_ENTREPRISE' && req.user.entrepriseId) {
+            userData.entrepriseId = req.user.entrepriseId;
         }
-        catch (err) {
-            res.status(500).json({ error: `Impossible de récupérer les utilisateurs : ${err.message}` });
+        const utilisateur = await this.utilisateurService.createUtilisateur(userData);
+        res.status(201).json({
+            message: 'Utilisateur créé avec succès.',
+            utilisateur
+        });
+    });
+    getAll = asyncHandler(async (req, res) => {
+        Logger.info('Requête de récupération de tous les utilisateurs reçue');
+        let utilisateurs = [];
+        // Filtrer selon le rôle de l'utilisateur connecté
+        if (req.user?.profil === 'SUPER_ADMIN') {
+            utilisateurs = await this.utilisateurService.getAllUtilisateurs();
         }
-    }
-    async getById(req, res) {
-        try {
-            const id = Number(req.params.id);
-            const utilisateur = await utilisateurService.getUtilisateur(id);
-            if (!utilisateur) {
-                return res.status(404).json({ error: `Aucun utilisateur trouvé avec l'identifiant ${id}.` });
-            }
-            res.json({ message: 'Utilisateur récupéré avec succès.', utilisateur });
+        else if (req.user?.profil === 'ADMIN_ENTREPRISE' && req.user.entrepriseId) {
+            utilisateurs = await this.utilisateurService.getUtilisateursByEntreprise(req.user.entrepriseId);
         }
-        catch (err) {
-            res.status(500).json({ error: `Impossible de récupérer l'utilisateur : ${err.message}` });
+        else {
+            // Pour les autres rôles, ne rien retourner ou lever une erreur
+            utilisateurs = [];
         }
-    }
-    async update(req, res) {
-        try {
-            const id = Number(req.params.id);
-            const data = utilisateurValidator.partial().parse(req.body);
-            const utilisateur = await utilisateurService.updateUtilisateur(id, data);
-            res.json({ message: 'Utilisateur mis à jour avec succès.', utilisateur });
-        }
-        catch (err) {
-            if (err.errors) {
-                res.status(400).json({ error: 'Erreur de validation des données.', details: err.errors });
-            }
-            else {
-                res.status(400).json({ error: `Échec de la mise à jour de l'utilisateur : ${err.message}` });
-            }
-        }
-    }
-    async delete(req, res) {
-        try {
-            const id = Number(req.params.id);
-            await utilisateurService.deleteUtilisateur(id);
-            res.status(200).json({ message: `Utilisateur avec l'identifiant ${id} supprimé avec succès.` });
-        }
-        catch (err) {
-            res.status(500).json({ error: `Impossible de supprimer l'utilisateur : ${err.message}` });
-        }
-    }
+        res.json({
+            message: 'Liste des utilisateurs récupérée avec succès.',
+            utilisateurs
+        });
+    });
+    getById = asyncHandler(async (req, res) => {
+        const id = Number(req.params.id);
+        Logger.info('Requête de récupération d\'utilisateur par ID reçue', { id });
+        const utilisateur = await this.utilisateurService.getUtilisateur(id);
+        res.json({
+            message: 'Utilisateur récupéré avec succès.',
+            utilisateur
+        });
+    });
+    update = asyncHandler(async (req, res) => {
+        const id = Number(req.params.id);
+        Logger.info('Requête de mise à jour d\'utilisateur reçue', { id });
+        const utilisateur = await this.utilisateurService.updateUtilisateur(id, req.body);
+        res.json({
+            message: 'Utilisateur mis à jour avec succès.',
+            utilisateur
+        });
+    });
+    delete = asyncHandler(async (req, res) => {
+        const id = Number(req.params.id);
+        Logger.info('Requête de suppression d\'utilisateur reçue', { id });
+        await this.utilisateurService.deleteUtilisateur(id);
+        res.json({
+            message: `Utilisateur avec l'identifiant ${id} supprimé avec succès.`
+        });
+    });
 }
+// Factory function pour créer le controller avec les dépendances
+export const createUtilisateurController = (utilisateurService) => {
+    return new UtilisateurController(utilisateurService);
+};
 //# sourceMappingURL=utilisateurController.js.map

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog } from "../components/ui";
 import { employesApi } from "../utils/api";
-import { PencilSquareIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon, TrashIcon, PlusIcon, EyeIcon } from "@heroicons/react/24/outline";
 
 export default function EmployeeList() {
   const [rows, setRows] = useState([]);
@@ -79,7 +79,11 @@ export default function EmployeeList() {
                 renderRow={(row) => (
                   <tr key={row.id}>
                     <td className="px-2 py-2 text-sm text-gray-700 font-medium">{row.matricule}</td>
-                    <td className="px-2 py-2 text-sm text-gray-900 font-medium">{row.prenom} {row.nom}</td>
+                    <td className="px-2 py-2 text-sm text-gray-900 font-medium">
+                      <Link to={`/employees/${row.id}`} className="text-blue-600 hover:text-blue-800 hover:underline">
+                        {row.prenom} {row.nom}
+                      </Link>
+                    </td>
                     <td className="px-2 py-2 text-sm text-gray-700 hidden sm:table-cell">
                       <div className="space-y-1">
                         <div>{row.email || '-'}</div>
@@ -119,6 +123,11 @@ export default function EmployeeList() {
                     <td className="px-2 py-2 text-sm text-gray-700 hidden xl:table-cell">{row.entreprise?.nom || '-'}</td>
                     <td className="px-2 py-2 text-sm">
                       <div className="flex gap-1">
+                        <Link to={`/employees/${row.id}`}>
+                          <Button variant="outline" className="text-xs px-2 py-1">
+                            <EyeIcon className="h-3 w-3" />
+                          </Button>
+                        </Link>
                         <Link to={`/employees/${row.id}/edit`}>
                           <Button variant="outline" className="text-xs px-2 py-1">
                             <PencilSquareIcon className="h-3 w-3" />

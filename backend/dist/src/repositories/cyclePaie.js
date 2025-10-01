@@ -4,8 +4,8 @@ export class cyclePaieRepository {
     async findByEntreprise(entrepriseId) {
         return mnprisma.cyclePaie.findMany({ where: { entrepriseId }, include: { entreprise: true, bulletins: true } });
     }
-    async setEstFerme(id, estFerme) {
-        return mnprisma.cyclePaie.update({ where: { id }, data: { estFerme } });
+    async setStatut(id, statut) {
+        return mnprisma.cyclePaie.update({ where: { id }, data: { statut } });
     }
     async create(data) {
         return mnprisma.cyclePaie.create({ data });
@@ -15,6 +15,23 @@ export class cyclePaieRepository {
     }
     async findAll() {
         return mnprisma.cyclePaie.findMany({ include: { entreprise: true, bulletins: true } });
+    }
+    async findAllByUser(user) {
+        // Super Admin voit tous les cycles de paie
+        if (user.profil === 'SUPER_ADMIN') {
+            return mnprisma.cyclePaie.findMany({
+                include: { entreprise: true, bulletins: true }
+            });
+        }
+        // Admin d'Entreprise voit seulement les cycles de son entreprise
+        if (user.profil === 'ADMIN_ENTREPRISE' && user.entrepriseId) {
+            return mnprisma.cyclePaie.findMany({
+                where: { entrepriseId: user.entrepriseId },
+                include: { entreprise: true, bulletins: true }
+            });
+        }
+        // Autres rôles n'ont pas accès aux cycles de paie
+        return [];
     }
     async update(id, data) {
         return mnprisma.cyclePaie.update({ where: { id }, data });
