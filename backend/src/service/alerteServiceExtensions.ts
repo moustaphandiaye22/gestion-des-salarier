@@ -19,7 +19,7 @@ export class AlerteServiceExtensions {
    */
   async generatePredictiveAlerts(entrepriseId: number | null, isSuperAdmin: boolean = false): Promise<AlerteData[]> {
     const alertes: AlerteData[] = [];
-    const baseWhere = isSuperAdmin ? {} : { entrepriseId: entrepriseId! };
+    const baseWhere: any = isSuperAdmin ? {} : { entrepriseId: entrepriseId! };
 
     // Alerte prédictive: Tendance à la baisse de la masse salariale
     const masseSalarialeTrend = await this.calculateTrend('MASSE_SALARIALE', entrepriseId, isSuperAdmin);
@@ -57,7 +57,7 @@ export class AlerteServiceExtensions {
    */
   async generatePerformanceAlerts(entrepriseId: number | null, isSuperAdmin: boolean = false): Promise<AlerteData[]> {
     const alertes: AlerteData[] = [];
-    const baseWhere = isSuperAdmin ? {} : { entrepriseId: entrepriseId! };
+    const baseWhere: any = isSuperAdmin ? {} : { entrepriseId: entrepriseId! };
 
     // Alerte: Productivité mensuelle faible
     const employes = await this.prisma.employe.findMany({
@@ -75,7 +75,7 @@ export class AlerteServiceExtensions {
         type: 'PRODUCTIVITE_FAIBLE',
         severite: 'MOYENNE',
         tableauDeBordId: 1,
-        entrepriseId: isSuperAdmin ? 1 : entrepriseId,
+        entrepriseId: isSuperAdmin ? null : entrepriseId,
         utilisateurId: 1
       });
     }
@@ -92,7 +92,7 @@ export class AlerteServiceExtensions {
         type: 'COUT_ELEVE',
         severite: 'ELEVEE',
         tableauDeBordId: 1,
-        entrepriseId: isSuperAdmin ? 1 : entrepriseId,
+        entrepriseId: isSuperAdmin ? null : entrepriseId,
         utilisateurId: 1
       });
     }

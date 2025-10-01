@@ -2,13 +2,18 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog } from "../components/ui";
 import { employesApi } from "../utils/api";
-import { PencilSquareIcon, TrashIcon, PlusIcon, EyeIcon } from "@heroicons/react/24/outline";
+import { useAuth } from "../context/AuthContext";
+import { PencilSquareIcon, TrashIcon, PlusIcon, EyeIcon, DocumentArrowUpIcon } from "@heroicons/react/24/outline";
 
 export default function EmployeeList() {
+  const { selectedCompanyId } = useAuth();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [toDelete, setToDelete] = useState(null);
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState(null);
 
   async function load() {
     setLoading(true);
@@ -25,7 +30,7 @@ export default function EmployeeList() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [selectedCompanyId]);
 
   async function confirmDelete() {
     if (!toDelete) return;
@@ -38,6 +43,25 @@ export default function EmployeeList() {
     }
   }
 
+  async function handleImport(e) {
+    e.preventDefault();
+    const file = e.target.elements.file.files[0];
+    if (!file) return;
+    setImporting(true);
+    setImportResult(null);
+    try {
+      const result = await employesApi.bulkImport(file);
+      setImportResult(result);
+      setImportModalOpen(false);
+      load(); // Reload list
+    } catch (err) {
+      setImportResult({ error: err?.response?.data?.error || err.message });
+      setImportModalOpen(false);
+    } finally {
+      setImporting(false);
+    }
+  }
+
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-gray-50">
       <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8 py-8">
@@ -45,18 +69,58 @@ export default function EmployeeList() {
           <CardHeader
             title="Employés"
             actions={
-              <Link to="/employees/new">
-                <Button className="flex items-center gap-2">
-                  <PlusIcon className="h-5 w-5" />
-                  Ajouter
+              <div className="flex gap-2">
+                <Link to="/employees/new">
+                  <Button className="flex items-center gap-2">
+                    <PlusIcon className="h-5 w-5" />
+                    Ajouter
+                  </Button>
+                </Link>
+                <Button
+                  className="flex items-center gap-2"
+                  variant="outline"
+                  onClick={() => setImportModalOpen(true)}
+                >
+                  <DocumentArrowUpIcon className="h-5 w-5" />
+                  Importer Excel
                 </Button>
-              </Link>
+              </div>
             }
           />
           <CardBody>
             {error && (
               <div className="mb-4 rounded-md bg-red-50 p-3 ring-1 ring-red-200 text-sm text-red-800">
                 {error}
+              </div>
+            )}
+            {importResult && (
+              <div className="mb-4 rounded-md bg-blue-50 p-3 ring-1 ring-blue-200 text-sm text-blue-800">
+                <div className="flex justify-between items-center">
+                  <div>
+                    {importResult.error ? (
+                      <div className="text-red-600">Erreur: {importResult.error}</div>
+                    ) : (
+                      <div>
+                        Import terminé. {importResult.success?.length || 0} employés créés, {importResult.errors?.length || 0} erreurs.
+                        {importResult.errors && importResult.errors.length > 0 && (
+                          <ul className="list-disc list-inside mt-2 max-h-40 overflow-y-auto text-xs text-red-700">
+                            {importResult.errors.map((err, idx) => (
+                              <li key={idx}>
+                                Ligne {err.index + 1}: {err.errors.map(e => e.message).join(", ")}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    className="text-blue-600 hover:underline"
+                    onClick={() => setImportResult(null)}
+                  >
+                    Fermer
+                  </button>
+                </div>
               </div>
             )}
             <div className="max-h-[calc(100vh-16rem)] overflow-y-auto">
@@ -152,6 +216,41 @@ export default function EmployeeList() {
           onCancel={() => setToDelete(null)}
           onConfirm={confirmDelete}
         />
+
+        {importModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="w-full max-w-md rounded-lg bg-white p-6 ring-1 ring-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Importer des employés depuis Excel</h3>
+              <form onSubmit={handleImport}>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Sélectionner un fichier Excel (.xlsx ou .xls)
+                  </label>
+                  <input
+                    type="file"
+                    name="file"
+                    accept=".xlsx,.xls"
+                    required
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                </div>
+                <div className="flex justify-end gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setImportModalOpen(false)}
+                    disabled={importing}
+                  >
+                    Annuler
+                  </Button>
+                  <Button type="submit" disabled={importing}>
+                    {importing ? "Importation..." : "Importer"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

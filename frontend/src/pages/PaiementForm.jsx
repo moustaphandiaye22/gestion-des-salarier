@@ -1,12 +1,34 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardHeader, CardBody, Input, Select, Button } from "../components/ui";
-import { paiementsApi, bulletinsApi, entreprisesApi } from "../utils/api";
+import { paiementsApi, bulletinsApi, entreprisesApi, employesApi } from "../utils/api";
+
+// Helper function to generate payment reference
+function generatePaymentReference(employeeId, date = new Date()) {
+  const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+  const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp
+  return `PAY-${employeeId}-${dateStr}-${timestamp}`;
+}
+
+// Helper function to calculate net salary (basic calculation)
+function calculateNetSalary(employee) {
+  const baseSalary = Number(employee.salaireBase || 0);
+  const allocations = Number(employee.allocations || 0);
+  const deductions = Number(employee.deductions || 0);
+
+  // Basic calculation: base + allocations - deductions
+  const netSalary = baseSalary + allocations - deductions;
+  return Math.max(0, netSalary);
+}
 
 export default function PaiementForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
+
+  // Get employeeId from query parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const preselectedEmployeeId = urlParams.get('employeeId');
 
   const [form, setForm] = useState({
     montant: "",
@@ -16,10 +38,12 @@ export default function PaiementForm() {
     reference: "",
     bulletinId: "",
     entrepriseId: "",
+    employeId: "",
   });
   const [errors, setErrors] = useState({});
   const [bulletins, setBulletins] = useState([]);
   const [entreprises, setEntreprises] = useState([]);
+  const [employes, setEmployes] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -56,11 +80,73 @@ export default function PaiementForm() {
   }
 
   useEffect(() => {
+    // Load employees
+    employesApi
+      .list()
+      .then((data) => setEmployes(Array.isArray(data) ? data : []))
+      .catch(() => setEmployes([]));
+
+    // Load entreprises
     entreprisesApi
       .list()
       .then((data) => setEntreprises(Array.isArray(data) ? data : []))
       .catch(() => setEntreprises([]));
   }, []);
+
+  // Auto-populate form when employee is selected
+  useEffect(() => {
+    if (form.employeId) {
+      const selectedEmployee = employes.find(emp => emp.id.toString() === form.employeId);
+      if (selectedEmployee) {
+        // Auto-populate entreprise
+        setForm(prev => ({
+          ...prev,
+          entrepriseId: selectedEmployee.entrepriseId.toString()
+        }));
+
+        // Load latest bulletin for the employee
+        employesApi.getLatestBulletin(form.employeId)
+          .then((bulletin) => {
+            if (bulletin) {
+              setForm(prev => ({
+                ...prev,
+                bulletinId: bulletin.id.toString(),
+                montant: bulletin.totalAPayer.toString(),
+                reference: generatePaymentReference(selectedEmployee.id, new Date())
+              }));
+            }
+          })
+          .catch(() => {
+            // If no bulletin, calculate net salary
+            const netSalary = calculateNetSalary(selectedEmployee);
+            setForm(prev => ({
+              ...prev,
+              montant: netSalary.toString(),
+              reference: generatePaymentReference(selectedEmployee.id, new Date())
+            }));
+          });
+      }
+    } else {
+      // Clear auto-populated fields when no employee selected
+      setForm(prev => ({
+        ...prev,
+        entrepriseId: "",
+        bulletinId: "",
+        montant: "",
+        reference: ""
+      }));
+    }
+  }, [form.employeId, employes]);
+
+  // Pre-select employee if coming from employee detail page
+  useEffect(() => {
+    if (preselectedEmployeeId && !isEdit) {
+      setForm(prev => ({
+        ...prev,
+        employeId: preselectedEmployeeId
+      }));
+    }
+  }, [preselectedEmployeeId, isEdit]);
 
   useEffect(() => {
     if (form.entrepriseId) {

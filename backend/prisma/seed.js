@@ -30,6 +30,7 @@ async function main() {
         adresse: 'Dakar, Plateau',
         telephone: '+221 33 123 45 67',
         email: 'contact@techcorp.sn',
+        logo: 'images/logos/LOGOst.png',
         estActive: true,
       },
     });
@@ -41,12 +42,27 @@ async function main() {
         adresse: 'Bamako, ACI 2000',
         telephone: '+223 20 12 34 56',
         email: 'info@agrisolutions.ml',
+        logo: 'images/logos/images.png',
         estActive: true,
       },
     });
   } else {
     entreprise1 = existingEntreprises.find(e => e.nom === 'TechCorp Senegal');
     entreprise2 = existingEntreprises.find(e => e.nom === 'AgriSolutions Mali');
+
+    // Update existing entreprises with logos if not set
+    if (entreprise1 && !entreprise1.logo) {
+      entreprise1 = await prisma.entreprise.update({
+        where: { id: entreprise1.id },
+        data: { logo: 'images/logos/LOGOst.png' }
+      });
+    }
+    if (entreprise2 && !entreprise2.logo) {
+      entreprise2 = await prisma.entreprise.update({
+        where: { id: entreprise2.id },
+        data: { logo: 'images/logos/images.png' }
+      });
+    }
   }
 
   console.log('Entreprises created');

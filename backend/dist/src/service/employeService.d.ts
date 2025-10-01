@@ -44,7 +44,7 @@ export declare class EmployeService {
         deductions: import("@prisma/client/runtime/library").Decimal;
         professionId: number | null;
     } | null>;
-    getAllEmployes(user?: any): Promise<{
+    getAllEmployes(user?: any, entrepriseId?: number): Promise<{
         id: number;
         nom: string;
         email: string | null;
@@ -128,6 +128,13 @@ export declare class EmployeService {
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
         professionId: number | null;
+    }>;
+    bulkCreateEmployes(employes: any[]): Promise<{
+        success: any[];
+        errors: {
+            index: number;
+            errors: any;
+        }[];
     }>;
 }
 //# sourceMappingURL=employeService.d.ts.map

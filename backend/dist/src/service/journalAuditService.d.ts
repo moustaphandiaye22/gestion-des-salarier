@@ -3,8 +3,8 @@ export declare class JournalAuditService {
     createJournalAudit(data: any): Promise<{
         id: number;
         entrepriseId: number | null;
-        bulletinId: number | null;
         employeId: number | null;
+        bulletinId: number | null;
         action: import("@prisma/client").$Enums.ActionAudit;
         details: import("@prisma/client/runtime/library").JsonValue;
         dateAction: Date;
@@ -15,8 +15,8 @@ export declare class JournalAuditService {
     getJournalAudit(id: number): Promise<{
         id: number;
         entrepriseId: number | null;
-        bulletinId: number | null;
         employeId: number | null;
+        bulletinId: number | null;
         action: import("@prisma/client").$Enums.ActionAudit;
         details: import("@prisma/client/runtime/library").JsonValue;
         dateAction: Date;
@@ -27,8 +27,8 @@ export declare class JournalAuditService {
     getAllJournalAudits(): Promise<{
         id: number;
         entrepriseId: number | null;
-        bulletinId: number | null;
         employeId: number | null;
+        bulletinId: number | null;
         action: import("@prisma/client").$Enums.ActionAudit;
         details: import("@prisma/client/runtime/library").JsonValue;
         dateAction: Date;
@@ -39,8 +39,8 @@ export declare class JournalAuditService {
     updateJournalAudit(id: number, data: any): Promise<{
         id: number;
         entrepriseId: number | null;
-        bulletinId: number | null;
         employeId: number | null;
+        bulletinId: number | null;
         action: import("@prisma/client").$Enums.ActionAudit;
         details: import("@prisma/client/runtime/library").JsonValue;
         dateAction: Date;

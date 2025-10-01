@@ -13,6 +13,7 @@ const mockRepository: jest.Mocked<Pick<IUserRepository, keyof IUserRepository>> 
   findAll: jest.fn(),
   findById: jest.fn(),
   findByEmail: jest.fn(),
+  findByEntreprise: jest.fn(),
   update: jest.fn(),
   delete: jest.fn(),
 };

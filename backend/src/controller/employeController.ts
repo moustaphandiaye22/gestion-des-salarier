@@ -1,8 +1,12 @@
 import type { Request, Response } from 'express';
 import { EmployeService } from '../service/employeService.js';
+import { SalaryCalculationService } from '../service/salaryCalculationService.js';
 import { employeSchema } from '../validators/employe.js';
+import * as XLSX from 'xlsx';
+import multer from 'multer';
 
 const employeService = new EmployeService();
+const salaryCalculationService = new SalaryCalculationService();
 
 export class EmployeController {
   async create(req: Request, res: Response) {
@@ -21,7 +25,8 @@ export class EmployeController {
 
   async getAll(req: Request, res: Response) {
     try {
-      const employes = await employeService.getAllEmployes(req.user);
+      const entrepriseId = req.query.entrepriseId ? parseInt(req.query.entrepriseId as string) : undefined;
+      const employes = await employeService.getAllEmployes(req.user, entrepriseId);
       res.json({ message: 'Liste des employés récupérée avec succès.', employes });
     } catch (err: any) {
       res.status(500).json({ error: `Impossible de récupérer les employés : ${err.message}` });
@@ -63,6 +68,75 @@ export class EmployeController {
       res.status(200).json({ message: `Employé avec l'identifiant ${id} supprimé avec succès.` });
     } catch (err: any) {
       res.status(500).json({ error: `Impossible de supprimer l'employé : ${err.message}` });
+    }
+  }
+
+  async getLatestBulletin(req: Request, res: Response) {
+    try {
+      const employeeId = Number(req.params.id);
+      const bulletin = await salaryCalculationService.getLatestBulletin(employeeId);
+      if (!bulletin) {
+        return res.status(404).json({ error: `Aucun bulletin trouvé pour l'employé ${employeeId}.` });
+      }
+      res.json({ message: 'Bulletin récupéré avec succès.', bulletin });
+    } catch (err: any) {
+      res.status(500).json({ error: `Impossible de récupérer le bulletin : ${err.message}` });
+    }
+  }
+
+  async bulkImport(req: Request, res: Response) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'Aucun fichier fourni.' });
+      }
+
+      const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      if (!sheetName) {
+        return res.status(400).json({ error: 'Aucune feuille trouvée dans le fichier Excel.' });
+      }
+      const worksheet = workbook.Sheets[sheetName];
+      if (!worksheet) {
+        return res.status(400).json({ error: 'Feuille de calcul invalide.' });
+      }
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      // Use entrepriseId from form data if provided (for super admin), otherwise from user
+      let entrepriseId: number | undefined = undefined;
+      if (req.body.entrepriseId) {
+        entrepriseId = parseInt(req.body.entrepriseId);
+      } else if ((req as any).user?.profil === 'SUPER_ADMIN') {
+        // If super admin and no entrepriseId provided, reject
+        return res.status(400).json({ error: 'ID de l\'entreprise requis pour super admin.' });
+      } else {
+        const user = req.user as any;
+        entrepriseId = user?.entrepriseId;
+      }
+
+      if (!entrepriseId) {
+        return res.status(400).json({ error: 'ID de l\'entreprise requis.' });
+      }
+
+      const employes = jsonData.map((row: any) => ({
+        ...row,
+        entrepriseId,
+        dateEmbauche: new Date(row.dateEmbauche),
+        salaireBase: parseFloat(row.salaireBase),
+        allocations: row.allocations ? parseFloat(row.allocations) : 0,
+        deductions: row.deductions ? parseFloat(row.deductions) : 0,
+        salaireHoraire: row.salaireHoraire ? parseFloat(row.salaireHoraire) : null,
+        tauxJournalier: row.tauxJournalier ? parseFloat(row.tauxJournalier) : null,
+        professionId: row.professionId ? parseInt(row.professionId) : null,
+        estActif: row.estActif !== undefined ? Boolean(row.estActif) : true,
+      }));
+
+      const results = await employeService.bulkCreateEmployes(employes);
+      res.status(200).json({
+        message: `Import terminé. ${results.success.length} employés créés, ${results.errors.length} erreurs.`,
+        results
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: `Échec de l'import : ${err.message}` });
     }
   }
 }

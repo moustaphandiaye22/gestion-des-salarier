@@ -21,9 +21,9 @@ export declare class LicenceService {
             telephone: string | null;
             adresse: string | null;
             description: string | null;
+            dateCreation: Date;
             logo: string | null;
             estActive: boolean;
-            dateCreation: Date;
         } | null;
     } & {
         id: number;
@@ -46,9 +46,9 @@ export declare class LicenceService {
             telephone: string | null;
             adresse: string | null;
             description: string | null;
+            dateCreation: Date;
             logo: string | null;
             estActive: boolean;
-            dateCreation: Date;
         } | null;
     } & {
         id: number;
@@ -71,9 +71,9 @@ export declare class LicenceService {
             telephone: string | null;
             adresse: string | null;
             description: string | null;
+            dateCreation: Date;
             logo: string | null;
             estActive: boolean;
-            dateCreation: Date;
         } | null;
     } & {
         id: number;
@@ -96,9 +96,9 @@ export declare class LicenceService {
             telephone: string | null;
             adresse: string | null;
             description: string | null;
+            dateCreation: Date;
             logo: string | null;
             estActive: boolean;
-            dateCreation: Date;
         } | null;
     } & {
         id: number;
@@ -134,9 +134,9 @@ export declare class LicenceService {
             telephone: string | null;
             adresse: string | null;
             description: string | null;
+            dateCreation: Date;
             logo: string | null;
             estActive: boolean;
-            dateCreation: Date;
         } | null;
     } & {
         id: number;
@@ -159,9 +159,9 @@ export declare class LicenceService {
             telephone: string | null;
             adresse: string | null;
             description: string | null;
+            dateCreation: Date;
             logo: string | null;
             estActive: boolean;
-            dateCreation: Date;
         } | null;
     } & {
         id: number;
@@ -184,9 +184,9 @@ export declare class LicenceService {
             telephone: string | null;
             adresse: string | null;
             description: string | null;
+            dateCreation: Date;
             logo: string | null;
             estActive: boolean;
-            dateCreation: Date;
         } | null;
     } & {
         id: number;
@@ -209,9 +209,9 @@ export declare class LicenceService {
             telephone: string | null;
             adresse: string | null;
             description: string | null;
+            dateCreation: Date;
             logo: string | null;
             estActive: boolean;
-            dateCreation: Date;
         } | null;
     } & {
         id: number;
@@ -234,9 +234,9 @@ export declare class LicenceService {
             telephone: string | null;
             adresse: string | null;
             description: string | null;
+            dateCreation: Date;
             logo: string | null;
             estActive: boolean;
-            dateCreation: Date;
         } | null;
     } & {
         id: number;

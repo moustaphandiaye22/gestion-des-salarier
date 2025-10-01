@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardBody, Button, ConfirmDialog } from "../components/ui";
 import { employesApi, paiementsApi } from "../utils/api";
+import { formatCFA } from "../utils/format";
 import { PencilSquareIcon, TrashIcon, ArrowLeftIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
 
 export default function EmployeeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [employee, setEmployee] = useState(null);
+  const [latestBulletin, setLatestBulletin] = useState(null);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,6 +19,19 @@ export default function EmployeeDetail() {
     try {
       const data = await employesApi.get(id);
       setEmployee(data);
+      // Load latest bulletin for employee (optional)
+      try {
+        const bulletin = await employesApi.getLatestBulletin(id);
+        setLatestBulletin(bulletin);
+      } catch (bulletinErr) {
+        // If no bulletin exists (404), just set to null - not an error
+        if (bulletinErr?.response?.status === 404) {
+          setLatestBulletin(null);
+        } else {
+          // Re-throw other errors
+          throw bulletinErr;
+        }
+      }
     } catch (err) {
       setError(err?.response?.data?.message || err.message);
     }
@@ -24,10 +39,10 @@ export default function EmployeeDetail() {
 
   async function loadPayments() {
     try {
-      // Get all payments and filter by bulletin employeId
+      // Get all payments and filter by employeId or bulletin employeId
       const allPayments = await paiementsApi.list();
       const employeePayments = allPayments.filter(payment =>
-        payment.bulletin?.employeId === parseInt(id)
+        payment.employeId === parseInt(id) || payment.bulletin?.employeId === parseInt(id)
       );
       setPayments(employeePayments);
     } catch (err) {
@@ -80,11 +95,11 @@ export default function EmployeeDetail() {
 
   const totalPaid = payments
     .filter(p => p.statut === 'PAYE')
-    .reduce((sum, p) => sum + (p.montant || 0), 0);
+    .reduce((sum, p) => sum + (Number(p.montant) || 0), 0);
 
   const pendingPayments = payments
     .filter(p => p.statut === 'EN_ATTENTE')
-    .reduce((sum, p) => sum + (p.montant || 0), 0);
+    .reduce((sum, p) => sum + (Number(p.montant) || 0), 0);
 
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-gray-50">
@@ -196,14 +211,14 @@ export default function EmployeeDetail() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Salaire de base</label>
                     <p className="mt-1 text-lg font-semibold text-gray-900">
-                      {employee.salaireBase?.toLocaleString()} CFA
+                      {formatCFA(employee.salaireBase)}
                     </p>
                   </div>
                   {employee.typeSalaire === 'HONORAIRES' && employee.salaireHoraire && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Salaire horaire</label>
                       <p className="mt-1 text-sm text-gray-900">
-                        {employee.salaireHoraire.toLocaleString()} CFA
+                        {formatCFA(employee.salaireHoraire)}
                       </p>
                     </div>
                   )}
@@ -211,26 +226,26 @@ export default function EmployeeDetail() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Taux journalier</label>
                       <p className="mt-1 text-sm text-gray-900">
-                        {employee.tauxJournalier.toLocaleString()} CFA
+                        {formatCFA(employee.tauxJournalier)}
                       </p>
                     </div>
                   )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Allocations</label>
                     <p className="mt-1 text-sm text-green-600">
-                      +{employee.allocations?.toLocaleString() || 0} CFA
+                      +{formatCFA(employee.allocations || 0)}
                     </p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Déductions</label>
                     <p className="mt-1 text-sm text-red-600">
-                      -{employee.deductions?.toLocaleString() || 0} CFA
+                      -{formatCFA(employee.deductions || 0)}
                     </p>
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700">Salaire net estimé</label>
                     <p className="mt-1 text-xl font-bold text-blue-600">
-                      {(employee.salaireBase + (employee.allocations || 0) - (employee.deductions || 0)).toLocaleString()} CFA
+                      {latestBulletin ? formatCFA(Number(latestBulletin.totalAPayer)) : formatCFA(employee.salaireBase + (employee.allocations || 0) - (employee.deductions || 0))}
                     </p>
                   </div>
                 </div>
@@ -247,13 +262,13 @@ export default function EmployeeDetail() {
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium text-gray-700">Total payé</span>
                     <span className="text-lg font-semibold text-green-600">
-                      {totalPaid.toLocaleString()} CFA
+                      {formatCFA(totalPaid)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium text-gray-700">En attente</span>
                     <span className="text-lg font-semibold text-yellow-600">
-                      {pendingPayments.toLocaleString()} CFA
+                      {formatCFA(pendingPayments)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center pt-2 border-t">
@@ -271,7 +286,7 @@ export default function EmployeeDetail() {
               <CardHeader title="Actions rapides" />
               <CardBody>
                 <div className="space-y-2">
-                  <Link to="/paiements/new">
+                  <Link to={`/paiements/new?employeeId=${id}`}>
                     <Button className="w-full flex items-center justify-center gap-2">
                       <CurrencyDollarIcon className="h-4 w-4" />
                       Nouveau paiement
@@ -319,7 +334,7 @@ export default function EmployeeDetail() {
                             {payment.bulletin?.numeroBulletin || '-'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {payment.montant?.toLocaleString()} CFA
+                            {formatCFA(payment.montant)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {payment.datePaiement ? new Date(payment.datePaiement).toLocaleDateString() : '-'}

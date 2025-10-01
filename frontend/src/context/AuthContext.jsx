@@ -8,32 +8,85 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [selectedCompanyId, setSelectedCompanyId] = useState(() => {
+    return localStorage.getItem('selectedCompanyId') || null;
+  });
+
+  const fetchCurrentUser = async () => {
+    // Prevent multiple simultaneous calls
+    if (isAuthenticating) {
+      throw new Error('Authentication already in progress');
+    }
+
+    try {
+      setIsAuthenticating(true);
+      const data = await authApi.getCurrentUser();
+      const utilisateur = data?.utilisateur;
+      if (!utilisateur) {
+        throw new Error('Aucun utilisateur trouvé');
+      }
+      setUser({
+        id: utilisateur?.id,
+        email: utilisateur?.email,
+        role: utilisateur?.role,
+        entrepriseId: utilisateur?.entrepriseId,
+        entreprise: utilisateur?.entreprise
+      });
+      return utilisateur;
+    } catch (error) {
+      console.error('Erreur lors de la récupération du profil utilisateur:', error);
+      // Reset user state on authentication failure
+      setUser(null);
+      throw error;
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
 
   useEffect(() => {
-    // Optionally decode access token to preload user email/role
+    // Prevent multiple simultaneous authentication checks
+    if (isAuthenticating) return;
+
+    // Check if there's a valid token and fetch current user
     const token = getAccessToken();
-    if (token) {
-      try {
-        const [, payload] = token.split(".");
-        const decoded = JSON.parse(atob(payload));
-        // Note: JWT payload contains email, profil (role), and entrepriseId
-        // User ID will be set after login or fetched from backend
-        const decodedUser = {
-          email: decoded?.email,
-          role: decoded?.profil, // Backend uses 'profil' for role in JWT
-          entrepriseId: decoded?.entrepriseId
-        };
-        setUser(decodedUser);
-      } catch (error) {
-        console.error('Erreur lors du décodage du token:', error);
-        // Clear invalid tokens
-        clearTokens();
-      }
+    if (token && !user) {
+      setIsAuthenticating(true);
+      // Try to fetch current user from backend
+      fetchCurrentUser()
+        .then(() => {
+          // User successfully fetched, loading is done
+        })
+        .catch((error) => {
+          console.error('Erreur lors de la récupération du profil utilisateur:', error);
+          // If fetching fails, clear tokens and reset user state
+          clearTokens();
+          setUser(null);
+        })
+        .finally(() => {
+          setIsLoading(false);
+          setIsAuthenticating(false);
+        });
+    } else if (!token) {
+      setIsLoading(false);
+      setUser(null);
     }
-  }, []);
+  }, [isAuthenticating, user]);
 
   const value = useMemo(() => ({
     user,
+    isLoading,
+    isAuthenticating,
+    selectedCompanyId,
+    setSelectedCompanyId: (id) => {
+      setSelectedCompanyId(id);
+      if (id) {
+        localStorage.setItem('selectedCompanyId', id);
+      } else {
+        localStorage.removeItem('selectedCompanyId');
+      }
+    },
     isAuthenticated: !!user,
     async login({ email, motDePasse }) {
       const data = await authApi.login({ email, motDePasse });
@@ -65,24 +118,8 @@ export function AuthProvider({ children }) {
       setUser(null);
       clearTokens();
     },
-    async fetchCurrentUser() {
-      try {
-        const data = await authApi.getCurrentUser();
-        const utilisateur = data?.utilisateur;
-        setUser({
-          id: utilisateur?.id,
-          email: utilisateur?.email,
-          role: utilisateur?.role,
-          entrepriseId: utilisateur?.entrepriseId,
-          entreprise: utilisateur?.entreprise
-        });
-        return utilisateur;
-      } catch (error) {
-        console.error('Erreur lors de la récupération du profil utilisateur:', error);
-        return null;
-      }
-    },
-  }), [user]);
+    fetchCurrentUser,
+  }), [user, isLoading, isAuthenticating]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

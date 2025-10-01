@@ -7,7 +7,7 @@ const router = Router();
 // Routes
 router.post('/register', container.authController.register);
 router.post('/login', container.authController.login);
-router.get('/me', container.authController.getCurrentUser);
+router.get('/me', authenticateToken, container.authController.getCurrentUser);
 router.post('/refresh', container.authController.refreshToken);
 router.post('/logout', container.authController.logout);
 

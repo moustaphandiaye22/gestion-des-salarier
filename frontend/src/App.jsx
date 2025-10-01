@@ -9,13 +9,15 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 
 // Pages
+
 import Dashboard from "./pages/Dashboard";
-import DashboardEnhanced from "./pages/DashboardEnhanced";
 import EmployeeList from "./pages/EmployeeList";
 import EmployeeForm from "./pages/EmployeeForm";
 import EmployeeDetail from "./pages/EmployeeDetail";
 import PaiementForm from "./pages/PaiementForm";
 import Entreprises from "./pages/Entreprises";
+import EntrepriseForm from "./pages/EntrepriseForm";
+import EntrepriseDetail from "./pages/EntrepriseDetail";
 import Paiements from "./pages/Paiements";
 import Bulletins from "./pages/Bulletins";
 import CyclesPaie from "./pages/CyclesPaie";
@@ -38,7 +40,7 @@ function App() {
         element={
           <ProtectedRoute>
             <MainLayout>
-              <DashboardEnhanced />
+              <Dashboard />
             </MainLayout>
           </ProtectedRoute>
         }
@@ -50,17 +52,6 @@ function App() {
           <ProtectedRoute>
             <MainLayout>
               <Dashboard />
-            </MainLayout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/dashboard-enhanced"
-        element={
-          <ProtectedRoute>
-            <MainLayout>
-              <DashboardEnhanced />
             </MainLayout>
           </ProtectedRoute>
         }
@@ -114,6 +105,36 @@ function App() {
           <ProtectedRoute>
             <MainLayout>
               <Entreprises />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/entreprises/new"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <EntrepriseForm />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/entreprises/:id/edit"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <EntrepriseForm />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/entreprises/:id"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <EntrepriseDetail />
             </MainLayout>
           </ProtectedRoute>
         }

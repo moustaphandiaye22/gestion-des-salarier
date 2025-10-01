@@ -41,9 +41,15 @@ export class employeRepository implements InterfaceRepository<Employe> {
   return mnprisma.employe.findMany({ include: { entreprise: true, bulletins: true, profession: true } });
   }
 
-  async findAllByUser(user: any) : Promise<Employe[]> {
-    // Super Admin voit tous les employés
+  async findAllByUser(user: any, entrepriseId?: number) : Promise<Employe[]> {
+    // Super Admin voit tous les employés, ou seulement ceux de l'entreprise sélectionnée
     if (user.profil === 'SUPER_ADMIN') {
+      if (entrepriseId) {
+        return mnprisma.employe.findMany({
+          where: { entrepriseId },
+          include: { entreprise: true, bulletins: true, profession: true }
+        });
+      }
       return mnprisma.employe.findMany({
         include: { entreprise: true, bulletins: true, profession: true }
       });

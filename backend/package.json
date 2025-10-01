@@ -4,9 +4,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "node --loader ts-node/esm index.ts",
-    "dev:local": "PORT=3003 node --loader ts-node/esm index.ts",
-    "dev:watch": "node --loader ts-node/esm --watch index.ts",
+    "dev": "tsx index.ts",
+    "dev:local": "PORT=3003 tsx index.ts",
+    "dev:watch": "tsx watch index.ts",
     "build": "npm run generate && tsc",
     "start": "node dist/index.js",
     "generate": "npx prisma generate",
@@ -42,6 +42,7 @@
     "prisma": "^6.16.2",
     "ts-jest": "^29.4.4",
     "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.2"
   },
   "dependencies": {
