@@ -1,8 +1,10 @@
 import type { Request, Response } from 'express';
 import { EmployeService } from '../service/employeService.js';
+import { SalaryCalculationService } from '../service/salaryCalculationService.js';
 import { employeSchema } from '../validators/employe.js';
 
 const employeService = new EmployeService();
+const salaryCalculationService = new SalaryCalculationService();
 
 export class EmployeController {
   async create(req: Request, res: Response) {
@@ -63,6 +65,19 @@ export class EmployeController {
       res.status(200).json({ message: `Employé avec l'identifiant ${id} supprimé avec succès.` });
     } catch (err: any) {
       res.status(500).json({ error: `Impossible de supprimer l'employé : ${err.message}` });
+    }
+  }
+
+  async getLatestBulletin(req: Request, res: Response) {
+    try {
+      const employeeId = Number(req.params.id);
+      const bulletin = await salaryCalculationService.getLatestBulletin(employeeId);
+      if (!bulletin) {
+        return res.status(404).json({ error: `Aucun bulletin trouvé pour l'employé ${employeeId}.` });
+      }
+      res.json({ message: 'Bulletin récupéré avec succès.', bulletin });
+    } catch (err: any) {
+      res.status(500).json({ error: `Impossible de récupérer le bulletin : ${err.message}` });
     }
   }
 }

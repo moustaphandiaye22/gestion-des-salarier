@@ -179,6 +179,7 @@ function toQuery(params = {}) {
 export const employesApi = {
   list: (params) => api.get(`/api/employes${toQuery(params)}`).then((r) => r.data?.employes || r.data || []),
   get: (id) => api.get(`/api/employes/${id}`).then((r) => r.data?.employe || r.data || null),
+  getLatestBulletin: (employeeId) => api.get(`/api/employes/${employeeId}/latest-bulletin`).then((r) => r.data?.bulletin || r.data || null),
   create: (payload) => api.post(`/api/employes`, payload).then((r) => r.data?.employe || r.data || null),
   update: (id, payload) => api.put(`/api/employes/${id}`, payload).then((r) => r.data?.employe || r.data || null),
   remove: (id) => api.delete(`/api/employes/${id}`).then((r) => r.data),

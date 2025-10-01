@@ -20,4 +20,7 @@ router.put('/:id', requireAdminOrSuper, employeController.update);
 // Supprimer un employé - admin entreprise ou super admin
 router.delete('/:id', requireAdminOrSuper, employeController.delete);
 
+// Obtenir le dernier bulletin d'un employé - admin entreprise ou super admin
+router.get('/:id/latest-bulletin', requireAdminOrSuper, employeController.getLatestBulletin);
+
 export default router;

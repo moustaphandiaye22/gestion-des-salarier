@@ -8,6 +8,7 @@ export default function EmployeeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [employee, setEmployee] = useState(null);
+  const [latestBulletin, setLatestBulletin] = useState(null);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,6 +18,9 @@ export default function EmployeeDetail() {
     try {
       const data = await employesApi.get(id);
       setEmployee(data);
+      // Load latest bulletin for employee
+      const bulletin = await employesApi.getLatestBulletin(id);
+      setLatestBulletin(bulletin);
     } catch (err) {
       setError(err?.response?.data?.message || err.message);
     }
@@ -24,10 +28,10 @@ export default function EmployeeDetail() {
 
   async function loadPayments() {
     try {
-      // Get all payments and filter by bulletin employeId
+      // Get all payments and filter by employeId or bulletin employeId
       const allPayments = await paiementsApi.list();
       const employeePayments = allPayments.filter(payment =>
-        payment.bulletin?.employeId === parseInt(id)
+        payment.employeId === parseInt(id) || payment.bulletin?.employeId === parseInt(id)
       );
       setPayments(employeePayments);
     } catch (err) {
@@ -230,7 +234,7 @@ export default function EmployeeDetail() {
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700">Salaire net estimé</label>
                     <p className="mt-1 text-xl font-bold text-blue-600">
-                      {(employee.salaireBase + (employee.allocations || 0) - (employee.deductions || 0)).toLocaleString()} CFA
+                      {latestBulletin ? Number(latestBulletin.totalAPayer).toLocaleString() : (employee.salaireBase + (employee.allocations || 0) - (employee.deductions || 0)).toLocaleString()} CFA
                     </p>
                   </div>
                 </div>
@@ -271,7 +275,7 @@ export default function EmployeeDetail() {
               <CardHeader title="Actions rapides" />
               <CardBody>
                 <div className="space-y-2">
-                  <Link to="/paiements/new">
+                  <Link to={`/paiements/new?employeeId=${id}`}>
                     <Button className="w-full flex items-center justify-center gap-2">
                       <CurrencyDollarIcon className="h-4 w-4" />
                       Nouveau paiement
