@@ -1,5 +1,6 @@
 import { rapportService } from '../service/rapportService.js';
 import { rapportValidator } from '../validators/rapport.js';
+import { PDFService } from '../service/pdfService.js';
 export class RapportController {
     async create(req, res) {
         try {
@@ -27,6 +28,23 @@ export class RapportController {
             if (!rapport)
                 return res.status(404).json({ error: 'Rapport non trouvé' });
             res.json(rapport);
+        }
+        catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
+    async downloadPdf(req, res) {
+        try {
+            const id = Number(req.params.id);
+            const rapport = await rapportService.getRapport(id);
+            if (!rapport)
+                return res.status(404).json({ error: 'Rapport non trouvé' });
+            // Generate PDF from rapport content
+            const pdfBuffer = await PDFService.generateRapportPdf(rapport);
+            // Set headers for PDF download
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="rapport-${rapport.typeRapport}-${id}.pdf"`);
+            res.send(pdfBuffer);
         }
         catch (err) {
             res.status(500).json({ error: err.message });

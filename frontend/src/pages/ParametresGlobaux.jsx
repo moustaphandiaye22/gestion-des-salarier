@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardBody, Input, Select, Button } from "../components/ui";
 import { parametresGlobauxApi } from "../utils/api";
+import { useToast } from "../context/ToastContext";
 import { PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 export default function ParametresGlobaux() {
+  const { showSuccess, showError } = useToast();
   const [list, setList] = useState([]);
   const [error, setError] = useState(null);
 
@@ -18,7 +20,11 @@ export default function ParametresGlobaux() {
     parametresGlobauxApi
       .list()
       .then((data) => setList(Array.isArray(data) ? data : data?.items || []))
-      .catch((err) => setError(err?.response?.data?.message || err.message));
+      .catch((err) => {
+        const errorMessage = err?.response?.data?.message || err.message;
+        setError(errorMessage);
+        showError("Erreur de chargement", errorMessage);
+      });
   }
 
   useEffect(() => { load(); }, []);
@@ -41,8 +47,11 @@ export default function ParametresGlobaux() {
       setSelected(null);
       setForm({ cle: "", valeur: "", description: "", categorie: "" });
       load();
+      showSuccess("Succès", selected?.id ? "Paramètre modifié avec succès" : "Paramètre créé avec succès");
     } catch (err) {
-      setError(err?.response?.data?.message || err.message);
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur d'enregistrement", errorMessage);
     } finally {
       setSaving(false);
     }

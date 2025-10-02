@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardHeader, CardBody, Input, Select, Button } from "../components/ui";
 import { entreprisesApi } from "../utils/api";
+import { useToast } from "../context/ToastContext";
 
 // Validation functions matching backend validators
 function validateNom(value) {
@@ -48,6 +49,7 @@ function validateSecteurActivite(value) {
 }
 
 export default function EntrepriseForm() {
+  const { showSuccess, showError } = useToast();
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
@@ -151,9 +153,12 @@ export default function EntrepriseForm() {
       };
       if (isEdit) await entreprisesApi.update(id, payload);
       else await entreprisesApi.create(payload);
+      showSuccess("Succès", isEdit ? "Entreprise modifiée avec succès" : "Entreprise créée avec succès");
       navigate("/entreprises");
     } catch (err) {
-      setError(err?.response?.data?.message || err.message);
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur d'enregistrement", errorMessage);
     } finally {
       setLoading(false);
     }

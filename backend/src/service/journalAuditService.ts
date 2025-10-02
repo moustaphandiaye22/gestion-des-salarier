@@ -14,7 +14,10 @@ export class JournalAuditService {
     return this.journalAuditRepository.findById(id);
   }
 
-  async getAllJournalAudits() {
+  async getAllJournalAudits(user?: any) {
+    if (user) {
+      return this.journalAuditRepository.findAllByUser(user);
+    }
     return this.journalAuditRepository.findAll();
   }
 

@@ -20,8 +20,8 @@ export class entrepriseRepository {
                 include: { employes: true, cyclesPaie: true, paiements: true, utilisateurs: true }
             });
         }
-        // Admin d'Entreprise voit seulement sa propre entreprise
-        if (user.profil === 'ADMIN_ENTREPRISE' && user.entrepriseId) {
+        // Admin d'Entreprise et Caissier voient seulement leur propre entreprise
+        if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
             return mnprisma.entreprise.findMany({
                 where: { id: user.entrepriseId },
                 include: { employes: true, cyclesPaie: true, paiements: true, utilisateurs: true }

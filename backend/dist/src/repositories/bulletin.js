@@ -26,8 +26,8 @@ export class bulletinRepository {
                 include: { employe: true, cycle: true, paiements: true }
             });
         }
-        // Admin d'Entreprise voit seulement les bulletins de son entreprise
-        if (user.profil === 'ADMIN_ENTREPRISE' && user.entrepriseId) {
+        // Admin d'Entreprise et Caissier voient seulement les bulletins de leur entreprise
+        if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
             return mnprisma.bulletin.findMany({
                 where: {
                     employe: {

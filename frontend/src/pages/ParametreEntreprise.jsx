@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardBody, Input, Select, Button } from "../components/ui";
 import { parametreEntrepriseApi, entreprisesApi } from "../utils/api";
 import { PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { useToast } from "../context/ToastContext";
 
 export default function ParametreEntreprise() {
+  const { showSuccess, showError } = useToast();
   const [list, setList] = useState([]);
   const [error, setError] = useState(null);
   const [entreprises, setEntreprises] = useState([]);
@@ -19,7 +21,11 @@ export default function ParametreEntreprise() {
     parametreEntrepriseApi
       .list()
       .then((data) => setList(Array.isArray(data) ? data : data?.items || []))
-      .catch((err) => setError(err?.response?.data?.message || err.message));
+      .catch((err) => {
+        const errorMessage = err?.response?.data?.message || err.message;
+        setError(errorMessage);
+        showError("Erreur de chargement", errorMessage);
+      });
   }
 
   useEffect(() => { load(); }, []);
@@ -42,10 +48,13 @@ export default function ParametreEntreprise() {
       if (selected?.id) await parametreEntrepriseApi.update(selected.id, form);
       else await parametreEntrepriseApi.create(form);
       setSelected(null);
-      setForm({ nom: "", valeur: "" });
+      setForm({ cle: "", valeur: "", type: "STRING", entrepriseId: "" });
       load();
+      showSuccess("Succès", selected?.id ? "Paramètre modifié avec succès" : "Paramètre créé avec succès");
     } catch (err) {
-      setError(err?.response?.data?.message || err.message);
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur d'enregistrement", errorMessage);
     } finally {
       setSaving(false);
     }

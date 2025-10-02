@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { EntrepriseController } from '../controller/entrepriseController.js';
-import { requireSuperAdmin, requireAdminOrSuper, requireCompanyAccess } from '../middleware/rbacMiddleware.js';
+import { requireSuperAdmin, requireAdminOrSuper, requireCompanyAccess, requireReadAccess } from '../middleware/rbacMiddleware.js';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -40,10 +40,10 @@ const upload = multer({
 // Créer une entreprise - seulement super admin
 router.post('/', requireSuperAdmin, upload.single('logo'), entrepriseController.create);
 
-// Lister toutes les entreprises - super admin voit toutes, admin entreprise voit la sienne
-router.get('/', requireAdminOrSuper, entrepriseController.getAll);
+// Lister toutes les entreprises - caissier, super admin voit toutes, admin entreprise voit la sienne
+router.get('/', requireReadAccess, entrepriseController.getAll);
 
-// Obtenir les détails d'une entreprise - super admin ou admin de l'entreprise
+// Obtenir les détails d'une entreprise - caissier, super admin ou admin de l'entreprise
 router.get('/:id', requireCompanyAccess, entrepriseController.getById);
 
 // Mettre à jour une entreprise - super admin ou admin de l'entreprise

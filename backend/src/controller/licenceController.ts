@@ -17,7 +17,7 @@ export class LicenceController {
 
   async getAll(req: Request, res: Response) {
     try {
-      const licences = await licenceService.getAllLicences();
+      const licences = await licenceService.getAllLicences(req.user);
       res.json({ message: 'Licences récupérées avec succès.', licences });
     } catch (err: any) {
       res.status(500).json({ error: `Impossible de récupérer les licences : ${err.message}` });

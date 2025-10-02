@@ -30,7 +30,7 @@ export class UtilisateurController {
     // Filtrer selon le rôle de l'utilisateur connecté
     if (req.user?.profil === 'SUPER_ADMIN') {
       utilisateurs = await this.utilisateurService.getAllUtilisateurs();
-    } else if (req.user?.profil === 'ADMIN_ENTREPRISE' && req.user.entrepriseId) {
+    } else if ((req.user?.profil === 'ADMIN_ENTREPRISE' || req.user?.profil === 'CAISSIER') && req.user.entrepriseId) {
       utilisateurs = await this.utilisateurService.getUtilisateursByEntreprise(req.user.entrepriseId);
     } else {
       // Pour les autres rôles, ne rien retourner ou lever une erreur

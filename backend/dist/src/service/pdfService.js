@@ -65,5 +65,36 @@ export class PDFService {
             doc.end();
         });
     }
+    static async generateRapportPdf(rapport) {
+        return new Promise((resolve, reject) => {
+            const doc = new PDFDocument();
+            const buffers = [];
+            doc.on('data', buffers.push.bind(buffers));
+            doc.on('end', () => {
+                const pdfBuffer = Buffer.concat(buffers);
+                resolve(pdfBuffer);
+            });
+            doc.on('error', reject);
+            // Header
+            doc.fontSize(20).text(`RAPPORT - ${rapport.typeRapport}`, { align: 'center' });
+            doc.moveDown();
+            // Report info
+            doc.fontSize(12).text(`Date de génération: ${rapport.dateGeneration ? new Date(rapport.dateGeneration).toLocaleString() : 'N/A'}`);
+            doc.moveDown();
+            // Content
+            if (rapport.contenu) {
+                if (typeof rapport.contenu === 'object') {
+                    Object.entries(rapport.contenu).forEach(([key, value]) => {
+                        doc.text(`${key}: ${JSON.stringify(value, null, 2)}`);
+                        doc.moveDown();
+                    });
+                }
+                else {
+                    doc.text(String(rapport.contenu));
+                }
+            }
+            doc.end();
+        });
+    }
 }
 //# sourceMappingURL=pdfService.js.map

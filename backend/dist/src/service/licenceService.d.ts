@@ -13,7 +13,7 @@ export declare class LicenceService {
         limiteEntreprises: number | null;
         prix: import("@prisma/client/runtime/library").Decimal | null;
     }>;
-    getAllLicences(): Promise<({
+    getAllLicences(user?: any): Promise<({
         entreprise: {
             id: number;
             nom: string;

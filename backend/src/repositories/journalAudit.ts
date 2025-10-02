@@ -33,4 +33,21 @@ export class journalAuditRepository implements InterfaceRepository<JournalAudit>
     return mnprisma.journalAudit.findMany({ where: { utilisateurId } });
   }
 
+  async findAllByUser(user: any): Promise<JournalAudit[]> {
+    // Super Admin voit tous les journaux d'audit
+    if (user.profil === 'SUPER_ADMIN') {
+      return mnprisma.journalAudit.findMany();
+    }
+
+    // Admin d'Entreprise et Caissier voient seulement les journaux d'audit de leur entreprise
+    if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
+      return mnprisma.journalAudit.findMany({
+        where: { entrepriseId: user.entrepriseId }
+      });
+    }
+
+    // Autres rôles n'ont pas accès aux journaux d'audit
+    return [];
+  }
+
 }

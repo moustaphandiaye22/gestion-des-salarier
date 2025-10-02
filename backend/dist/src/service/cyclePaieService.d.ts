@@ -10,6 +10,7 @@ export declare class CyclePaieService {
         dateDebut: Date;
         dateFin: Date;
         statut: import("@prisma/client").$Enums.StatutCyclePaie;
+        statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
         frequence: import("@prisma/client").$Enums.FrequencePaie;
         createdAt: Date;
         updatedAt: Date;
@@ -22,6 +23,7 @@ export declare class CyclePaieService {
         dateDebut: Date;
         dateFin: Date;
         statut: import("@prisma/client").$Enums.StatutCyclePaie;
+        statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
         frequence: import("@prisma/client").$Enums.FrequencePaie;
         createdAt: Date;
         updatedAt: Date;
@@ -34,6 +36,7 @@ export declare class CyclePaieService {
         dateDebut: Date;
         dateFin: Date;
         statut: import("@prisma/client").$Enums.StatutCyclePaie;
+        statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
         frequence: import("@prisma/client").$Enums.FrequencePaie;
         createdAt: Date;
         updatedAt: Date;
@@ -46,6 +49,7 @@ export declare class CyclePaieService {
         dateDebut: Date;
         dateFin: Date;
         statut: import("@prisma/client").$Enums.StatutCyclePaie;
+        statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
         frequence: import("@prisma/client").$Enums.FrequencePaie;
         createdAt: Date;
         updatedAt: Date;
@@ -59,9 +63,37 @@ export declare class CyclePaieService {
         dateDebut: Date;
         dateFin: Date;
         statut: import("@prisma/client").$Enums.StatutCyclePaie;
+        statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
         frequence: import("@prisma/client").$Enums.FrequencePaie;
         createdAt: Date;
         updatedAt: Date;
     }>;
+    validateCyclePaie(id: number, user: any): Promise<{
+        id: number;
+        nom: string;
+        entrepriseId: number;
+        description: string | null;
+        dateDebut: Date;
+        dateFin: Date;
+        statut: import("@prisma/client").$Enums.StatutCyclePaie;
+        statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
+        frequence: import("@prisma/client").$Enums.FrequencePaie;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    closeCyclePaie(id: number, user: any): Promise<{
+        id: number;
+        nom: string;
+        entrepriseId: number;
+        description: string | null;
+        dateDebut: Date;
+        dateFin: Date;
+        statut: import("@prisma/client").$Enums.StatutCyclePaie;
+        statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
+        frequence: import("@prisma/client").$Enums.FrequencePaie;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    canCashierPayCycle(id: number, user: any): Promise<boolean>;
 }
 //# sourceMappingURL=cyclePaieService.d.ts.map

@@ -1,13 +1,16 @@
 import type { StatutPaiement } from '@prisma/client';
 import { paiementRepository } from '../repositories/paiement.js';
+import { bulletinRepository } from '../repositories/bulletin.js';
 import { paiementSchema } from '../validators/paiement.js';
 
 export class PaiementService {
 
     private paiementRepository : paiementRepository
+    private bulletinRepository : bulletinRepository
 
     constructor (){
         this.paiementRepository = new paiementRepository()
+        this.bulletinRepository = new bulletinRepository()
     }
 
   async createPaiement(data: any) {
@@ -30,7 +33,23 @@ export class PaiementService {
   async updatePaiement(id: number, data: any) {
     const parsed = paiementSchema.partial().safeParse(data);
     if (!parsed.success) throw parsed.error;
-   return await this.paiementRepository.update(id, data);
+
+    const updatedPaiement = await this.paiementRepository.update(id, data);
+
+    // If the payment status was changed to PAYE, check if all payments for the bulletin are now PAYE
+    if (data.statut === 'PAYE') {
+      const bulletin = await this.bulletinRepository.findById(updatedPaiement.bulletinId);
+      if (bulletin) {
+        const allPayments = await this.paiementRepository.findByBulletin(bulletin.id);
+        const allPaymentsPaye = allPayments.every(p => p.statut === 'PAYE');
+
+        if (allPaymentsPaye && bulletin.statutPaiement !== 'PAYE') {
+          await this.bulletinRepository.setStatutPaiement(bulletin.id, 'PAYE');
+        }
+      }
+    }
+
+    return updatedPaiement;
   }
 
   async deletePaiement(id: number) {

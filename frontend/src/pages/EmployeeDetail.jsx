@@ -5,7 +5,10 @@ import { employesApi, paiementsApi } from "../utils/api";
 import { formatCFA } from "../utils/format";
 import { PencilSquareIcon, TrashIcon, ArrowLeftIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
 
+import { useToast } from "../context/ToastContext";
+
 export default function EmployeeDetail() {
+  const { showSuccess, showError } = useToast();
   const { id } = useParams();
   const navigate = useNavigate();
   const [employee, setEmployee] = useState(null);
@@ -65,9 +68,12 @@ export default function EmployeeDetail() {
     if (!toDelete) return;
     try {
       await employesApi.remove(toDelete.id);
+      showSuccess("Succès", "Employé supprimé avec succès");
       navigate("/employees");
     } catch (err) {
-      setError(err?.response?.data?.message || err.message);
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur de suppression", errorMessage);
     }
   }
 

@@ -119,9 +119,33 @@ export default function MainLayout({ children }) {
   }, [location.pathname]);
 
   const NavItems = ({ onNavigate }) => {
+    // Don't render navigation if user is not loaded yet
+    if (!user) {
+      return null;
+    }
+
     const filteredNav = NAV.filter((it) => {
       if (it.superAdminOnly) {
-        return user?.role === 'SUPER_ADMIN';
+        return user.role === 'SUPER_ADMIN';
+      }
+      // For CAISSIER, only show payment-related items
+      if (user.role === 'CAISSIER') {
+        return ['/paiements', '/bulletins', '/rapports', '/journal-audit'].includes(it.to);
+      }
+      // For ADMIN_ENTREPRISE, filter menu items to only allowed ones
+      if (user.role === 'ADMIN_ENTREPRISE') {
+        const allowedPaths = [
+          '/dashboard',
+          '/employees',
+          '/paiements',
+          '/bulletins',
+          '/cycles-paie',
+          '/parametres-entreprise',
+          '/rapports',
+          '/journal-audit',
+          '/professions',
+        ];
+        return allowedPaths.includes(it.to);
       }
       return true;
     });

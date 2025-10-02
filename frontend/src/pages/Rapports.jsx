@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog } from "../components/ui";
 import { rapportsApi, entreprisesApi } from "../utils/api";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { EyeIcon, ArrowDownTrayIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 function truncate(value, n = 160) {
@@ -14,6 +16,8 @@ function truncate(value, n = 160) {
 }
 
 export default function Rapports() {
+  const { user } = useAuth();
+  const { showSuccess, showError } = useToast();
   const [rows, setRows] = useState([]);
   const [entreprises, setEntreprises] = useState([]);
   const [error, setError] = useState(null);
@@ -30,20 +34,38 @@ export default function Rapports() {
     Promise.all([rapportsApi.list(), entreprisesApi.list()])
       .then(([rapports, ents]) => {
         if (!mounted) return;
+
+        // Filter reports based on user role
+        if (user?.role === 'SUPER_ADMIN') {
+          // Super admin sees all reports
+        } else if (user?.role === 'ADMIN_ENTREPRISE' && user.entrepriseId) {
+          // Admin entreprise sees only reports from their entreprise
+          rapports = rapports.filter(r => r.entrepriseId === user.entrepriseId);
+        } else if (user?.role === 'CAISSIER' && user.entrepriseId) {
+          // Cashier sees only reports from their entreprise
+          rapports = rapports.filter(r => r.entrepriseId === user.entrepriseId);
+        }
+
         setRows(Array.isArray(rapports) ? rapports : []);
         setEntreprises(Array.isArray(ents) ? ents : []);
       })
-      .catch((err) => setError(err?.response?.data?.message || err.message))
+      .catch((err) => {
+        const errorMessage = err?.response?.data?.message || err.message;
+        setError(errorMessage);
+        showError("Erreur de chargement", errorMessage);
+      })
       .finally(() => mounted && setLoading(false));
     return () => { mounted = false; };
-  }, []);
+  }, [user]);
 
   async function refresh() {
     try {
       const rapports = await rapportsApi.list();
       setRows(Array.isArray(rapports) ? rapports : []);
     } catch (err) {
-      setError(err?.response?.data?.message || err.message);
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur de rafraîchissement", errorMessage);
     }
   }
 
@@ -53,8 +75,11 @@ export default function Rapports() {
       await rapportsApi.remove(toDelete.id);
       setToDelete(null);
       refresh();
+      showSuccess("Succès", "Rapport supprimé avec succès");
     } catch (err) {
-      setError(err?.response?.data?.message || err.message);
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur de suppression", errorMessage);
     }
   }
 
@@ -72,18 +97,42 @@ export default function Rapports() {
     });
   }, [rows, filterType, filterEntreprise]);
 
-  function downloadRapport(row) {
+  async function downloadRapport(row) {
     try {
-      const file = new Blob([JSON.stringify(row.contenu, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(file);
+      const pdfBlob = await rapportsApi.getPdf(row.id);
+      const url = URL.createObjectURL(pdfBlob);
       const a = document.createElement("a");
       const date = row.dateGeneration ? new Date(row.dateGeneration).toISOString().slice(0, 10) : "";
       a.href = url;
-      a.download = `rapport-${row.typeRapport?.toLowerCase() || "data"}-${date}.json`;
+      a.download = `rapport-${row.typeRapport?.toLowerCase() || "data"}-${date}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) {
-      // silencieux
+      console.error("Erreur lors du téléchargement du rapport:", e);
+      setError("Erreur lors du téléchargement du rapport");
+    }
+  }
+
+  async function generateRapport() {
+    try {
+      // For now, generate a basic report - you might want to add a modal for report type selection
+      const reportData = {
+        typeRapport: "STATISTIQUES",
+        entrepriseId: user?.entrepriseId || null,
+        contenu: {
+          message: "Rapport généré automatiquement",
+          date: new Date().toISOString(),
+          user: user?.email || "Système"
+        }
+      };
+
+      await rapportsApi.create(reportData);
+      refresh();
+      showSuccess("Succès", "Rapport généré avec succès");
+    } catch (err) {
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur de génération", errorMessage);
     }
   }
 
@@ -96,7 +145,7 @@ export default function Rapports() {
             subtitle="Aperçu et export des rapports générés"
             actions={(
               <div className="flex items-center gap-2">
-                <Button className="flex items-center gap-2">
+                <Button className="flex items-center gap-2" onClick={generateRapport}>
                   <PlusIcon className="h-5 w-5" />
                   Générer
                 </Button>

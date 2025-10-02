@@ -1,5 +1,6 @@
 import { PaiementService } from '../service/paiementService.js';
 import { paiementSchema } from '../validators/paiement.js';
+import { PDFService } from '../service/pdfService.js';
 const paiementService = new PaiementService();
 export class PaiementController {
     async create(req, res) {
@@ -37,6 +38,34 @@ export class PaiementController {
         }
         catch (err) {
             res.status(500).json({ error: `Impossible de récupérer le paiement : ${err.message}` });
+        }
+    }
+    async generateReceiptPDF(req, res) {
+        try {
+            const id = Number(req.params.id);
+            const paiement = await paiementService.getPaiement(id);
+            if (!paiement) {
+                return res.status(404).json({ error: `Aucun paiement trouvé avec l'identifiant ${id}.` });
+            }
+            const pdfBuffer = await PDFService.generatePaymentReceipt(paiement);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename=receipt_${id}.pdf`);
+            res.send(pdfBuffer);
+        }
+        catch (err) {
+            res.status(500).json({ error: `Impossible de générer le reçu PDF : ${err.message}` });
+        }
+    }
+    async generatePaymentListPDF(req, res) {
+        try {
+            const paiements = await paiementService.getAllPaiements(req.user);
+            const pdfBuffer = await PDFService.generatePaymentList(paiements);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename=payment_list.pdf');
+            res.send(pdfBuffer);
+        }
+        catch (err) {
+            res.status(500).json({ error: `Impossible de générer la liste des paiements PDF : ${err.message}` });
         }
     }
     async update(req, res) {

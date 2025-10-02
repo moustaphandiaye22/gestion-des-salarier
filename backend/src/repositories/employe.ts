@@ -55,8 +55,8 @@ export class employeRepository implements InterfaceRepository<Employe> {
       });
     }
 
-    // Admin d'Entreprise voit seulement les employés de son entreprise
-    if (user.profil === 'ADMIN_ENTREPRISE' && user.entrepriseId) {
+    // Admin d'Entreprise et Caissier voient seulement les employés de leur entreprise
+    if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
       return mnprisma.employe.findMany({
         where: { entrepriseId: user.entrepriseId },
         include: { entreprise: true, bulletins: true, profession: true }

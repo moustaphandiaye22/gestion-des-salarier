@@ -1,4 +1,4 @@
-import type { CyclePaie, StatutCyclePaie } from "@prisma/client";
+import type { CyclePaie, StatutCyclePaie, StatutValidationCycle } from "@prisma/client";
 import type { InterfaceRepository } from './InterfaceRepository.js';
 export declare class cyclePaieRepository implements InterfaceRepository<CyclePaie> {
     findByEntreprise(entrepriseId: number): Promise<CyclePaie[]>;
@@ -9,5 +9,7 @@ export declare class cyclePaieRepository implements InterfaceRepository<CyclePai
     findAllByUser(user: any): Promise<CyclePaie[]>;
     update(id: number, data: Partial<Omit<CyclePaie, "id">>): Promise<CyclePaie>;
     delete(id: number): Promise<void>;
+    setStatutValidation(id: number, statutValidation: StatutValidationCycle): Promise<CyclePaie>;
+    getBulletinsByCycleId(id: number): Promise<any[]>;
 }
 //# sourceMappingURL=cyclePaie.d.ts.map

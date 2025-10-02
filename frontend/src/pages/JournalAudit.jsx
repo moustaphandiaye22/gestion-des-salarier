@@ -9,6 +9,8 @@ import {
   paiementsApi,
   cyclesPaieApi,
 } from "../utils/api";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 
 function truncate(value, n = 120) {
@@ -35,6 +37,9 @@ export default function JournalAudit() {
     cycles: new Map(),
   });
 
+  const { user } = useAuth();
+  const { showSuccess, showError } = useToast();
+
   useEffect(() => {
     let mounted = true;
     setLoading(true);
@@ -49,6 +54,16 @@ export default function JournalAudit() {
     ])
       .then(([journaux, users, entreprises, employes, bulletins, paiements, cycles]) => {
         if (!mounted) return;
+
+        // Filter journaux based on user role
+        if (user?.role === 'SUPER_ADMIN') {
+          // Super admin sees all journaux
+        } else if (user?.role === 'ADMIN_ENTREPRISE' && user.entrepriseId) {
+          journaux = journaux.filter(j => j.entrepriseId === user.entrepriseId);
+        } else if (user?.role === 'CAISSIER' && user.entrepriseId) {
+          journaux = journaux.filter(j => j.entrepriseId === user.entrepriseId);
+        }
+
         const toMap = (arr) => {
           const m = new Map();
           (Array.isArray(arr) ? arr : []).forEach((it) => m.set(it.id, it));
@@ -69,11 +84,35 @@ export default function JournalAudit() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [user]);
+
+  async function exportJournal() {
+    try {
+      const csvContent = "data:text/csv;charset=utf-8,"
+        + "Date,Action,Utilisateur,Entreprise,Employé,Bulletin,Paiement,Cycle,Détails\n"
+        + resolvedRows.map(row =>
+            `"${row.dateAction ? new Date(row.dateAction).toLocaleString() : ''}","${row.action || ''}","${row._userLabel}","${row._entLabel}","${row._empLabel}","${row._bulLabel}","${row._payLabel}","${row._cycLabel}","${row.details || ''}"`
+          ).join("\n");
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `journal-audit-${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showSuccess("Succès", "Journal d'audit exporté avec succès");
+    } catch (err) {
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur d'export", errorMessage);
+    }
+  }
 
   const resolvedRows = useMemo(() => {
     return rows.map((r) => {
-      const user = r.utilisateurId ? maps.users.get(r.utilisateurId) : null;
+      const utilisateur = r.utilisateurId ? maps.users.get(r.utilisateurId) : null;
       const ent = r.entrepriseId ? maps.entreprises.get(r.entrepriseId) : null;
       const emp = r.employeId ? maps.employes.get(r.employeId) : null;
       const bul = r.bulletinId ? maps.bulletins.get(r.bulletinId) : null;
@@ -81,7 +120,7 @@ export default function JournalAudit() {
       const cyc = r.cyclePaieId ? maps.cycles.get(r.cyclePaieId) : null;
       return {
         ...r,
-        _userLabel: user ? `${user.email}${user.role ? " (" + user.role + ")" : ""}` : (r.utilisateurId ?? "-"),
+        _userLabel: utilisateur ? `${utilisateur.email}${utilisateur.role ? " (" + utilisateur.role + ")" : ""}` : (r.utilisateurId ?? "-"),
         _entLabel: ent ? `${ent.nom}` : (r.entrepriseId ?? "-"),
         _empLabel: emp ? `${emp.prenom || ""} ${emp.nom || ""}`.trim() : (r.employeId ?? "-"),
         _bulLabel: bul ? `${bul.numeroBulletin || bul.id}` : (r.bulletinId ?? "-"),
@@ -98,7 +137,7 @@ export default function JournalAudit() {
           <CardHeader
             title="Journal d'audit"
             actions={
-              <Button className="flex items-center gap-2">
+              <Button className="flex items-center gap-2" onClick={exportJournal}>
                 <ArrowDownTrayIcon className="h-5 w-5" />
                 Exporter
               </Button>

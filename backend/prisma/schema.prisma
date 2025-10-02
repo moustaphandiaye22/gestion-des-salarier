@@ -133,6 +133,7 @@ model CyclePaie {
   dateDebut     DateTime
   dateFin       DateTime
   statut        StatutCyclePaie   @default(OUVERT)
+  statutValidation StatutValidationCycle @default(BROUILLON)
   frequence     FrequencePaie     @default(MENSUEL)
   entrepriseId  Int
   createdAt     DateTime          @default(now())
@@ -415,6 +416,12 @@ enum TypeCyclePaie {
 enum StatutCyclePaie {
   OUVERT
   FERME
+}
+
+enum StatutValidationCycle {
+  BROUILLON
+  VALIDE
+  CLOTURE
 }
 
 enum FrequencePaie {

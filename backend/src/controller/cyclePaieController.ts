@@ -66,4 +66,34 @@ export class CyclePaieController {
       res.status(500).json({ error: `Impossible de supprimer le cycle de paie : ${err.message}` });
     }
   }
+
+  async validate(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id);
+      const cycle = await cyclePaieService.validateCyclePaie(id, req.user);
+      res.json({ message: 'Cycle de paie validé avec succès.', cycle });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  }
+
+  async close(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id);
+      const cycle = await cyclePaieService.closeCyclePaie(id, req.user);
+      res.json({ message: 'Cycle de paie clôturé avec succès.', cycle });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  }
+
+  async canCashierPay(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id);
+      const canPay = await cyclePaieService.canCashierPayCycle(id, req.user);
+      res.json({ canPay });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  }
 }

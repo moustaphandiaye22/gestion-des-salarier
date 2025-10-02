@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardHeader, CardBody, Input, Select, Button } from "../components/ui";
 import { employesApi, entreprisesApi, professionsApi } from "../utils/api";
+import { useToast } from "../context/ToastContext";
 
 // Validation functions matching backend validators
 function validateMatricule(value) {
@@ -104,6 +105,7 @@ function generateMatricule(entrepriseId, entreprises) {
 }
 
 export default function EmployeeForm() {
+  const { showSuccess, showError } = useToast();
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
@@ -304,9 +306,12 @@ export default function EmployeeForm() {
       };
       if (isEdit) await employesApi.update(id, payload);
       else await employesApi.create(payload);
+      showSuccess("Succès", isEdit ? "Employé modifié avec succès" : "Employé créé avec succès");
       navigate("/employees");
     } catch (err) {
-      setError(err?.response?.data?.message || err.message);
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur d'enregistrement", errorMessage);
     } finally {
       setLoading(false);
     }

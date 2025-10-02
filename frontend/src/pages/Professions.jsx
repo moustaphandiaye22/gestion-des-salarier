@@ -1,13 +1,20 @@
-import React, { useEffect, useState } from "react";
-import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog } from "../components/ui";
+import React, { useEffect, useState, useMemo } from "react";
+import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog, Input, Select } from "../components/ui";
 import { professionsApi } from "../utils/api";
-import { PencilSquareIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { useToast } from "../context/ToastContext";
+import { PencilSquareIcon, TrashIcon, PlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 export default function Professions() {
+  const { showSuccess, showError } = useToast();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [toDelete, setToDelete] = useState(null);
+
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterCategorie, setFilterCategorie] = useState("");
+  const [filterStatut, setFilterStatut] = useState("");
 
   async function load() {
     setLoading(true);
@@ -16,7 +23,9 @@ export default function Professions() {
       const data = await professionsApi.list();
       setRows(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err?.response?.data?.message || err.message || "Erreur");
+      const errorMessage = err?.response?.data?.message || err.message || "Erreur";
+      setError(errorMessage);
+      showError("Erreur de chargement", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -32,10 +41,36 @@ export default function Professions() {
       await professionsApi.remove(toDelete.id);
       setToDelete(null);
       load();
+      showSuccess("Succès", "Profession supprimée avec succès");
     } catch (err) {
-      setError(err?.response?.data?.message || err.message);
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur de suppression", errorMessage);
     }
   }
+
+  // Filtered rows based on search and filters
+  const filteredRows = useMemo(() => {
+    return rows.filter((profession) => {
+      const matchesSearch = !searchTerm ||
+        profession.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        profession.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        profession.categorie?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesCategorie = !filterCategorie || profession.categorie === filterCategorie;
+      const matchesStatut = !filterStatut ||
+        (filterStatut === "active" && profession.estActive) ||
+        (filterStatut === "inactive" && !profession.estActive);
+
+      return matchesSearch && matchesCategorie && matchesStatut;
+    });
+  }, [rows, searchTerm, filterCategorie, filterStatut]);
+
+  // Get unique categories for filter dropdown
+  const categories = useMemo(() => {
+    const uniqueCategories = [...new Set(rows.map(p => p.categorie).filter(Boolean))];
+    return uniqueCategories.sort();
+  }, [rows]);
 
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-gray-50">
@@ -43,11 +78,43 @@ export default function Professions() {
         <Card>
           <CardHeader
             title="Professions"
+            subtitle="Gestion des professions"
             actions={
-              <Button className="flex items-center gap-2">
-                <PlusIcon className="h-5 w-5" />
-                Ajouter
-              </Button>
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="relative">
+                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Rechercher par nom, description..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 w-64"
+                  />
+                </div>
+                <Select
+                  value={filterCategorie}
+                  onChange={(e) => setFilterCategorie(e.target.value)}
+                  className="w-40"
+                >
+                  <option value="">Toutes catégories</option>
+                  {categories.map((categorie) => (
+                    <option key={categorie} value={categorie}>{categorie}</option>
+                  ))}
+                </Select>
+                <Select
+                  value={filterStatut}
+                  onChange={(e) => setFilterStatut(e.target.value)}
+                  className="w-32"
+                >
+                  <option value="">Tous statuts</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </Select>
+                <Button className="flex items-center gap-2">
+                  <PlusIcon className="h-5 w-5" />
+                  Ajouter
+                </Button>
+              </div>
             }
           />
           <CardBody>
@@ -56,6 +123,11 @@ export default function Professions() {
                 {error}
               </div>
             )}
+
+            <div className="text-sm text-gray-600 mb-4">
+              {filteredRows.length} profession{filteredRows.length !== 1 ? 's' : ''} trouvée{filteredRows.length !== 1 ? 's' : ''}
+            </div>
+
             <div className="max-h-[calc(100vh-16rem)] overflow-y-auto">
               <Table
                 head={[
@@ -65,7 +137,7 @@ export default function Professions() {
                   "Actif",
                   "Actions",
                 ]}
-                rows={rows}
+                rows={filteredRows}
                 renderRow={(row) => (
                   <tr key={row.id}>
                     <td className="px-2 py-2 text-sm text-gray-900 font-medium">{row.nom}</td>
