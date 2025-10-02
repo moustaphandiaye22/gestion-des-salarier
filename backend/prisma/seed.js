@@ -67,22 +67,16 @@ async function main() {
 
   console.log('Entreprises created');
 
-  // Check if utilisateurs already exist
-  const existingUsers = await prisma.utilisateur.findMany({
-    where: {
-      email: {
-        in: ['admin@techcorp.sn', 'employe@techcorp.sn', 'admin@agrisolutions.ml', 'Request failed with status code 400'],
-      },
-    },
+  // Create Utilisateurs - check each one individually to avoid conflicts
+  const hashedPasswordAdmin = await hashPassword('admin123');
+  const hashedPasswordEmploye = await hashPassword('employe123');
+  const hashedPasswordCaissier = await hashPassword('caissier123');
+
+  // Admin TechCorp
+  let user1 = await prisma.utilisateur.findUnique({
+    where: { email: 'admin@techcorp.sn' }
   });
-
-  let user1, user2, user3, superAdmin;
-
-  if (existingUsers.length === 0) {
-    // Create Utilisateurs
-    const hashedPasswordAdmin = await hashPassword('admin123');
-    const hashedPasswordEmploye = await hashPassword('employe123');
-
+  if (!user1) {
     user1 = await prisma.utilisateur.create({
       data: {
         nom: 'Admin TechCorp',
@@ -93,7 +87,13 @@ async function main() {
         entrepriseId: entreprise1.id,
       },
     });
+  }
 
+  // Employe TechCorp
+  let user2 = await prisma.utilisateur.findUnique({
+    where: { email: 'employe@techcorp.sn' }
+  });
+  if (!user2) {
     user2 = await prisma.utilisateur.create({
       data: {
         nom: 'Employe TechCorp',
@@ -104,8 +104,31 @@ async function main() {
         entrepriseId: entreprise1.id,
       },
     });
+  }
 
+  // Caissier TechCorp
+  let user3 = await prisma.utilisateur.findUnique({
+    where: { email: 'caissier@techcorp.sn' }
+  });
+  if (!user3) {
     user3 = await prisma.utilisateur.create({
+      data: {
+        nom: 'Caissier TechCorp',
+        email: 'caissier@techcorp.sn',
+        motDePasse: hashedPasswordCaissier,
+        role: 'CAISSIER',
+        estActif: true,
+        entrepriseId: entreprise1.id,
+      },
+    });
+  }
+
+  // Admin AgriSolutions
+  let user4 = await prisma.utilisateur.findUnique({
+    where: { email: 'admin@agrisolutions.ml' }
+  });
+  if (!user4) {
+    user4 = await prisma.utilisateur.create({
       data: {
         nom: 'Admin AgriSolutions',
         email: 'admin@agrisolutions.ml',
@@ -115,8 +138,30 @@ async function main() {
         entrepriseId: entreprise2.id,
       },
     });
+  }
 
-    // Create Super Admin
+  // Caissier AgriSolutions
+  let user5 = await prisma.utilisateur.findUnique({
+    where: { email: 'caissier@agrisolutions.ml' }
+  });
+  if (!user5) {
+    user5 = await prisma.utilisateur.create({
+      data: {
+        nom: 'Caissier AgriSolutions',
+        email: 'caissier@agrisolutions.ml',
+        motDePasse: hashedPasswordCaissier,
+        role: 'CAISSIER',
+        estActif: true,
+        entrepriseId: entreprise2.id,
+      },
+    });
+  }
+
+  // Super Admin
+  let superAdmin = await prisma.utilisateur.findUnique({
+    where: { email: 'superadmin@pay.com' }
+  });
+  if (!superAdmin) {
     const superAdminPassword = await hashPassword('superadmin123');
     superAdmin = await prisma.utilisateur.create({
       data: {
@@ -128,11 +173,6 @@ async function main() {
         // No entrepriseId for super admin
       },
     });
-  } else {
-    user1 = existingUsers.find(u => u.email === 'admin@techcorp.sn');
-    user2 = existingUsers.find(u => u.email === 'employe@techcorp.sn');
-    user3 = existingUsers.find(u => u.email === 'admin@agrisolutions.ml');
-    superAdmin = existingUsers.find(u => u.email === 'superadmin@pay.com');
   }
 
   console.log('Utilisateurs created');
@@ -426,6 +466,44 @@ async function main() {
       statut: 'PAYE',
       reference: 'ESP-2024-001',
       bulletinId: bulletin4.id,
+      entrepriseId: entreprise2.id,
+    },
+  });
+
+  // Additional cashier test payments
+  const paiement4 = await prisma.paiement.create({
+    data: {
+      montant: 440000.00,
+      datePaiement: new Date('2024-02-15'),
+      modePaiement: 'ESPECES',
+      statut: 'PAYE',
+      reference: 'ESP-2024-002',
+      bulletinId: bulletin3.id,
+      entrepriseId: entreprise1.id,
+    },
+  });
+
+  const paiement5 = await prisma.paiement.create({
+    data: {
+      montant: 418000.00,
+      datePaiement: new Date('2024-02-20'),
+      modePaiement: 'CHEQUE',
+      statut: 'PAYE',
+      reference: 'CHQ-2024-002',
+      bulletinId: bulletin5.id,
+      entrepriseId: entreprise2.id,
+    },
+  });
+
+  // Pending payment for cashier to process
+  const paiement6 = await prisma.paiement.create({
+    data: {
+      montant: 418000.00,
+      datePaiement: new Date('2024-02-25'),
+      modePaiement: 'VIREMENT',
+      statut: 'EN_ATTENTE',
+      reference: 'VIR-2024-003',
+      bulletinId: bulletin5.id,
       entrepriseId: entreprise2.id,
     },
   });

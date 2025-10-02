@@ -2,11 +2,13 @@ import type { Request, Response } from 'express';
 import { BulletinService } from '../service/bulletinService.js';
 import { bulletinSchema } from '../validators/bulletin.js';
 import { PDFService } from '../service/pdfService.js';
+import { ExportService } from '../service/exportService.js';
 
 const bulletinService = new BulletinService();
+const exportService = new ExportService();
 
 export class BulletinController {
-    
+
   async create(req: Request, res: Response) {
     try {
       const data = bulletinSchema.parse(req.body);
@@ -82,6 +84,17 @@ export class BulletinController {
       res.send(pdfBuffer);
     } catch (err: any) {
       res.status(500).json({ error: `Impossible de générer le PDF : ${err.message}` });
+    }
+  }
+
+  async exportToExcel(req: Request, res: Response) {
+    try {
+      const buffer = await exportService.exportBulletinsToExcel(req.user);
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=bulletins.xlsx');
+      res.send(buffer);
+    } catch (err: any) {
+      res.status(500).json({ error: `Impossible d'exporter les bulletins : ${err.message}` });
     }
   }
 }

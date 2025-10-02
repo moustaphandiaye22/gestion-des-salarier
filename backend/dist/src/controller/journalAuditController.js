@@ -13,7 +13,7 @@ export class JournalAuditController {
     }
     async getAll(req, res) {
         try {
-            const journals = await journalAuditService.getAllJournalAudits();
+            const journals = await journalAuditService.getAllJournalAudits(req.user);
             res.json(journals);
         }
         catch (err) {

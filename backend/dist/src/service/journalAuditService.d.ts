@@ -24,7 +24,7 @@ export declare class JournalAuditService {
         paiementId: number | null;
         cyclePaieId: number | null;
     } | null>;
-    getAllJournalAudits(): Promise<{
+    getAllJournalAudits(user?: any): Promise<{
         id: number;
         entrepriseId: number | null;
         employeId: number | null;

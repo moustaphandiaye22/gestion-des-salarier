@@ -32,6 +32,8 @@ export const requireOwnershipOrAdmin = (req: Request, res: Response, next: NextF
 
 export const requireSuperAdmin = requireRole(['SUPER_ADMIN']);
 export const requireAdminOrSuper = requireRole(['ADMIN_ENTREPRISE', 'SUPER_ADMIN']);
+export const requireCashierOrAdmin = requireRole(['CAISSIER', 'ADMIN_ENTREPRISE', 'SUPER_ADMIN']);
+export const requireReadAccess = requireRole(['CAISSIER', 'ADMIN_ENTREPRISE', 'SUPER_ADMIN']);
 export const requireCompanyAccess = (req: Request, res: Response, next: NextFunction) => {
   if (!req.user) {
     return res.status(401).json({ error: 'Utilisateur non authentifié' });
@@ -42,8 +44,8 @@ export const requireCompanyAccess = (req: Request, res: Response, next: NextFunc
     return next();
   }
 
-  // Admin can only access their own company
-  if (req.user.profil === 'ADMIN_ENTREPRISE' && req.user.entrepriseId) {
+  // Admin and cashier can only access their own company
+  if ((req.user.profil === 'ADMIN_ENTREPRISE' || req.user.profil === 'CAISSIER') && req.user.entrepriseId) {
     const companyId = Number(req.params.id) || req.user.entrepriseId;
     if (req.user.entrepriseId === companyId) {
       return next();

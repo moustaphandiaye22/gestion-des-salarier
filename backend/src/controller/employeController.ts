@@ -1,12 +1,14 @@
 import type { Request, Response } from 'express';
 import { EmployeService } from '../service/employeService.js';
 import { SalaryCalculationService } from '../service/salaryCalculationService.js';
+import { ExportService } from '../service/exportService.js';
 import { employeSchema } from '../validators/employe.js';
 import * as XLSX from 'xlsx';
 import multer from 'multer';
 
 const employeService = new EmployeService();
 const salaryCalculationService = new SalaryCalculationService();
+const exportService = new ExportService();
 
 export class EmployeController {
   async create(req: Request, res: Response) {
@@ -137,6 +139,18 @@ export class EmployeController {
       });
     } catch (err: any) {
       res.status(500).json({ error: `Échec de l'import : ${err.message}` });
+    }
+  }
+
+  async exportTemplate(req: Request, res: Response) {
+    try {
+      const buffer = await exportService.exportEmployeeTemplate();
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename="modele-employes.xlsx"');
+      res.send(buffer);
+    } catch (err: any) {
+      res.status(500).json({ error: `Échec de l'export du modèle : ${err.message}` });
     }
   }
 }

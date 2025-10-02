@@ -25,7 +25,7 @@ export class UtilisateurController {
         if (req.user?.profil === 'SUPER_ADMIN') {
             utilisateurs = await this.utilisateurService.getAllUtilisateurs();
         }
-        else if (req.user?.profil === 'ADMIN_ENTREPRISE' && req.user.entrepriseId) {
+        else if ((req.user?.profil === 'ADMIN_ENTREPRISE' || req.user?.profil === 'CAISSIER') && req.user.entrepriseId) {
             utilisateurs = await this.utilisateurService.getUtilisateursByEntreprise(req.user.entrepriseId);
         }
         else {

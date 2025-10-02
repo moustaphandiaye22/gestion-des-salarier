@@ -12,5 +12,6 @@ export declare class journalAuditRepository implements InterfaceRepository<Journ
     delete(id: number): Promise<void>;
     findByAction(action: ActionAudit): Promise<JournalAudit[]>;
     findByUser(utilisateurId: number): Promise<JournalAudit[]>;
+    findAllByUser(user: any): Promise<JournalAudit[]>;
 }
 //# sourceMappingURL=journalAudit.d.ts.map

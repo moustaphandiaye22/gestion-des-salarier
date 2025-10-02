@@ -23,8 +23,8 @@ export class paiementRepository {
                 include: { bulletin: true, entreprise: true }
             });
         }
-        // Admin d'Entreprise voit seulement les paiements de son entreprise
-        if (user.profil === 'ADMIN_ENTREPRISE' && user.entrepriseId) {
+        // Admin d'Entreprise et Caissier voient seulement les paiements de leur entreprise
+        if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
             return mnprisma.paiement.findMany({
                 where: { entrepriseId: user.entrepriseId },
                 include: { bulletin: true, entreprise: true }

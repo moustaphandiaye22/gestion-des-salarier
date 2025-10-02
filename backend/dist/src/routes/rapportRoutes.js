@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { RapportController } from '../controller/rapportController.js';
+import { requireCashierOrAdmin } from '../middleware/rbacMiddleware.js';
 const router = Router();
 const rapportController = new RapportController();
-router.post('/', rapportController.create);
-router.get('/', rapportController.getAll);
-router.get('/:id', rapportController.getById);
-router.put('/:id', rapportController.update);
-router.delete('/:id', rapportController.delete);
+router.post('/', requireCashierOrAdmin, rapportController.create);
+router.get('/', requireCashierOrAdmin, rapportController.getAll);
+router.get('/:id', requireCashierOrAdmin, rapportController.getById);
+router.get('/:id/pdf', requireCashierOrAdmin, rapportController.downloadPdf);
+router.put('/:id', requireCashierOrAdmin, rapportController.update);
+router.delete('/:id', requireCashierOrAdmin, rapportController.delete);
 export default router;
 //# sourceMappingURL=rapportRoutes.js.map

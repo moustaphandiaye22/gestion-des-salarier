@@ -5,5 +5,8 @@ export declare class CyclePaieController {
     getById(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
     update(req: Request, res: Response): Promise<void>;
     delete(req: Request, res: Response): Promise<void>;
+    validate(req: Request, res: Response): Promise<void>;
+    close(req: Request, res: Response): Promise<void>;
+    canCashierPay(req: Request, res: Response): Promise<void>;
 }
 //# sourceMappingURL=cyclePaieController.d.ts.map

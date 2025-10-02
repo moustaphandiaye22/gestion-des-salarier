@@ -1,14 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog, Input, Select } from "../components/ui";
 import { licencesApi, entreprisesApi } from "../utils/api";
-import { TrashIcon, PlusIcon, PencilIcon, UserGroupIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useToast } from "../context/ToastContext";
+import { TrashIcon, PlusIcon, PencilIcon, UserGroupIcon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 export default function Licences() {
+  const { showSuccess, showError } = useToast();
   const [rows, setRows] = useState([]);
   const [entreprises, setEntreprises] = useState([]);
   const [error, setError] = useState(null);
   const [toDelete, setToDelete] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("");
+  const [filterStatut, setFilterStatut] = useState("");
+  const [filterEntreprise, setFilterEntreprise] = useState("");
 
   const [selected, setSelected] = useState(null);
   const [form, setForm] = useState({
@@ -37,7 +45,9 @@ export default function Licences() {
       setRows(Array.isArray(licencesData) ? licencesData : []);
       setEntreprises(Array.isArray(entreprisesData) ? entreprisesData : []);
     } catch (err) {
-      setError(err?.response?.data?.message || err.message);
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur de chargement", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -86,8 +96,11 @@ export default function Licences() {
         entrepriseId: ""
       });
       load();
+      showSuccess("Succès", selected?.id ? "Licence modifiée avec succès" : "Licence créée avec succès");
     } catch (err) {
-      setError(err?.response?.data?.message || err.message);
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur d'enregistrement", errorMessage);
     } finally {
       setSaving(false);
     }
@@ -99,8 +112,11 @@ export default function Licences() {
       await licencesApi.remove(toDelete.id);
       setToDelete(null);
       load();
+      showSuccess("Succès", "Licence supprimée avec succès");
     } catch (err) {
-      setError(err?.response?.data?.message || err.message);
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur de suppression", errorMessage);
     }
   }
 
@@ -109,8 +125,11 @@ export default function Licences() {
     try {
       await licencesApi.assignToEntreprise(licence.id, licence.entrepriseId);
       load();
+      showSuccess("Succès", "Licence assignée avec succès");
     } catch (err) {
-      setError(err?.response?.data?.message || err.message);
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur d'assignation", errorMessage);
     }
   }
 
@@ -118,10 +137,29 @@ export default function Licences() {
     try {
       await licencesApi.revokeFromEntreprise(licence.id);
       load();
+      showSuccess("Succès", "Licence révoquée avec succès");
     } catch (err) {
-      setError(err?.response?.data?.message || err.message);
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur de révocation", errorMessage);
     }
   }
+
+  // Filtered rows based on search and filters
+  const filteredRows = useMemo(() => {
+    return rows.filter((licence) => {
+      const matchesSearch = !searchTerm ||
+        licence.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        licence.description?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesType = !filterType || licence.typeLicence === filterType;
+      const matchesStatut = !filterStatut || licence.statut === filterStatut;
+      const matchesEntreprise = !filterEntreprise ||
+        licence.entreprise?.id === parseInt(filterEntreprise);
+
+      return matchesSearch && matchesType && matchesStatut && matchesEntreprise;
+    });
+  }, [rows, searchTerm, filterType, filterStatut, filterEntreprise]);
 
   const getStatutColor = (statut) => {
     switch (statut) {
@@ -148,31 +186,79 @@ export default function Licences() {
         <Card>
           <CardHeader
             title="Gestion des licences"
+            subtitle="Gestion des licences et assignations"
             actions={
-              <Button
-                className="flex items-center gap-2"
-                onClick={() => {
-                  setSelected(null);
-                  setShowForm(true);
-                  setForm({
-                    nom: "",
-                    description: "",
-                    typeLicence: "STANDARD",
-                    statut: "ACTIVE",
-                    dateDebut: "",
-                    dateFin: "",
-                    nombreUtilisateursMax: "",
-                    entrepriseId: ""
-                  });
-                }}
-              >
-                <PlusIcon className="h-5 w-5" />
-                Nouvelle licence
-              </Button>
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="relative">
+                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Rechercher par nom, description..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 w-64"
+                  />
+                </div>
+                <Select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                  className="w-32"
+                >
+                  <option value="">Tous types</option>
+                  <option value="STANDARD">Standard</option>
+                  <option value="PREMIUM">Premium</option>
+                  <option value="ENTERPRISE">Entreprise</option>
+                </Select>
+                <Select
+                  value={filterStatut}
+                  onChange={(e) => setFilterStatut(e.target.value)}
+                  className="w-32"
+                >
+                  <option value="">Tous statuts</option>
+                  <option value="ACTIVE">Active</option>
+                  <option value="INACTIVE">Inactive</option>
+                  <option value="SUSPENDED">Suspendue</option>
+                  <option value="EXPIRED">Expirée</option>
+                </Select>
+                <Select
+                  value={filterEntreprise}
+                  onChange={(e) => setFilterEntreprise(e.target.value)}
+                  className="w-40"
+                >
+                  <option value="">Toutes entreprises</option>
+                  {entreprises.map((entreprise) => (
+                    <option key={entreprise.id} value={entreprise.id}>{entreprise.nom}</option>
+                  ))}
+                </Select>
+                <Button
+                  className="flex items-center gap-2"
+                  onClick={() => {
+                    setSelected(null);
+                    setShowForm(true);
+                    setForm({
+                      nom: "",
+                      description: "",
+                      typeLicence: "STANDARD",
+                      statut: "ACTIVE",
+                      dateDebut: "",
+                      dateFin: "",
+                      nombreUtilisateursMax: "",
+                      entrepriseId: ""
+                    });
+                  }}
+                >
+                  <PlusIcon className="h-5 w-5" />
+                  Nouvelle licence
+                </Button>
+              </div>
             }
           />
           <CardBody>
             {error && <div className="mb-4 rounded bg-red-50 p-3 ring-1 ring-red-200 text-sm text-red-800">{error}</div>}
+
+            <div className="text-sm text-gray-600 mb-4">
+              {filteredRows.length} licence{filteredRows.length !== 1 ? 's' : ''} trouvée{filteredRows.length !== 1 ? 's' : ''}
+            </div>
 
             {showForm && (
               <Card className="mb-6">
@@ -267,7 +353,7 @@ export default function Licences() {
                   "Date fin",
                   "Actions",
                 ]}
-                rows={rows}
+                rows={filteredRows}
                 renderRow={(row) => (
                   <tr key={row.id}>
                     <td className="px-2 py-2 text-sm text-gray-900 font-medium">

@@ -15,7 +15,7 @@ export class JournalAuditController {
 
   async getAll(req: Request, res: Response) {
     try {
-      const journals = await journalAuditService.getAllJournalAudits();
+      const journals = await journalAuditService.getAllJournalAudits(req.user);
       res.json(journals);
     } catch (err: any) {
       res.status(500).json({ error: err.message });

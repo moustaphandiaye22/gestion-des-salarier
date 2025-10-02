@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardBody, Table, Button } from "../components/ui";
 import { bulletinsApi } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { useToast } from "../context/ToastContext";
+import { PlusIcon, DocumentArrowDownIcon } from "@heroicons/react/24/outline";
 
 export default function Bulletins() {
-  const { selectedCompanyId } = useAuth();
+  const { selectedCompanyId, user } = useAuth();
+  const { showSuccess, showError } = useToast();
   const [rows, setRows] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,10 +16,24 @@ export default function Bulletins() {
     setLoading(true);
     setError(null);
     try {
-      const data = await bulletinsApi.list();
+      let data = await bulletinsApi.list();
+
+      // Filter bulletins based on user role
+      if (user?.role === 'SUPER_ADMIN') {
+        // Super admin sees all bulletins
+      } else if (user?.role === 'ADMIN_ENTREPRISE' && user.entrepriseId) {
+        // Admin entreprise sees only bulletins from their entreprise
+        data = data.filter(b => b.employe?.entrepriseId === user.entrepriseId);
+      } else if (user?.role === 'CAISSIER' && user.entrepriseId) {
+        // Cashier sees only bulletins from their entreprise
+        data = data.filter(b => b.employe?.entrepriseId === user.entrepriseId);
+      }
+
       setRows(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err?.response?.data?.message || err.message);
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur de chargement", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -27,6 +43,40 @@ export default function Bulletins() {
     load();
   }, [selectedCompanyId]);
 
+  async function generateBulletins() {
+    try {
+      // For now, generate bulletins for the current cycle - you might want to add cycle selection
+      await bulletinsApi.generate();
+      load();
+      showSuccess("Succès", "Bulletins générés avec succès");
+    } catch (err) {
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur de génération", errorMessage);
+    }
+  }
+
+  async function exportBulletins() {
+    try {
+      const response = await bulletinsApi.exportExcel();
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'bulletins.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      showSuccess("Succès", "Bulletins exportés avec succès");
+    } catch (err) {
+      const errorMessage = err?.response?.data?.message || err.message;
+      showError("Erreur d'export", errorMessage);
+    }
+  }
+
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-gray-50">
       <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8 py-8">
@@ -34,10 +84,20 @@ export default function Bulletins() {
           <CardHeader
             title="Bulletins de salaire"
             actions={
-              <Button className="flex items-center gap-2">
-                <PlusIcon className="h-5 w-5" />
-                Générer
-              </Button>
+              <div className="flex gap-2">
+                <Button className="flex items-center gap-2" onClick={generateBulletins}>
+                  <PlusIcon className="h-5 w-5" />
+                  Générer
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="flex items-center gap-2"
+                  onClick={exportBulletins}
+                >
+                  <DocumentArrowDownIcon className="h-5 w-5" />
+                  Exporter Excel
+                </Button>
+              </div>
             }
           />
           <CardBody>

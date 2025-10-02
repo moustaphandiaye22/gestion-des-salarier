@@ -201,6 +201,7 @@ export const employesApi = {
   },
   update: (id, payload) => api.put(`/api/employes/${id}`, payload).then((r) => r.data?.employe || r.data || null),
   remove: (id) => api.delete(`/api/employes/${id}`).then((r) => r.data),
+  exportTemplate: () => api.get(`/api/employes/export/template`, { responseType: 'blob' }).then((r) => r),
 };
 
 export const entreprisesApi = {
@@ -239,6 +240,7 @@ export const bulletinsApi = {
   update: (id, payload) => api.put(`/api/bulletins/${id}`, payload).then((r) => r.data?.bulletin || r.data || null),
   remove: (id) => api.delete(`/api/bulletins/${id}`).then((r) => r.data),
   downloadPdf: (id) => api.get(`/api/bulletins/${id}/pdf`, { responseType: 'blob' }).then((r) => r.data),
+  exportExcel: () => api.get(`/api/bulletins/export/excel`, { responseType: 'blob' }).then((r) => r),
 };
 
 export const paiementsApi = {
@@ -247,6 +249,7 @@ export const paiementsApi = {
   create: (payload) => api.post(`/api/paiements`, payload).then((r) => r.data?.paiement || r.data || null),
   update: (id, payload) => api.put(`/api/paiements/${id}`, payload).then((r) => r.data?.paiement || r.data || null),
   remove: (id) => api.delete(`/api/paiements/${id}`).then((r) => r.data),
+  exportExcel: () => api.get(`/api/paiements/export/excel`, { responseType: 'blob' }).then((r) => r),
 };
 
 export const cyclesPaieApi = {
@@ -255,6 +258,10 @@ export const cyclesPaieApi = {
   create: (payload) => api.post(`/api/cycles-paie`, payload).then((r) => r.data?.cycle || null),
   update: (id, payload) => api.put(`/api/cycles-paie/${id}`, payload).then((r) => r.data?.cycle || null),
   remove: (id) => api.delete(`/api/cycles-paie/${id}`).then((r) => r.data),
+
+  validate: (id) => api.put(`/api/cycles-paie/${id}/validate`).then((r) => r.data?.cycle || null),
+  close: (id) => api.put(`/api/cycles-paie/${id}/close`).then((r) => r.data?.cycle || null),
+  canCashierPay: (id) => api.get(`/api/cycles-paie/${id}/can-cashier-pay`).then((r) => r.data?.canPay || false),
 };
 
 export const parametreEntrepriseApi = {
@@ -269,6 +276,7 @@ export const parametreEntrepriseApi = {
 export const rapportsApi = {
   list: (params) => api.get(`/api/rapports${toQuery(params)}`).then((r) => r.data),
   get: (id) => api.get(`/api/rapports/${id}`).then((r) => r.data),
+  getPdf: (id) => api.get(`/api/rapports/${id}/pdf`, { responseType: 'blob' }).then((r) => r.data),
   create: (payload) => api.post(`/api/rapports`, payload).then((r) => r.data),
   update: (id, payload) => api.put(`/api/rapports/${id}`, payload).then((r) => r.data),
   remove: (id) => api.delete(`/api/rapports/${id}`).then((r) => r.data),

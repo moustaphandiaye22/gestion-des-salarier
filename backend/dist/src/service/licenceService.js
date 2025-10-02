@@ -10,7 +10,19 @@ export class LicenceService {
         }
         return await licenceRepository.create(data);
     }
-    async getAllLicences() {
+    async getAllLicences(user) {
+        if (user) {
+            // Super Admin voit toutes les licences
+            if (user.profil === 'SUPER_ADMIN') {
+                return await licenceRepository.getAll();
+            }
+            // Admin d'Entreprise et Caissier voient seulement les licences de leur entreprise
+            if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
+                return await licenceRepository.getByEntreprise(user.entrepriseId);
+            }
+            // Autres rôles n'ont pas accès aux licences
+            return [];
+        }
         return await licenceRepository.getAll();
     }
     async getLicenceById(id) {

@@ -23,8 +23,8 @@ export class cyclePaieRepository {
                 include: { entreprise: true, bulletins: true }
             });
         }
-        // Admin d'Entreprise voit seulement les cycles de son entreprise
-        if (user.profil === 'ADMIN_ENTREPRISE' && user.entrepriseId) {
+        // Admin d'Entreprise et Caissier voient seulement les cycles de leur entreprise
+        if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
             return mnprisma.cyclePaie.findMany({
                 where: { entrepriseId: user.entrepriseId },
                 include: { entreprise: true, bulletins: true }
@@ -38,6 +38,15 @@ export class cyclePaieRepository {
     }
     async delete(id) {
         await mnprisma.cyclePaie.delete({ where: { id } });
+    }
+    async setStatutValidation(id, statutValidation) {
+        return mnprisma.cyclePaie.update({ where: { id }, data: { statutValidation } });
+    }
+    async getBulletinsByCycleId(id) {
+        return mnprisma.bulletin.findMany({
+            where: { cycleId: id },
+            include: { paiements: true }
+        });
     }
 }
 ;

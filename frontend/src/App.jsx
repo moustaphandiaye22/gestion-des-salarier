@@ -3,14 +3,15 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import MainLayout from "./layouts/MainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { useAuth } from "./context/AuthContext";
 
 // Auth
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
 // Pages
-
 import Dashboard from "./pages/Dashboard";
+import CaissierDashboard from "./pages/CaissierDashboard";
 import EmployeeList from "./pages/EmployeeList";
 import EmployeeForm from "./pages/EmployeeForm";
 import EmployeeDetail from "./pages/EmployeeDetail";
@@ -29,6 +30,18 @@ import JournalAudit from "./pages/JournalAudit";
 import Utilisateurs from "./pages/Utilisateurs";
 import Professions from "./pages/Professions";
 
+// Role-based dashboard component
+function RoleBasedDashboard() {
+  const { user } = useAuth();
+
+  if (user?.role === 'CAISSIER') {
+    return <CaissierDashboard />;
+  }
+
+  // Default to admin dashboard for ADMIN_ENTREPRISE, SUPER_ADMIN, EMPLOYE
+  return <Dashboard />;
+}
+
 function App() {
   return (
     <Routes>
@@ -40,7 +53,7 @@ function App() {
         element={
           <ProtectedRoute>
             <MainLayout>
-              <Dashboard />
+              <RoleBasedDashboard />
             </MainLayout>
           </ProtectedRoute>
         }
@@ -51,7 +64,7 @@ function App() {
         element={
           <ProtectedRoute>
             <MainLayout>
-              <Dashboard />
+              <RoleBasedDashboard />
             </MainLayout>
           </ProtectedRoute>
         }

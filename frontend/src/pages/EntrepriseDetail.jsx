@@ -4,8 +4,10 @@ import { Card, CardHeader, CardBody, Button, ConfirmDialog } from "../components
 import { entreprisesApi, employesApi } from "../utils/api";
 import { formatCFA } from "../utils/format";
 import { PencilSquareIcon, TrashIcon, ArrowLeftIcon, UsersIcon, BuildingOfficeIcon } from "@heroicons/react/24/outline";
+import { useToast } from "../context/ToastContext";
 
 export default function EntrepriseDetail() {
+  const { showSuccess, showError } = useToast();
   const { id } = useParams();
   const navigate = useNavigate();
   const [entreprise, setEntreprise] = useState(null);
@@ -47,9 +49,12 @@ export default function EntrepriseDetail() {
     if (!toDelete) return;
     try {
       await entreprisesApi.remove(toDelete.id);
+      showSuccess("Succès", "Entreprise supprimée avec succès");
       navigate("/entreprises");
     } catch (err) {
-      setError(err?.response?.data?.message || err.message);
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur de suppression", errorMessage);
     }
   }
 

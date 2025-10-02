@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog } from "../components/ui";
+import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog, Input, Select } from "../components/ui";
+import Pagination from "../components/Pagination";
 import { employesApi } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
-import { PencilSquareIcon, TrashIcon, PlusIcon, EyeIcon, DocumentArrowUpIcon } from "@heroicons/react/24/outline";
+import { useToast } from "../context/ToastContext";
+import { PencilSquareIcon, TrashIcon, PlusIcon, EyeIcon, DocumentArrowUpIcon, MagnifyingGlassIcon, DocumentArrowDownIcon } from "@heroicons/react/24/outline";
 
 export default function EmployeeList() {
   const { selectedCompanyId } = useAuth();
+  const { showSuccess, showError } = useToast();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -14,6 +17,14 @@ export default function EmployeeList() {
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [contractFilter, setContractFilter] = useState("");
+  const [activeFilter, setActiveFilter] = useState("");
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   async function load() {
     setLoading(true);
@@ -22,11 +33,60 @@ export default function EmployeeList() {
       const data = await employesApi.list();
       setRows(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err?.response?.data?.message || err.message || "Erreur");
+      const errorMessage = err?.response?.data?.message || err.message || "Erreur";
+      setError(errorMessage);
+      showError("Erreur de chargement", errorMessage);
     } finally {
       setLoading(false);
     }
   }
+
+  // Filtered employees based on search and filters
+  const filteredRows = useMemo(() => {
+    let filtered = rows;
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(employee =>
+        employee.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.prenom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.matricule?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Status filter
+    if (statusFilter) {
+      filtered = filtered.filter(employee => employee.statutEmploi === statusFilter);
+    }
+
+    // Contract filter
+    if (contractFilter) {
+      filtered = filtered.filter(employee => employee.typeContrat === contractFilter);
+    }
+
+    // Active filter
+    if (activeFilter) {
+      const isActive = activeFilter === "true";
+      filtered = filtered.filter(employee => employee.estActif === isActive);
+    }
+
+    return filtered;
+  }, [rows, searchTerm, statusFilter, contractFilter, activeFilter]);
+
+  // Paginated rows
+  const paginatedRows = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredRows.slice(startIndex, endIndex);
+  }, [filteredRows, currentPage, itemsPerPage]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, contractFilter, activeFilter]);
+
+  const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
 
   useEffect(() => {
     load();
@@ -38,8 +98,11 @@ export default function EmployeeList() {
       await employesApi.remove(toDelete.id);
       setToDelete(null);
       load();
+      showSuccess("Succès", "Employé supprimé avec succès");
     } catch (err) {
-      setError(err?.response?.data?.message || err.message);
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur de suppression", errorMessage);
     }
   }
 
@@ -54,11 +117,31 @@ export default function EmployeeList() {
       setImportResult(result);
       setImportModalOpen(false);
       load(); // Reload list
+      showSuccess("Import réussi", `${result.success?.length || 0} employés importés avec succès`);
     } catch (err) {
-      setImportResult({ error: err?.response?.data?.error || err.message });
+      const errorMessage = err?.response?.data?.error || err.message;
+      setImportResult({ error: errorMessage });
       setImportModalOpen(false);
+      showError("Erreur d'import", errorMessage);
     } finally {
       setImporting(false);
+    }
+  }
+
+  async function handleExportTemplate() {
+    try {
+      const response = await employesApi.exportTemplate();
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'modele_employes.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      showSuccess("Succès", "Modèle Excel téléchargé avec succès");
+    } catch (err) {
+      const errorMessage = err?.response?.data?.message || err.message;
+      showError("Erreur d'export", errorMessage);
     }
   }
 
@@ -76,6 +159,14 @@ export default function EmployeeList() {
                     Ajouter
                   </Button>
                 </Link>
+                <Button
+                  className="flex items-center gap-2"
+                  variant="outline"
+                  onClick={handleExportTemplate}
+                >
+                  <DocumentArrowDownIcon className="h-5 w-5" />
+                  Modèle Excel
+                </Button>
                 <Button
                   className="flex items-center gap-2"
                   variant="outline"
@@ -123,7 +214,57 @@ export default function EmployeeList() {
                 </div>
               </div>
             )}
-            <div className="max-h-[calc(100vh-16rem)] overflow-y-auto">
+
+            {/* Search and Filters */}
+            <div className="mb-6 space-y-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <Input
+                    placeholder="Rechercher par nom, prénom, matricule ou email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full"
+                    icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-40"
+                  >
+                    <option value="">Tous statuts</option>
+                    <option value="ACTIF">Actif</option>
+                    <option value="CONGE">Congé</option>
+                    <option value="INACTIF">Inactif</option>
+                  </Select>
+                  <Select
+                    value={contractFilter}
+                    onChange={(e) => setContractFilter(e.target.value)}
+                    className="w-40"
+                  >
+                    <option value="">Tous contrats</option>
+                    <option value="CDI">CDI</option>
+                    <option value="CDD">CDD</option>
+                    <option value="STAGE">Stage</option>
+                  </Select>
+                  <Select
+                    value={activeFilter}
+                    onChange={(e) => setActiveFilter(e.target.value)}
+                    className="w-32"
+                  >
+                    <option value="">Tous</option>
+                    <option value="true">Actif</option>
+                    <option value="false">Inactif</option>
+                  </Select>
+                </div>
+              </div>
+              <div className="text-sm text-gray-600">
+                {filteredRows.length} employé{filteredRows.length !== 1 ? 's' : ''} trouvé{filteredRows.length !== 1 ? 's' : ''}
+              </div>
+            </div>
+
+            <div className="max-h-[calc(100vh-20rem)] overflow-y-auto">
               <Table
                 head={[
                   "Matricule",
@@ -139,7 +280,7 @@ export default function EmployeeList() {
                   "Entreprise",
                   "Actions",
                 ]}
-                rows={rows}
+                rows={paginatedRows}
                 renderRow={(row) => (
                   <tr key={row.id}>
                     <td className="px-2 py-2 text-sm text-gray-700 font-medium">{row.matricule}</td>
@@ -206,6 +347,16 @@ export default function EmployeeList() {
                 )}
               />
             </div>
+
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={filteredRows.length}
+                itemsPerPage={itemsPerPage}
+              />
+            )}
           </CardBody>
         </Card>
 

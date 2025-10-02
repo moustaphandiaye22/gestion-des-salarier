@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { EmployeController } from '../controller/employeController.js';
-import { requireAdminOrSuper } from '../middleware/rbacMiddleware.js';
+import { requireAdminOrSuper, requireReadAccess } from '../middleware/rbacMiddleware.js';
 import multer from 'multer';
 
 const router = Router();
@@ -13,11 +13,11 @@ router.post('/', requireAdminOrSuper, employeController.create);
 // Import Excel - ajout multiple
 router.post('/bulk-import', requireAdminOrSuper, upload.single('file'), employeController.bulkImport);
 
-// Lister les employés - admin entreprise (de leur entreprise) ou super admin
-router.get('/', requireAdminOrSuper, employeController.getAll);
+// Lister les employés - caissier, admin entreprise (de leur entreprise) ou super admin
+router.get('/', requireReadAccess, employeController.getAll);
 
-// Obtenir un employé par ID - admin entreprise ou super admin
-router.get('/:id', requireAdminOrSuper, employeController.getById);
+// Obtenir un employé par ID - caissier, admin entreprise ou super admin
+router.get('/:id', requireReadAccess, employeController.getById);
 
 // Mettre à jour un employé - admin entreprise ou super admin
 router.put('/:id', requireAdminOrSuper, employeController.update);
@@ -27,5 +27,8 @@ router.delete('/:id', requireAdminOrSuper, employeController.delete);
 
 // Obtenir le dernier bulletin d'un employé - admin entreprise ou super admin
 router.get('/:id/latest-bulletin', requireAdminOrSuper, employeController.getLatestBulletin);
+
+// Exporter le modèle Excel - admin entreprise ou super admin
+router.get('/export/template', requireAdminOrSuper, employeController.exportTemplate);
 
 export default router;

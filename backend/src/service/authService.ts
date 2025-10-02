@@ -118,7 +118,8 @@ export class AuthService implements IAuthService {
       // Générer un nouveau token d'accès
       const newAccessToken = AuthUtils.generateAccessToken({
         email: utilisateur.email,
-        profil: utilisateur.role
+        profil: utilisateur.role,
+        ...(utilisateur.entrepriseId && { entrepriseId: utilisateur.entrepriseId })
       });
 
       Logger.info('Token rafraîchi avec succès', { userId: utilisateur.id });

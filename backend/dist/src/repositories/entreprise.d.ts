@@ -53,6 +53,7 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             dateDebut: Date;
             dateFin: Date;
             statut: import("@prisma/client").$Enums.StatutCyclePaie;
+            statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
             frequence: import("@prisma/client").$Enums.FrequencePaie;
             createdAt: Date;
             updatedAt: Date;
@@ -117,6 +118,7 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             dateDebut: Date;
             dateFin: Date;
             statut: import("@prisma/client").$Enums.StatutCyclePaie;
+            statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
             frequence: import("@prisma/client").$Enums.FrequencePaie;
             createdAt: Date;
             updatedAt: Date;
@@ -181,6 +183,7 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             dateDebut: Date;
             dateFin: Date;
             statut: import("@prisma/client").$Enums.StatutCyclePaie;
+            statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
             frequence: import("@prisma/client").$Enums.FrequencePaie;
             createdAt: Date;
             updatedAt: Date;

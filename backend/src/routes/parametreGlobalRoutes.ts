@@ -1,14 +1,14 @@
 import { Router } from 'express';
 import { ParametreGlobalController } from '../controller/parametreGlobalController.js';
-import { requireSuperAdmin } from '../middleware/rbacMiddleware.js';
+import { requireAdminOrSuper } from '../middleware/rbacMiddleware.js';
 import { authenticateToken } from '../middleware/authMiddleware.js';
 
 const router = Router();
 const parametreGlobalController = new ParametreGlobalController();
 
-// Toutes les routes nécessitent une authentification et le rôle SUPER_ADMIN
+// Toutes les routes nécessitent une authentification et le rôle ADMIN_ENTREPRISE ou SUPER_ADMIN
 router.use(authenticateToken);
-router.use(requireSuperAdmin);
+router.use(requireAdminOrSuper);
 
 router.post('/', parametreGlobalController.create.bind(parametreGlobalController));
 router.get('/', parametreGlobalController.getAll.bind(parametreGlobalController));
