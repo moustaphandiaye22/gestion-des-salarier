@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog, Input, Select } from "../components/ui";
 import { cyclesPaieApi } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import { TrashIcon, PlusIcon, CheckIcon, XMarkIcon, CreditCardIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, PlusIcon, CheckIcon, XMarkIcon, CreditCardIcon, MagnifyingGlassIcon, PencilIcon } from "@heroicons/react/24/outline";
 
 export default function CyclesPaie() {
   const [rows, setRows] = useState([]);
@@ -12,6 +13,7 @@ export default function CyclesPaie() {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { showSuccess, showError } = useToast();
+  const navigate = useNavigate();
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -146,9 +148,9 @@ export default function CyclesPaie() {
                   className="w-32"
                 >
                   <option value="">Toutes fréquences</option>
-                  <option value="MENSUELLE">Mensuelle</option>
+                  <option value="MENSUEL">Mensuelle</option>
                   <option value="HEBDOMADAIRE">Hebdomadaire</option>
-                  <option value="QUOTIDIENNE">Quotidienne</option>
+                  <option value="QUINZAINE">Quinzaine</option>
                 </Select>
                 <Select
                   value={filterEntreprise}
@@ -162,13 +164,13 @@ export default function CyclesPaie() {
                     <option key={entreprise.id} value={entreprise.id}>{entreprise.nom}</option>
                   ))}
                 </Select>
-                <Button className="flex items-center gap-2">
-                  <PlusIcon className="h-5 w-5" />
-                  Ajouter
-                </Button>
-              </div>
-            }
-          />
+            <Button className="flex items-center gap-2" onClick={() => navigate("/cycles-paie/new")}>
+              <PlusIcon className="h-5 w-5" />
+              Ajouter
+            </Button>
+          </div>
+        }
+      />
           <CardBody>
             {error && <div className="mb-4 rounded bg-red-50 p-3 ring-1 ring-red-200 text-sm text-red-800">{error}</div>}
 
@@ -197,7 +199,14 @@ export default function CyclesPaie() {
                   return (
                     <tr key={row.id}>
                       <td className="px-2 py-2 text-sm text-gray-900 font-medium">{row.entreprise?.nom || '-'}</td>
-                      <td className="px-2 py-2 text-sm text-gray-700 font-medium">{row.nom || '-'}</td>
+                      <td className="px-2 py-2 text-sm text-gray-700 font-medium">
+                        <button
+                          className="text-blue-600 hover:text-blue-800 underline"
+                          onClick={() => navigate(`/cycles-paie/${row.id}/edit`)}
+                        >
+                          {row.nom || '-'}
+                        </button>
+                      </td>
                       <td className="px-2 py-2 text-sm text-gray-700 hidden sm:table-cell">{row.frequence || '-'}</td>
                       <td className="px-2 py-2 text-sm text-gray-700 hidden md:table-cell">
                         <div className="text-xs">
@@ -242,6 +251,9 @@ export default function CyclesPaie() {
                             <CreditCardIcon className="h-4 w-4" />
                           </Button>
                         )}
+                        <Button variant="primary" title="Modifier" onClick={() => navigate(`/cycles-paie/${row.id}/edit`)} className="text-xs px-2 py-1">
+                          <PencilIcon className="h-4 w-4" />
+                        </Button>
                         <Button variant="danger" onClick={() => setToDelete(row)} className="text-xs px-2 py-1">
                           <TrashIcon className="h-3 w-3" />
                         </Button>

@@ -1,12 +1,19 @@
 import { PaiementService } from '../service/paiementService.js';
 import { paiementSchema } from '../validators/paiement.js';
 import { PDFService } from '../service/pdfService.js';
+import { ExportService } from '../service/exportService.js';
 const paiementService = new PaiementService();
+const exportService = new ExportService();
 export class PaiementController {
     async create(req, res) {
         try {
             const data = paiementSchema.parse(req.body);
-            const paiement = await paiementService.createPaiement(data);
+            // Add user ID for audit logging
+            const paiementData = {
+                ...data,
+                utilisateurId: req.user?.id
+            };
+            const paiement = await paiementService.createPaiement(paiementData);
             res.status(201).json({ message: 'Paiement créé avec succès.', paiement });
         }
         catch (err) {
@@ -68,11 +75,29 @@ export class PaiementController {
             res.status(500).json({ error: `Impossible de générer la liste des paiements PDF : ${err.message}` });
         }
     }
+    async exportToExcel(req, res) {
+        try {
+            const buffer = await exportService.exportPaiementsToExcel(req.user);
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', 'attachment; filename=paiements.xlsx');
+            res.send(buffer);
+        }
+        catch (err) {
+            res.status(500).json({ error: `Impossible d'exporter les paiements : ${err.message}` });
+        }
+    }
     async update(req, res) {
         try {
             const id = Number(req.params.id);
             const data = paiementSchema.partial().parse(req.body);
             const paiement = await paiementService.updatePaiement(id, data);
+            // If payment status changed to PAYE, generate the bulletin PDF automatically
+            if (data.statut === 'PAYE') {
+                const pdfBuffer = await PDFService.generatePaymentReceipt(paiement);
+                res.setHeader('Content-Type', 'application/pdf');
+                res.setHeader('Content-Disposition', `attachment; filename=receipt_${id}.pdf`);
+                return res.send(pdfBuffer);
+            }
             res.json({ message: 'Paiement mis à jour avec succès.', paiement });
         }
         catch (err) {

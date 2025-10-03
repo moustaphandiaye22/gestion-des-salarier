@@ -17,6 +17,8 @@ import {
   ArrowRightOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
+  ClockIcon,
+  QrCodeIcon,
 } from "@heroicons/react/24/outline";
 
 function cx(...cls) {
@@ -24,8 +26,10 @@ function cx(...cls) {
 }
 
 const NAV = [
-   { to: "/dashboard", label: "Tableau de bord", icon: ChartPieIcon },
-   { to: "/employees", label: "Employés", icon: UsersIcon },
+    { to: "/dashboard", label: "Tableau de bord", icon: ChartPieIcon },
+    { to: "/employees", label: "Employés", icon: UsersIcon },
+  { to: "/pointages", label: "Pointages", icon: ClockIcon },
+  { to: "/qrcodes", label: "QR Codes", icon: QrCodeIcon },
   { to: "/entreprises", label: "Entreprises", icon: BuildingOfficeIcon },
   { to: "/paiements", label: "Paiements", icon: BanknotesIcon },
   { to: "/bulletins", label: "Bulletins", icon: DocumentTextIcon },
@@ -130,13 +134,15 @@ export default function MainLayout({ children }) {
       }
       // For CAISSIER, only show payment-related items
       if (user.role === 'CAISSIER') {
-        return ['/paiements', '/bulletins', '/rapports', '/journal-audit'].includes(it.to);
+        return ['/paiements', '/bulletins', '/pointages', '/qrcodes', '/rapports', '/journal-audit'].includes(it.to);
       }
       // For ADMIN_ENTREPRISE, filter menu items to only allowed ones
       if (user.role === 'ADMIN_ENTREPRISE') {
         const allowedPaths = [
           '/dashboard',
           '/employees',
+          '/pointages',
+          '/qrcodes',
           '/paiements',
           '/bulletins',
           '/cycles-paie',

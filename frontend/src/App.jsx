@@ -22,6 +22,7 @@ import EntrepriseDetail from "./pages/EntrepriseDetail";
 import Paiements from "./pages/Paiements";
 import Bulletins from "./pages/Bulletins";
 import CyclesPaie from "./pages/CyclesPaie";
+import CyclePaieForm from "./pages/CyclePaieForm";
 import ParametreEntreprise from "./pages/ParametreEntreprise";
 import ParametresGlobaux from "./pages/ParametresGlobaux";
 import Licences from "./pages/Licences";
@@ -29,6 +30,10 @@ import Rapports from "./pages/Rapports";
 import JournalAudit from "./pages/JournalAudit";
 import Utilisateurs from "./pages/Utilisateurs";
 import Professions from "./pages/Professions";
+import Pointages from "./pages/Pointages";
+import PointageForm from "./pages/PointageForm";
+import QRCodeManagement from "./pages/QRCodeManagement";
+import EmployeeDashboard from "./pages/EmployeeDashboard";
 
 // Role-based dashboard component
 function RoleBasedDashboard() {
@@ -38,7 +43,11 @@ function RoleBasedDashboard() {
     return <CaissierDashboard />;
   }
 
-  // Default to admin dashboard for ADMIN_ENTREPRISE, SUPER_ADMIN, EMPLOYE
+  if (user?.role === 'EMPLOYE') {
+    return <EmployeeDashboard />;
+  }
+
+  // Default to admin dashboard for ADMIN_ENTREPRISE, SUPER_ADMIN
   return <Dashboard />;
 }
 
@@ -69,7 +78,6 @@ function App() {
           </ProtectedRoute>
         }
       />
-
 
       <Route
         path="/employees"
@@ -205,6 +213,26 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/cycles-paie/new"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <CyclePaieForm />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/cycles-paie/:id/edit"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <CyclePaieForm />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/parametres-entreprise"
@@ -278,6 +306,59 @@ function App() {
           <ProtectedRoute>
             <MainLayout>
               <Professions />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/pointages"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Pointages />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pointages/new"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <PointageForm />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pointages/:id/edit"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <PointageForm />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/qrcodes"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <QRCodeManagement />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/mon-dashboard"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <EmployeeDashboard />
             </MainLayout>
           </ProtectedRoute>
         }

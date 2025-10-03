@@ -2,6 +2,8 @@ import type { StatutPaiement } from '@prisma/client';
 export declare class PaiementService {
     private paiementRepository;
     private bulletinRepository;
+    private salaryCalculationService;
+    private bulletinService;
     constructor();
     createPaiement(data: any): Promise<{
         id: number;

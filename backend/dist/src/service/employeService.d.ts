@@ -1,6 +1,9 @@
 import type { StatutEmploi } from '@prisma/client';
 export declare class EmployeService {
     private employeRepository;
+    private pointageRepository;
+    private qrCodeService;
+    private fileService;
     constructor();
     createEmploye(data: any): Promise<{
         id: number;
@@ -22,6 +25,14 @@ export declare class EmployeService {
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
         professionId: number | null;
+        qrCode: string | null;
+        qrCodeGenere: Date | null;
+        qrCodeImagePath: string | null;
+        totalPresences: number;
+        totalAbsences: number;
+        totalRetards: number;
+        heuresTravaillees: import("@prisma/client/runtime/library").Decimal;
+        dernierPointage: Date | null;
     }>;
     getEmploye(id: number): Promise<{
         id: number;
@@ -43,6 +54,14 @@ export declare class EmployeService {
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
         professionId: number | null;
+        qrCode: string | null;
+        qrCodeGenere: Date | null;
+        qrCodeImagePath: string | null;
+        totalPresences: number;
+        totalAbsences: number;
+        totalRetards: number;
+        heuresTravaillees: import("@prisma/client/runtime/library").Decimal;
+        dernierPointage: Date | null;
     } | null>;
     getAllEmployes(user?: any, entrepriseId?: number): Promise<{
         id: number;
@@ -64,6 +83,14 @@ export declare class EmployeService {
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
         professionId: number | null;
+        qrCode: string | null;
+        qrCodeGenere: Date | null;
+        qrCodeImagePath: string | null;
+        totalPresences: number;
+        totalAbsences: number;
+        totalRetards: number;
+        heuresTravaillees: import("@prisma/client/runtime/library").Decimal;
+        dernierPointage: Date | null;
     }[]>;
     updateEmploye(id: number, data: any): Promise<{
         id: number;
@@ -85,6 +112,14 @@ export declare class EmployeService {
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
         professionId: number | null;
+        qrCode: string | null;
+        qrCodeGenere: Date | null;
+        qrCodeImagePath: string | null;
+        totalPresences: number;
+        totalAbsences: number;
+        totalRetards: number;
+        heuresTravaillees: import("@prisma/client/runtime/library").Decimal;
+        dernierPointage: Date | null;
     }>;
     deleteEmploye(id: number): Promise<void>;
     filterEmployes(filters: any): Promise<{
@@ -107,6 +142,14 @@ export declare class EmployeService {
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
         professionId: number | null;
+        qrCode: string | null;
+        qrCodeGenere: Date | null;
+        qrCodeImagePath: string | null;
+        totalPresences: number;
+        totalAbsences: number;
+        totalRetards: number;
+        heuresTravaillees: import("@prisma/client/runtime/library").Decimal;
+        dernierPointage: Date | null;
     }[]>;
     setStatus(id: number, statutEmploi: StatutEmploi): Promise<{
         id: number;
@@ -128,6 +171,14 @@ export declare class EmployeService {
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
         professionId: number | null;
+        qrCode: string | null;
+        qrCodeGenere: Date | null;
+        qrCodeImagePath: string | null;
+        totalPresences: number;
+        totalAbsences: number;
+        totalRetards: number;
+        heuresTravaillees: import("@prisma/client/runtime/library").Decimal;
+        dernierPointage: Date | null;
     }>;
     bulkCreateEmployes(employes: any[]): Promise<{
         success: any[];
@@ -135,6 +186,94 @@ export declare class EmployeService {
             index: number;
             errors: any;
         }[];
+    }>;
+    generateQrCode(employeId: number): Promise<{
+        qrCode: string;
+        qrContent: string;
+        employe: {
+            id: number;
+            nom: string;
+            prenom: string;
+            matricule: string;
+        };
+    }>;
+    regenerateQrCode(employeId: number): Promise<{
+        qrCode: string;
+        qrContent: string;
+        employe: {
+            id: number;
+            nom: string;
+            prenom: string;
+            matricule: string;
+        };
+    }>;
+    getEmployeByQrCode(qrContent: string): Promise<{
+        id: number;
+        nom: string;
+        email: string | null;
+        estActif: boolean;
+        entrepriseId: number;
+        matricule: string;
+        prenom: string;
+        telephone: string | null;
+        adresse: string | null;
+        dateEmbauche: Date;
+        statutEmploi: import("@prisma/client").$Enums.StatutEmploi;
+        typeContrat: import("@prisma/client").$Enums.TypeContrat;
+        typeSalaire: import("@prisma/client").$Enums.TypeSalaire;
+        salaireBase: import("@prisma/client/runtime/library").Decimal;
+        salaireHoraire: import("@prisma/client/runtime/library").Decimal | null;
+        tauxJournalier: import("@prisma/client/runtime/library").Decimal | null;
+        allocations: import("@prisma/client/runtime/library").Decimal;
+        deductions: import("@prisma/client/runtime/library").Decimal;
+        professionId: number | null;
+        qrCode: string | null;
+        qrCodeGenere: Date | null;
+        qrCodeImagePath: string | null;
+        totalPresences: number;
+        totalAbsences: number;
+        totalRetards: number;
+        heuresTravaillees: import("@prisma/client/runtime/library").Decimal;
+        dernierPointage: Date | null;
+    }>;
+    generateMultipleQrCodes(entrepriseId: number): Promise<{
+        [key: number]: any;
+    }>;
+    generateQrCodeWithFileSave(employeId: number): Promise<{
+        qrCode: string;
+        qrContent: string;
+        imagePath: string;
+        employe: {
+            id: number;
+            nom: string;
+            prenom: string;
+            matricule: string;
+        };
+    }>;
+    updatePresenceStats(employeId: number): Promise<{
+        totalPresences: number;
+        totalAbsences: number;
+        totalRetards: number;
+        totalHeures: number;
+        dernierPointage: Date | null;
+    }>;
+    getEmployeStats(employeId: number): Promise<{
+        employe: {
+            id: number | undefined;
+            nom: string | undefined;
+            prenom: string | undefined;
+            matricule: string | undefined;
+        };
+        statistiques: {
+            totalPresences: any;
+            totalAbsences: any;
+            totalRetards: any;
+            heuresTravaillees: any;
+            dernierPointage: any;
+        };
+    }>;
+    generateAllQrCodesForEntreprise(entrepriseId: number): Promise<{
+        [key: number]: any;
     }>;
 }
 //# sourceMappingURL=employeService.d.ts.map

@@ -11,7 +11,7 @@ export class paiementRepository {
         return mnprisma.paiement.create({ data });
     }
     async findById(id) {
-        return mnprisma.paiement.findUnique({ where: { id }, include: { bulletin: true, entreprise: true } });
+        return mnprisma.paiement.findUnique({ where: { id }, include: { bulletin: { include: { employe: true } }, entreprise: true } });
     }
     async findAll() {
         return mnprisma.paiement.findMany({ include: { bulletin: true, entreprise: true } });
@@ -20,14 +20,14 @@ export class paiementRepository {
         // Super Admin voit tous les paiements
         if (user.profil === 'SUPER_ADMIN') {
             return mnprisma.paiement.findMany({
-                include: { bulletin: true, entreprise: true }
+                include: { bulletin: { include: { employe: true } }, entreprise: true }
             });
         }
         // Admin d'Entreprise et Caissier voient seulement les paiements de leur entreprise
         if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
             return mnprisma.paiement.findMany({
                 where: { entrepriseId: user.entrepriseId },
-                include: { bulletin: true, entreprise: true }
+                include: { bulletin: { include: { employe: true } }, entreprise: true }
             });
         }
         // Autres rôles n'ont pas accès aux paiements

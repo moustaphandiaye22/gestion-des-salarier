@@ -1,0 +1,1 @@
+{"message":"Paiement mis à jour avec succès.","paiement":{"id":5,"montant":"495000","datePaiement":"2024-02-01T00:00:00.000Z","modePaiement":"CHEQUE","statut":"PAYE","reference":"CHQ-2024-001","bulletinId":2,"entrepriseId":1}}

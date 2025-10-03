@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardHeader, CardBody, Table, Button } from "../components/ui";
-import { cyclesPaieApi, bulletinsApi, paiementsApi, rapportsApi } from "../utils/api";
+import { Card, CardHeader, CardBody, Table, Button, Modal, Input, Select } from "../components/ui";
+import { cyclesPaieApi, bulletinsApi, paiementsApi, rapportsApi, employesApi } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { CreditCardIcon, DocumentIcon, ChartBarIcon } from "@heroicons/react/24/outline";
 
@@ -11,6 +11,11 @@ export default function CaissierDashboard() {
   const [rapports, setRapports] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedCycle, setSelectedCycle] = useState(null);
+  const [employees, setEmployees] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState("");
+  const [paymentLoading, setPaymentLoading] = useState(false);
   const { user } = useAuth();
 
   async function loadData() {
@@ -45,9 +50,25 @@ export default function CaissierDashboard() {
     loadData();
   }, []);
 
+  useEffect(() => {
+    if (showPaymentModal && selectedCycle) {
+      loadEmployeesForCycle();
+    }
+  }, [showPaymentModal, selectedCycle]);
+
+  async function loadEmployeesForCycle() {
+    try {
+      const employeesData = await employesApi.list();
+      setEmployees(employeesData);
+    } catch (err) {
+      setError(err?.response?.data?.message || err.message);
+    }
+  }
+
   async function handlePayCycle(cycleId) {
-    // Navigate to payment page or open payment modal
-    alert(`Paiement pour le cycle ${cycleId} initié (fonctionnalité à implémenter)`);
+    // Open employee selection modal for payment
+    setSelectedCycle(cycleId);
+    setShowPaymentModal(true);
   }
 
   async function handleDownloadReport(rapportId) {
@@ -64,6 +85,42 @@ export default function CaissierDashboard() {
     } catch (err) {
       setError(err?.response?.data?.message || err.message);
     }
+  }
+
+  async function handleCreatePayment() {
+    if (!selectedEmployee) {
+      setError("Veuillez sélectionner un employé");
+      return;
+    }
+
+    setPaymentLoading(true);
+    try {
+      await paiementsApi.create({
+        cycleId: selectedCycle,
+        employeId: selectedEmployee,
+        entrepriseId: user.entrepriseId,
+        utilisateurId: user.id,
+        modePaiement: "VIREMENT", // Default payment method
+        datePaiement: new Date().toISOString()
+      });
+
+      // Close modal and refresh data
+      setShowPaymentModal(false);
+      setSelectedEmployee("");
+      setSelectedCycle(null);
+      await loadData();
+    } catch (err) {
+      setError(err?.response?.data?.message || err.message);
+    } finally {
+      setPaymentLoading(false);
+    }
+  }
+
+  function handleCloseModal() {
+    setShowPaymentModal(false);
+    setSelectedEmployee("");
+    setSelectedCycle(null);
+    setError(null);
   }
 
   return (
@@ -216,6 +273,50 @@ export default function CaissierDashboard() {
         </div>
 
         {loading && <p className="mt-8 text-sm text-gray-600 text-center">Chargement...</p>}
+
+        {/* Payment Modal */}
+        <Modal
+          isOpen={showPaymentModal}
+          onClose={handleCloseModal}
+          title="Créer un paiement"
+        >
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Sélectionner un employé
+              </label>
+              <Select
+                value={selectedEmployee}
+                onChange={(e) => setSelectedEmployee(e.target.value)}
+                className="w-full"
+              >
+                <option value="">Choisir un employé...</option>
+                {employees.map((employee) => (
+                  <option key={employee.id} value={employee.id}>
+                    {employee.prenom} {employee.nom} - {employee.profession?.nom}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-4">
+              <Button
+                variant="secondary"
+                onClick={handleCloseModal}
+                disabled={paymentLoading}
+              >
+                Annuler
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleCreatePayment}
+                disabled={paymentLoading || !selectedEmployee}
+              >
+                {paymentLoading ? "Création..." : "Créer le paiement"}
+              </Button>
+            </div>
+          </div>
+        </Modal>
       </div>
     </main>
   );

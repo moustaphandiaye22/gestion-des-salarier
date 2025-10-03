@@ -15,6 +15,16 @@ export class bulletinRepository implements InterfaceRepository<Bulletin> {
   return mnprisma.bulletin.findMany({ where: { cycleId }, include: { employe: true, cycle: true, paiements: true } });
   }
 
+  async findByEmployeeAndCycle(employeId: number, cycleId: number): Promise<Bulletin | null> {
+    return mnprisma.bulletin.findFirst({
+      where: {
+        employeId,
+        cycleId
+      },
+      include: { employe: true, cycle: true, paiements: true }
+    });
+  }
+
   async setStatutPaiement(id: number, statutPaiement: StatutPaiement): Promise<Bulletin> {
     return mnprisma.bulletin.update({ where: { id }, data: { statutPaiement } });
   }

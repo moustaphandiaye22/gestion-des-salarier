@@ -10,6 +10,7 @@ export declare class JournalAuditService {
         dateAction: Date;
         utilisateurId: number | null;
         paiementId: number | null;
+        pointageId: number | null;
         cyclePaieId: number | null;
     }>;
     getJournalAudit(id: number): Promise<{
@@ -22,6 +23,7 @@ export declare class JournalAuditService {
         dateAction: Date;
         utilisateurId: number | null;
         paiementId: number | null;
+        pointageId: number | null;
         cyclePaieId: number | null;
     } | null>;
     getAllJournalAudits(user?: any): Promise<{
@@ -34,6 +36,7 @@ export declare class JournalAuditService {
         dateAction: Date;
         utilisateurId: number | null;
         paiementId: number | null;
+        pointageId: number | null;
         cyclePaieId: number | null;
     }[]>;
     updateJournalAudit(id: number, data: any): Promise<{
@@ -46,6 +49,7 @@ export declare class JournalAuditService {
         dateAction: Date;
         utilisateurId: number | null;
         paiementId: number | null;
+        pointageId: number | null;
         cyclePaieId: number | null;
     }>;
     deleteJournalAudit(id: number): Promise<void>;

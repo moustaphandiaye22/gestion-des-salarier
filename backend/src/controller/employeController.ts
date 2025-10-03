@@ -4,6 +4,8 @@ import { SalaryCalculationService } from '../service/salaryCalculationService.js
 import { ExportService } from '../service/exportService.js';
 import { employeSchema } from '../validators/employe.js';
 import * as XLSX from 'xlsx';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 import multer from 'multer';
 
 const employeService = new EmployeService();
@@ -151,6 +153,132 @@ export class EmployeController {
       res.send(buffer);
     } catch (err: any) {
       res.status(500).json({ error: `Échec de l'export du modèle : ${err.message}` });
+    }
+  }
+
+  async generateQrCode(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const employeId = Number(id);
+
+      if (isNaN(employeId)) {
+        return res.status(400).json({ error: 'ID employé invalide.' });
+      }
+
+      const result = await employeService.generateQrCodeWithFileSave(employeId);
+      res.json({
+        message: 'QR code généré avec succès.',
+        ...result
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: `Impossible de générer le QR code : ${err.message}` });
+    }
+  }
+
+  async regenerateQrCode(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const employeId = Number(id);
+
+      if (isNaN(employeId)) {
+        return res.status(400).json({ error: 'ID employé invalide.' });
+      }
+
+      const result = await employeService.regenerateQrCode(employeId);
+      res.json({
+        message: 'QR code régénéré avec succès.',
+        ...result
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: `Impossible de régénérer le QR code : ${err.message}` });
+    }
+  }
+
+  async getEmployeStats(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const employeId = Number(id);
+
+      if (isNaN(employeId)) {
+        return res.status(400).json({ error: 'ID employé invalide.' });
+      }
+
+      const result = await employeService.getEmployeStats(employeId);
+      res.json({
+        message: 'Statistiques récupérées avec succès.',
+        ...result
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: `Impossible de récupérer les statistiques : ${err.message}` });
+    }
+  }
+
+  async updatePresenceStats(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const employeId = Number(id);
+
+      if (isNaN(employeId)) {
+        return res.status(400).json({ error: 'ID employé invalide.' });
+      }
+
+      const result = await employeService.updatePresenceStats(employeId);
+      res.json({
+        message: 'Statistiques de présence mises à jour avec succès.',
+        statistiques: result
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: `Impossible de mettre à jour les statistiques : ${err.message}` });
+    }
+  }
+
+  async generateAllQrCodes(req: Request, res: Response) {
+    try {
+      const { entrepriseId } = req.params;
+      const id = Number(entrepriseId);
+
+      if (isNaN(id)) {
+        return res.status(400).json({ error: 'ID entreprise invalide.' });
+      }
+
+      const result = await employeService.generateAllQrCodesForEntreprise(id);
+      res.json({
+        message: 'Génération des QR codes terminée.',
+        results: result
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: `Impossible de générer les QR codes : ${err.message}` });
+    }
+  }
+
+  async getQrCodeImage(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const employeId = Number(id);
+
+      if (isNaN(employeId)) {
+        return res.status(400).json({ error: 'ID employé invalide.' });
+      }
+
+      const employe = await employeService.getEmploye(employeId);
+      if (!employe) {
+        return res.status(404).json({ error: 'Employé non trouvé.' });
+      }
+
+      if (!(employe as any).qrCodeImagePath) {
+        return res.status(404).json({ error: 'QR code non généré pour cet employé.' });
+      }
+
+      const imagePath = (employe as any).qrCodeImagePath;
+      const fullPath = path.join(process.cwd(), 'assets', imagePath);
+
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+
+      const imageBuffer = await fs.readFile(fullPath);
+      res.send(imageBuffer);
+    } catch (err: any) {
+      res.status(500).json({ error: `Impossible de récupérer l'image QR code : ${err.message}` });
     }
   }
 }

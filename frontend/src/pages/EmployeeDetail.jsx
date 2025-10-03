@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardBody, Button, ConfirmDialog } from "../components/ui";
-import { employesApi, paiementsApi } from "../utils/api";
+import { employesApi, paiementsApi, qrcodesApi } from "../utils/api";
 import { formatCFA } from "../utils/format";
-import { PencilSquareIcon, TrashIcon, ArrowLeftIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon, TrashIcon, ArrowLeftIcon, CurrencyDollarIcon, QrCodeIcon, ChartBarIcon, ClockIcon } from "@heroicons/react/24/outline";
 
 import { useToast } from "../context/ToastContext";
 
@@ -14,9 +14,44 @@ export default function EmployeeDetail() {
   const [employee, setEmployee] = useState(null);
   const [latestBulletin, setLatestBulletin] = useState(null);
   const [payments, setPayments] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [qrCode, setQrCode] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [toDelete, setToDelete] = useState(null);
+
+  async function downloadQrCode() {
+    if (!qrCode || !qrCode.hasQrCode) return;
+
+    try {
+      const qrImageBlob = await qrcodesApi.getQrCodeImage(id);
+      const qrImageUrl = URL.createObjectURL(qrImageBlob);
+
+      const link = document.createElement('a');
+      link.href = qrImageUrl;
+      link.download = `qr-code-${employee.prenom}-${employee.nom}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      URL.revokeObjectURL(qrImageUrl);
+      showSuccess('Succès', 'QR code téléchargé avec succès');
+    } catch (err) {
+      console.error('Erreur lors du téléchargement du QR code:', err);
+      showError('Erreur', 'Impossible de télécharger le QR code');
+    }
+  }
+
+  async function generateQrCode() {
+    try {
+      await qrcodesApi.generateQrCode(id);
+      showSuccess('Succès', 'QR code généré avec succès');
+      await loadQrCode(); // Recharger le QR code
+    } catch (err) {
+      console.error('Erreur lors de la génération du QR code:', err);
+      showError('Erreur', err?.response?.data?.error || 'Impossible de générer le QR code');
+    }
+  }
 
   async function loadEmployee() {
     try {
@@ -27,13 +62,8 @@ export default function EmployeeDetail() {
         const bulletin = await employesApi.getLatestBulletin(id);
         setLatestBulletin(bulletin);
       } catch (bulletinErr) {
-        // If no bulletin exists (404), just set to null - not an error
-        if (bulletinErr?.response?.status === 404) {
-          setLatestBulletin(null);
-        } else {
-          // Re-throw other errors
-          throw bulletinErr;
-        }
+        // If no bulletin exists or other errors, just set to null - not an error for employee loading
+        setLatestBulletin(null);
       }
     } catch (err) {
       setError(err?.response?.data?.message || err.message);
@@ -55,10 +85,54 @@ export default function EmployeeDetail() {
     }
   }
 
+  async function loadStats() {
+    try {
+      // Simulation des statistiques - à remplacer par l'appel réel
+      // const statsData = await employesApi.getStats(id);
+      // setStats(statsData.statistiques);
+
+      // Données de simulation
+      setStats({
+        totalPresences: 45,
+        totalAbsences: 2,
+        totalRetards: 3,
+        heuresTravaillees: 180.5,
+        dernierPointage: new Date().toISOString()
+      });
+    } catch (err) {
+      console.error("Error loading stats:", err);
+      setStats(null);
+    }
+  }
+
+  async function loadQrCode() {
+    try {
+      // Récupérer les informations du QR code
+      const qrInfo = await qrcodesApi.getQrCodeInfo(id);
+
+      if (qrInfo.employe.hasQrCode) {
+        // Récupérer l'image du QR code depuis le serveur
+        const qrImageBlob = await qrcodesApi.getQrCodeImage(id);
+        const qrImageUrl = URL.createObjectURL(qrImageBlob);
+
+        setQrCode({
+          qrCode: qrImageUrl,
+          qrContent: qrInfo.employe.qrCode || 'Non disponible',
+          hasQrCode: true
+        });
+      } else {
+        setQrCode({ hasQrCode: false });
+      }
+    } catch (err) {
+      console.error("Error loading QR code:", err);
+      setQrCode({ hasQrCode: false });
+    }
+  }
+
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      await Promise.all([loadEmployee(), loadPayments()]);
+      await Promise.all([loadEmployee(), loadPayments(), loadStats(), loadQrCode()]);
       setLoading(false);
     }
     loadData();
@@ -147,6 +221,50 @@ export default function EmployeeDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Employee Information */}
           <div className="lg:col-span-2 space-y-6">
+
+            {/* QR Code Section */}
+            <Card>
+              <CardHeader title="QR Code de pointage" />
+              <CardBody>
+                {qrCode && qrCode.hasQrCode ? (
+                  <div className="text-center space-y-4">
+                    <div className="inline-block p-4 bg-white border rounded-lg">
+                      <img
+                        src={qrCode.qrCode}
+                        alt="QR Code employé"
+                        className="w-32 h-32"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 mb-2">QR Code personnel</p>
+                      <p className="text-xs text-gray-500 break-all font-mono">
+                        {qrCode.qrContent}
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={downloadQrCode}
+                      className="flex items-center gap-2"
+                    >
+                      <QrCodeIcon className="h-4 w-4" />
+                      Télécharger QR Code
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <QrCodeIcon className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <p className="text-gray-600 mb-4">Aucun QR code généré</p>
+                    <Button
+                      onClick={generateQrCode}
+                      className="flex items-center gap-2"
+                    >
+                      <QrCodeIcon className="h-4 w-4" />
+                      Générer QR Code
+                    </Button>
+                  </div>
+                )}
+              </CardBody>
+            </Card>
             {/* Basic Information */}
             <Card>
               <CardHeader title="Informations personnelles" />
@@ -258,6 +376,61 @@ export default function EmployeeDetail() {
               </CardBody>
             </Card>
           </div>
+
+          {/* Statistics de présence */}
+          {stats && (
+            <Card>
+              <CardHeader title="Statistiques de présence" />
+              <CardBody>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-gray-700">Présences</span>
+                    </div>
+                    <span className="text-lg font-semibold text-green-600">
+                      {stats.totalPresences}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-gray-700">Absences</span>
+                    </div>
+                    <span className="text-lg font-semibold text-red-600">
+                      {stats.totalAbsences}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-gray-700">Retards</span>
+                    </div>
+                    <span className="text-lg font-semibold text-yellow-600">
+                      {stats.totalRetards}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2 border-t">
+                    <div className="flex items-center gap-2">
+                      <ClockIcon className="h-4 w-4 text-blue-500" />
+                      <span className="text-sm font-medium text-gray-700">Heures travaillées</span>
+                    </div>
+                    <span className="text-lg font-semibold text-blue-600">
+                      {stats.heuresTravaillees}h
+                    </span>
+                  </div>
+                  {stats.dernierPointage && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-gray-700">Dernier pointage</span>
+                      <span className="text-sm text-gray-600">
+                        {new Date(stats.dernierPointage).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </CardBody>
+            </Card>
+          )}
 
           {/* Payment Summary */}
           <div className="space-y-6">
