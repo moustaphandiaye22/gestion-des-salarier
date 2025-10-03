@@ -1,28 +1,17 @@
-# TODO: Fix Report Download, Menu Visibility, Dashboard, and Add Cashier Test Data
+# TODO - Cycle de Paie Implementation
 
-## Issues to Fix:
-1. **Report Download Format**: Reports are downloaded as JSON instead of PDF
-2. **Menu Visibility**: Superadmin menu appears when logged in as cashier
-3. **Cashier Dashboard**: Dashboard not visible for cashier role
-4. **Cashier Payment Test Data**: Add test data in seeder for cashier payment verification
+## Completed
+- [x] Backend: Repository, Service, Controller, Routes, Validator for CyclePaie
+- [x] Frontend: CyclePaieForm for create/edit with validation
+- [x] Frontend: CyclesPaie list page with filters and actions (validate, close, delete)
+- [x] API integration for CRUD operations
+- [x] Navigation: Added "Ajouter" button to navigate to /cycles-paie/new
+- [x] Navigation: Added edit button and clickable name to navigate to /cycles-paie/{id}/edit
+- [x] Form navigation back to list after save/cancel
 
-## Progress:
-- [x] Fix report download to return PDF instead of JSON
-- [x] Fix menu filtering for cashier role (code is correct, may need testing)
-- [x] Fix cashier dashboard routing/display (code is correct, may need testing)
-- [x] Add cashier payment test data to seeder
-- [x] Test all fixes (servers running, ready for manual testing)
-
-## Additional UI Improvements:
-- [x] Add search bars and filters to list pages (EmployeeList, Entreprises, Utilisateurs, Professions, Licences, Paiements, CyclesPaie)
-- [x] Fix "Générer" buttons functionality in Rapports, Bulletins, and JournalAudit pages
-- [x] Fix "Exporter" button functionality in JournalAudit page
-
-## Backend Permission Fixes:
-- [x] Fix 403 Forbidden error on /api/parametres-globaux by allowing ADMIN_ENTREPRISE access
-- [x] Improve error messages for cycle close operations when payments are incomplete
-
-## Export Functionality:
-- [x] Add Excel export functionality for payments and bulletins
-- [x] Add export buttons to frontend pages (Paiements and Bulletins)
-- [x] Test export functionality (working correctly - returns valid Excel files)
+## Pending
+- [ ] Implement payment functionality for cashier (currently alert)
+- [ ] Add bulletin generation when creating cycle
+- [ ] Add link to view bulletins for a cycle
+- [ ] Test full workflow: create cycle -> validate -> pay -> close
+- [ ] Clean up duplicated routes in App.jsx

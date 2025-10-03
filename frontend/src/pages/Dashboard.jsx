@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Chart from "react-apexcharts";
-import { Card, CardHeader, CardBody, Button } from "../components/ui";
+import { Card, CardHeader, CardBody } from "../components/ui";
 import { employesApi, bulletinsApi, paiementsApi, cyclesPaieApi } from "../utils/api";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
 function StatCard({ title, value, subtitle }) {
   return (
@@ -169,15 +168,11 @@ export default function Dashboard() {
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
-            <p className="mt-1 text-gray-600 text-sm">Vue d'ensemble de l'activité. Interface professionnelle, sobre et sans dégradés.</p>
+            <p className="mt-1 text-gray-600 text-sm">Vue d'ensemble de l'activité salariale.</p>
           </div>
-          <Button onClick={loadData} disabled={loading} className="flex items-center gap-2">
-            <ArrowPathIcon className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
-            Actualiser
-          </Button>
         </div>
 
         {error && (

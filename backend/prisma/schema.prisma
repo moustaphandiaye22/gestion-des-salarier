@@ -31,6 +31,7 @@ model Entreprise {
    // Relations
    utilisateurs   Utilisateur[]
    employes       Employe[]
+   pointages      Pointage[]
    cyclesPaie     CyclePaie[]
    paiements      Paiement[]
    rapports       Rapport[]
@@ -67,64 +68,107 @@ model Utilisateur {
  }
 
 model Employe {
+   id            Int               @id @default(autoincrement())
+   matricule     String            @db.VarChar(50)
+   prenom        String            @db.VarChar(100)
+   nom           String            @db.VarChar(100)
+   email         String?           @db.VarChar(100)
+   telephone     String?           @db.VarChar(20)
+   adresse       String?           @db.VarChar(255)
+   dateEmbauche  DateTime
+   statutEmploi  StatutEmploi
+   typeContrat   TypeContrat
+   typeSalaire   TypeSalaire       @default(MENSUEL)
+   salaireBase   Decimal           @db.Decimal(15, 2)
+   salaireHoraire Decimal?         @db.Decimal(15, 2) // Pour les honoraires
+   tauxJournalier Decimal?         @db.Decimal(15, 2) // Pour les journaliers
+   allocations   Decimal           @default(0.0) @db.Decimal(15, 2)
+   deductions    Decimal           @default(0.0) @db.Decimal(15, 2)
+   professionId  Int?
+   estActif      Boolean           @default(true)
+   qrCode        String?           @unique @db.VarChar(255) // Code QR unique pour le pointage
+   qrCodeGenere  DateTime?         // Date de génération du QR code
+   qrCodeImagePath String?         @db.VarChar(500) // Chemin vers l'image QR code sauvegardée
+   entrepriseId  Int
+
+   // Statistiques de présence (calculées automatiquement)
+   totalPresences Int              @default(0)
+   totalAbsences  Int              @default(0)
+   totalRetards   Int              @default(0)
+   heuresTravaillees Decimal        @default(0.0) @db.Decimal(10, 2)
+   dernierPointage DateTime?
+
+   // Relations
+   entreprise    Entreprise        @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+   profession    Profession?       @relation(fields: [professionId], references: [id])
+   bulletins     Bulletin[]
+   pointages     Pointage[]
+   journauxAudit JournalAudit[]
+
+   @@unique([entrepriseId, matricule])
+   @@index([entrepriseId, estActif])
+   @@index([statutEmploi])
+   @@index([typeContrat])
+   @@index([professionId])
+   @@index([qrCode])
+   @@index([dernierPointage])
+   @@map("employees")
+ }
+
+model Pointage {
   id            Int               @id @default(autoincrement())
-  matricule     String            @db.VarChar(50)
-  prenom        String            @db.VarChar(100)
-  nom           String            @db.VarChar(100)
-  email         String?           @db.VarChar(100)
-  telephone     String?           @db.VarChar(20)
-  adresse       String?           @db.VarChar(255)
-  dateEmbauche  DateTime
-  statutEmploi  StatutEmploi
-  typeContrat   TypeContrat
-  typeSalaire   TypeSalaire       @default(MENSUEL)
-  salaireBase   Decimal           @db.Decimal(15, 2)
-  salaireHoraire Decimal?         @db.Decimal(15, 2) // Pour les honoraires
-  tauxJournalier Decimal?         @db.Decimal(15, 2) // Pour les journaliers
-  allocations   Decimal           @default(0.0) @db.Decimal(15, 2)
-  deductions    Decimal           @default(0.0) @db.Decimal(15, 2)
-  professionId  Int?
-  estActif      Boolean           @default(true)
+  datePointage  DateTime
+  heureEntree   DateTime?
+  heureSortie   DateTime?
+  dureeTravail  Decimal?          @db.Decimal(8, 2) // Durée en heures
+  typePointage  TypePointage      @default(PRESENCE)
+  statut        StatutPointage    @default(PRESENT)
+  lieu          String?           @db.VarChar(100)
+  commentaire   String?           @db.Text
+  ipAddress     String?           @db.VarChar(45)
+  localisation  Json?             // Coordonnées GPS si disponibles
+  employeId     Int
   entrepriseId  Int
+  dateCreation  DateTime          @default(now())
+  dateModification DateTime      @updatedAt
 
   // Relations
+  employe       Employe           @relation(fields: [employeId], references: [id], onDelete: Cascade)
   entreprise    Entreprise        @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
-  profession    Profession?       @relation(fields: [professionId], references: [id])
-  bulletins     Bulletin[]
   journauxAudit JournalAudit[]
 
-  @@unique([entrepriseId, matricule])
-  @@index([entrepriseId, estActif])
-  @@index([statutEmploi])
-  @@index([typeContrat])
-  @@index([professionId])
-  @@map("employees")
+  @@index([employeId, datePointage])
+  @@index([entrepriseId, datePointage])
+  @@index([datePointage])
+  @@index([typePointage])
+  @@index([statut])
+  @@map("attendance")
 }
 
 model Bulletin {
-  id              Int               @id @default(autoincrement())
-  numeroBulletin  String            @unique @db.VarChar(50)
-  periodeDebut    DateTime
-  periodeFin      DateTime
-  salaireBase     Decimal           @db.Decimal(15, 2)
-  allocations     Decimal           @default(0.0) @db.Decimal(15, 2)
-  deductions      Decimal           @default(0.0) @db.Decimal(15, 2)
-  totalAPayer     Decimal           @db.Decimal(15, 2)
-  statutPaiement  StatutPaiement    @default(EN_ATTENTE)
-  dateGeneration  DateTime          @default(now())
-  cycleId         Int
-  employeId       Int
+   id              Int               @id @default(autoincrement())
+   numeroBulletin  String            @unique @db.VarChar(50)
+   periodeDebut    DateTime
+   periodeFin      DateTime
+   salaireBase     Decimal           @db.Decimal(15, 2)
+   allocations     Decimal           @default(0.0) @db.Decimal(15, 2)
+   deductions      Decimal           @default(0.0) @db.Decimal(15, 2)
+   totalAPayer     Decimal           @db.Decimal(15, 2)
+   statutPaiement  StatutPaiement    @default(EN_ATTENTE)
+   dateGeneration  DateTime          @default(now())
+   cycleId         Int
+   employeId       Int
 
-  // Relations
-  cycle           CyclePaie         @relation(fields: [cycleId], references: [id], onDelete: Cascade)
-  employe         Employe           @relation(fields: [employeId], references: [id], onDelete: NoAction)
-  paiements       Paiement[]
-  journauxAudit   JournalAudit[]
+   // Relations
+   cycle           CyclePaie         @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+   employe         Employe           @relation(fields: [employeId], references: [id], onDelete: NoAction)
+   paiements       Paiement[]
+   journauxAudit   JournalAudit[]
 
-  @@unique([cycleId, employeId])
-  @@index([statutPaiement])
-  @@map("payslips")
-}
+   @@unique([cycleId, employeId])
+   @@index([statutPaiement])
+   @@map("payslips")
+ }
 
 model CyclePaie {
   id            Int               @id @default(autoincrement())
@@ -181,32 +225,35 @@ model Rapport {
 }
 
 model JournalAudit {
-  id            Int               @id @default(autoincrement())
-  action        ActionAudit
-  details       Json
-  dateAction    DateTime          @default(now())
-  utilisateurId Int?
-  entrepriseId  Int?
-  employeId     Int?
-  bulletinId    Int?
-  paiementId    Int?
-    cyclePaieId   Int?
+   id            Int               @id @default(autoincrement())
+   action        ActionAudit
+   details       Json
+   dateAction    DateTime          @default(now())
+   utilisateurId Int?
+   entrepriseId  Int?
+   employeId     Int?
+   bulletinId    Int?
+   paiementId    Int?
+   pointageId    Int?
+   cyclePaieId   Int?
 
-  // Relations
-  utilisateur   Utilisateur?      @relation(fields: [utilisateurId], references: [id], onDelete: SetNull)
-  entreprise    Entreprise?       @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
-  employe       Employe?          @relation(fields: [employeId], references: [id], onDelete: SetNull)
-  bulletin      Bulletin?         @relation(fields: [bulletinId], references: [id], onDelete: SetNull)
-  paiement      Paiement?         @relation(fields: [paiementId], references: [id], onDelete: SetNull)
-    cyclePaie     CyclePaie?        @relation(fields: [cyclePaieId], references: [id], onDelete: SetNull)
+   // Relations
+   utilisateur   Utilisateur?      @relation(fields: [utilisateurId], references: [id], onDelete: SetNull)
+   entreprise    Entreprise?       @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+   employe       Employe?          @relation(fields: [employeId], references: [id], onDelete: SetNull)
+   bulletin      Bulletin?         @relation(fields: [bulletinId], references: [id], onDelete: SetNull)
+   paiement      Paiement?         @relation(fields: [paiementId], references: [id], onDelete: SetNull)
+   pointage      Pointage?         @relation(fields: [pointageId], references: [id], onDelete: SetNull)
+   cyclePaie     CyclePaie?        @relation(fields: [cyclePaieId], references: [id], onDelete: SetNull)
 
-    @@index([utilisateurId])
-    @@index([entrepriseId])
-    @@index([employeId])
-    @@index([bulletinId])
-    @@index([paiementId])
-    @@map("audit_logs")
-}
+   @@index([utilisateurId])
+   @@index([entrepriseId])
+   @@index([employeId])
+   @@index([bulletinId])
+   @@index([paiementId])
+   @@index([pointageId])
+   @@map("audit_logs")
+ }
 
 model TableauDeBord {
    id            Int               @id @default(autoincrement())
@@ -546,7 +593,27 @@ enum StatutLicence {
  }
 
  enum StatutExport {
-   EN_COURS
-   TERMINE
-   ECHEC
+     EN_COURS
+     TERMINE
+     ECHEC
+   }
+ 
+ enum TypePointage {
+   PRESENCE
+   ABSENCE
+   CONGE
+   MALADIE
+   MISSION
+   FORMATION
+   TELETRAVAIL
+   HEURE_SUPPLEMENTAIRE
+ }
+ 
+ enum StatutPointage {
+   PRESENT
+   ABSENT
+   EN_ATTENTE
+   VALIDE
+   REJETE
+   MODIFIE
  }

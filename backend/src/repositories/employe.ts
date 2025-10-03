@@ -75,4 +75,11 @@ export class employeRepository implements InterfaceRepository<Employe> {
     await mnprisma.employe.delete({ where: { id } });
   }
 
+  async getEmployePointages(employeId: number): Promise<any[]> {
+    return mnprisma.pointage.findMany({
+      where: { employeId },
+      orderBy: { datePointage: 'desc' }
+    });
+  }
+
 };

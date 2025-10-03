@@ -39,6 +39,8 @@ export function Button({ variant = "solid", className = "", ...props }) {
     outline: "text-gray-900 ring-1 ring-gray-300 hover:bg-gray-100",
     ghost: "text-gray-700 hover:bg-gray-100",
     danger: "bg-red-600 text-white hover:bg-red-500",
+    primary: "bg-blue-600 text-white hover:bg-blue-700",
+    secondary: "bg-gray-600 text-white hover:bg-gray-700",
   };
   return React.createElement("button", { className: cx(base, variants[variant], className), ...props });
 }
@@ -174,6 +176,37 @@ export function Pagination({ page, pageSize, total, onChange }) {
   );
 }
 
+export function Modal({ isOpen, onClose, title, children }) {
+  if (!isOpen) return null;
+
+  return React.createElement(
+    "div",
+    { className: "fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" },
+    React.createElement(
+      "div",
+      { className: "w-full max-w-md rounded-lg bg-white ring-1 ring-gray-200" },
+      React.createElement(
+        "div",
+        { className: "flex items-center justify-between p-4 border-b border-gray-200" },
+        React.createElement("h3", { className: "text-base font-semibold text-gray-900" }, title),
+        React.createElement(
+          "button",
+          {
+            onClick: onClose,
+            className: "text-gray-400 hover:text-gray-600 transition-colors"
+          },
+          React.createElement(
+            "svg",
+            { className: "w-5 h-5", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
+            React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M6 18L18 6M6 6l12 12" })
+          )
+        )
+      ),
+      React.createElement("div", { className: "p-4" }, children)
+    )
+  );
+}
+
 export function ConfirmDialog({ open, title, message, onCancel, onConfirm }) {
   if (!open) return null;
   return React.createElement(
@@ -190,6 +223,33 @@ export function ConfirmDialog({ open, title, message, onCancel, onConfirm }) {
         React.createElement(Button, { variant: "outline", onClick: onCancel }, "Annuler"),
         React.createElement(Button, { variant: "danger", onClick: onConfirm }, "Confirmer")
       )
+    )
+  );
+}
+
+export function Textarea({ label, error, className = "", rows = 3, ...props }) {
+  return React.createElement(
+    "label",
+    { className: "block" },
+    label && React.createElement("span", { className: "text-sm font-medium text-gray-700 mb-1 block" }, label),
+    React.createElement("textarea", {
+      className: cx(
+        "block w-full rounded-lg border px-3 py-2.5 text-sm transition-all duration-200",
+        "bg-white shadow-sm",
+        "placeholder:text-gray-400",
+        "focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
+        "disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed",
+        error && "border-red-300 focus:border-red-500 focus:ring-red-500/20",
+        className
+      ),
+      rows,
+      ...props,
+    }),
+    error && React.createElement("span", { className: "mt-1.5 text-xs text-red-600 flex items-center gap-1" },
+      React.createElement("svg", { className: "w-3 h-3", fill: "currentColor", viewBox: "0 0 20 20" },
+        React.createElement("path", { fillRule: "evenodd", d: "M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z", clipRule: "evenodd" })
+      ),
+      error
     )
   );
 }

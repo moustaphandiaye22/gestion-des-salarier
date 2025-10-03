@@ -7,6 +7,7 @@ router.post('/', requireCashierOrAdmin, bulletinController.create);
 router.get('/', requireCashierOrAdmin, bulletinController.getAll);
 router.get('/:id', requireCashierOrAdmin, bulletinController.getById);
 router.get('/:id/pdf', requireCashierOrAdmin, bulletinController.generatePDF);
+router.get('/export/excel', requireCashierOrAdmin, bulletinController.exportToExcel);
 router.put('/:id', requireCashierOrAdmin, bulletinController.update);
 router.delete('/:id', requireCashierOrAdmin, bulletinController.delete);
 export default router;

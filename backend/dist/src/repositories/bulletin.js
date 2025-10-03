@@ -7,6 +7,15 @@ export class bulletinRepository {
     async findByCycle(cycleId) {
         return mnprisma.bulletin.findMany({ where: { cycleId }, include: { employe: true, cycle: true, paiements: true } });
     }
+    async findByEmployeeAndCycle(employeId, cycleId) {
+        return mnprisma.bulletin.findFirst({
+            where: {
+                employeId,
+                cycleId
+            },
+            include: { employe: true, cycle: true, paiements: true }
+        });
+    }
     async setStatutPaiement(id, statutPaiement) {
         return mnprisma.bulletin.update({ where: { id }, data: { statutPaiement } });
     }

@@ -12,5 +12,6 @@ export declare class employeRepository implements InterfaceRepository<Employe> {
     findAllByUser(user: any, entrepriseId?: number): Promise<Employe[]>;
     update(id: number, data: Partial<Omit<Employe, "id">>): Promise<Employe>;
     delete(id: number): Promise<void>;
+    getEmployePointages(employeId: number): Promise<any[]>;
 }
 //# sourceMappingURL=employe.d.ts.map

@@ -19,5 +19,19 @@ router.put('/:id', requireAdminOrSuper, employeController.update);
 router.delete('/:id', requireAdminOrSuper, employeController.delete);
 // Obtenir le dernier bulletin d'un employé - admin entreprise ou super admin
 router.get('/:id/latest-bulletin', requireAdminOrSuper, employeController.getLatestBulletin);
+// Exporter le modèle Excel - admin entreprise ou super admin
+router.get('/export/template', requireAdminOrSuper, employeController.exportTemplate);
+// Générer QR code pour un employé - admin entreprise ou super admin
+router.post('/:id/generate-qr', requireAdminOrSuper, employeController.generateQrCode);
+// Régénérer QR code pour un employé - admin entreprise ou super admin
+router.post('/:id/regenerate-qr', requireAdminOrSuper, employeController.regenerateQrCode);
+// Obtenir les statistiques d'un employé - caissier, admin entreprise ou super admin
+router.get('/:id/statistiques', requireReadAccess, employeController.getEmployeStats);
+// Mettre à jour les statistiques de présence d'un employé - admin entreprise ou super admin
+router.post('/:id/update-stats', requireAdminOrSuper, employeController.updatePresenceStats);
+// Générer tous les QR codes d'une entreprise - admin entreprise ou super admin
+router.post('/entreprise/:entrepriseId/generate-all-qr', requireAdminOrSuper, employeController.generateAllQrCodes);
+// Obtenir l'image QR code d'un employé - caissier, admin entreprise ou super admin
+router.get('/:id/qr-image', requireReadAccess, employeController.getQrCodeImage);
 export default router;
 //# sourceMappingURL=employeRoutes.js.map

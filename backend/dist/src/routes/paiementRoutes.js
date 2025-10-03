@@ -13,6 +13,8 @@ router.get('/:id', requireCashierOrAdmin, paiementController.getById);
 router.get('/:id/receipt-pdf', requireCashierOrAdmin, paiementController.generateReceiptPDF);
 // Générer la liste des paiements PDF - caissier, admin entreprise ou super admin
 router.get('/list-pdf', requireCashierOrAdmin, paiementController.generatePaymentListPDF);
+// Exporter les paiements vers Excel - caissier, admin entreprise ou super admin
+router.get('/export/excel', requireCashierOrAdmin, paiementController.exportToExcel);
 // Mettre à jour un paiement - caissier, admin entreprise ou super admin
 router.put('/:id', requireCashierOrAdmin, paiementController.update);
 // Supprimer un paiement - caissier, admin entreprise ou super admin

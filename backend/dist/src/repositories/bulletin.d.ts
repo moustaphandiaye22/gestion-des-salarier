@@ -4,6 +4,7 @@ import type { InterfaceRepository } from './InterfaceRepository.js';
 export declare class bulletinRepository implements InterfaceRepository<Bulletin> {
     findByEmploye(employeId: number): Promise<Bulletin[]>;
     findByCycle(cycleId: number): Promise<Bulletin[]>;
+    findByEmployeeAndCycle(employeId: number, cycleId: number): Promise<Bulletin | null>;
     setStatutPaiement(id: number, statutPaiement: StatutPaiement): Promise<Bulletin>;
     create(data: Omit<Bulletin, "id">): Promise<Bulletin>;
     findById(id: number): Promise<Bulletin | null>;
@@ -14,6 +15,7 @@ export declare class bulletinRepository implements InterfaceRepository<Bulletin>
         salaireBase: Prisma.Decimal;
         allocations: Prisma.Decimal;
         deductions: Prisma.Decimal;
+        employeId: number;
         numeroBulletin: string;
         periodeDebut: Date;
         periodeFin: Date;
@@ -21,7 +23,6 @@ export declare class bulletinRepository implements InterfaceRepository<Bulletin>
         statutPaiement: import("@prisma/client").$Enums.StatutPaiement;
         dateGeneration: Date;
         cycleId: number;
-        employeId: number;
     }>;
     delete(id: number): Promise<void>;
 }

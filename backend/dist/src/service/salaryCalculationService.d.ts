@@ -28,15 +28,23 @@ export declare class SalaryCalculationService {
             allocations: import("@prisma/client/runtime/library").Decimal;
             deductions: import("@prisma/client/runtime/library").Decimal;
             professionId: number | null;
+            qrCode: string | null;
+            qrCodeGenere: Date | null;
+            qrCodeImagePath: string | null;
+            totalPresences: number;
+            totalAbsences: number;
+            totalRetards: number;
+            heuresTravaillees: import("@prisma/client/runtime/library").Decimal;
+            dernierPointage: Date | null;
         };
         cycle: {
             id: number;
             nom: string;
             entrepriseId: number;
+            statut: import("@prisma/client").$Enums.StatutCyclePaie;
             description: string | null;
             dateDebut: Date;
             dateFin: Date;
-            statut: import("@prisma/client").$Enums.StatutCyclePaie;
             statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
             frequence: import("@prisma/client").$Enums.FrequencePaie;
             createdAt: Date;
@@ -57,6 +65,7 @@ export declare class SalaryCalculationService {
         salaireBase: import("@prisma/client/runtime/library").Decimal;
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
+        employeId: number;
         numeroBulletin: string;
         periodeDebut: Date;
         periodeFin: Date;
@@ -64,7 +73,6 @@ export declare class SalaryCalculationService {
         statutPaiement: import("@prisma/client").$Enums.StatutPaiement;
         dateGeneration: Date;
         cycleId: number;
-        employeId: number;
     }) | null>;
     /**
      * Generate a unique payment reference
@@ -80,10 +88,10 @@ export declare class SalaryCalculationService {
                     id: number;
                     nom: string;
                     entrepriseId: number;
+                    statut: import("@prisma/client").$Enums.StatutCyclePaie;
                     description: string | null;
                     dateDebut: Date;
                     dateFin: Date;
-                    statut: import("@prisma/client").$Enums.StatutCyclePaie;
                     statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
                     frequence: import("@prisma/client").$Enums.FrequencePaie;
                     createdAt: Date;
@@ -95,8 +103,8 @@ export declare class SalaryCalculationService {
                 email: string | null;
                 telephone: string | null;
                 adresse: string | null;
-                description: string | null;
                 dateCreation: Date;
+                description: string | null;
                 logo: string | null;
                 estActive: boolean;
             };
@@ -120,16 +128,24 @@ export declare class SalaryCalculationService {
             allocations: import("@prisma/client/runtime/library").Decimal;
             deductions: import("@prisma/client/runtime/library").Decimal;
             professionId: number | null;
+            qrCode: string | null;
+            qrCodeGenere: Date | null;
+            qrCodeImagePath: string | null;
+            totalPresences: number;
+            totalAbsences: number;
+            totalRetards: number;
+            heuresTravaillees: import("@prisma/client/runtime/library").Decimal;
+            dernierPointage: Date | null;
         };
         entreprise: {
             cyclesPaie: {
                 id: number;
                 nom: string;
                 entrepriseId: number;
+                statut: import("@prisma/client").$Enums.StatutCyclePaie;
                 description: string | null;
                 dateDebut: Date;
                 dateFin: Date;
-                statut: import("@prisma/client").$Enums.StatutCyclePaie;
                 statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
                 frequence: import("@prisma/client").$Enums.FrequencePaie;
                 createdAt: Date;
@@ -141,8 +157,8 @@ export declare class SalaryCalculationService {
             email: string | null;
             telephone: string | null;
             adresse: string | null;
-            description: string | null;
             dateCreation: Date;
+            description: string | null;
             logo: string | null;
             estActive: boolean;
         };
@@ -167,15 +183,23 @@ export declare class SalaryCalculationService {
                 allocations: import("@prisma/client/runtime/library").Decimal;
                 deductions: import("@prisma/client/runtime/library").Decimal;
                 professionId: number | null;
+                qrCode: string | null;
+                qrCodeGenere: Date | null;
+                qrCodeImagePath: string | null;
+                totalPresences: number;
+                totalAbsences: number;
+                totalRetards: number;
+                heuresTravaillees: import("@prisma/client/runtime/library").Decimal;
+                dernierPointage: Date | null;
             };
             cycle: {
                 id: number;
                 nom: string;
                 entrepriseId: number;
+                statut: import("@prisma/client").$Enums.StatutCyclePaie;
                 description: string | null;
                 dateDebut: Date;
                 dateFin: Date;
-                statut: import("@prisma/client").$Enums.StatutCyclePaie;
                 statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
                 frequence: import("@prisma/client").$Enums.FrequencePaie;
                 createdAt: Date;
@@ -196,6 +220,7 @@ export declare class SalaryCalculationService {
             salaireBase: import("@prisma/client/runtime/library").Decimal;
             allocations: import("@prisma/client/runtime/library").Decimal;
             deductions: import("@prisma/client/runtime/library").Decimal;
+            employeId: number;
             numeroBulletin: string;
             periodeDebut: Date;
             periodeFin: Date;
@@ -203,16 +228,15 @@ export declare class SalaryCalculationService {
             statutPaiement: import("@prisma/client").$Enums.StatutPaiement;
             dateGeneration: Date;
             cycleId: number;
-            employeId: number;
         }) | null;
         currentCycle: {
             id: number;
             nom: string;
             entrepriseId: number;
+            statut: import("@prisma/client").$Enums.StatutCyclePaie;
             description: string | null;
             dateDebut: Date;
             dateFin: Date;
-            statut: import("@prisma/client").$Enums.StatutCyclePaie;
             statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
             frequence: import("@prisma/client").$Enums.FrequencePaie;
             createdAt: Date;

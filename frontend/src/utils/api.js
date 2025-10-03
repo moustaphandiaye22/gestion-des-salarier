@@ -188,7 +188,13 @@ function toQuery(params = {}) {
 export const employesApi = {
   list: (params) => api.get(`/api/employes${toQuery(params)}`).then((r) => r.data?.employes || r.data || []),
   get: (id) => api.get(`/api/employes/${id}`).then((r) => r.data?.employe || r.data || null),
-  getLatestBulletin: (employeeId) => api.get(`/api/employes/${employeeId}/latest-bulletin`).then((r) => r.data?.bulletin || r.data || null),
+  getLatestBulletin: (employeeId) => api.get(`/api/employes/${employeeId}/latest-bulletin`).then((r) => r.data?.bulletin || null).catch((err) => {
+    // Si 404, retourner null au lieu de throw
+    if (err.response && err.response.status === 404) {
+      return null;
+    }
+    throw err;
+  }),
   create: (payload) => api.post(`/api/employes`, payload).then((r) => r.data?.employe || r.data || null),
   bulkImport: (file) => {
     const formData = new FormData();
@@ -333,6 +339,65 @@ export const licencesApi = {
   remove: (id) => api.delete(`/api/licences/${id}`).then((r) => r.data),
   assignToEntreprise: (id, entrepriseId) => api.post(`/api/licences/${id}/assign`, { entrepriseId }).then((r) => r.data?.licence || r.data || null),
   revokeFromEntreprise: (id) => api.post(`/api/licences/${id}/revoke`).then((r) => r.data?.licence || r.data || null),
+};
+
+export const pointagesApi = {
+   list: (params) => api.get(`/api/pointages${toQuery(params)}`).then((r) => r.data?.pointages || r.data || []),
+   get: (id) => api.get(`/api/pointages/${id}`).then((r) => r.data?.pointage || r.data || null),
+   create: (payload) => api.post(`/api/pointages`, payload).then((r) => r.data?.pointage || r.data || null),
+   update: (id, payload) => api.put(`/api/pointages/${id}`, payload).then((r) => r.data?.pointage || r.data || null),
+   remove: (id) => api.delete(`/api/pointages/${id}`).then((r) => r.data),
+
+   // Pointages par employé
+   getByEmploye: (employeId) => api.get(`/api/pointages/employe/${employeId}`).then((r) => r.data?.pointages || r.data || []),
+   getByEmployeAndPeriode: (employeId, dateDebut, dateFin) =>
+     api.get(`/api/pointages/employe/${employeId}/periode?dateDebut=${dateDebut}&dateFin=${dateFin}`)
+       .then((r) => r.data?.pointages || r.data || []),
+
+   // Pointages par entreprise et période
+   getByEntrepriseAndDate: (entrepriseId, dateDebut, dateFin) =>
+     api.get(`/api/pointages/entreprise/${entrepriseId}/periode?dateDebut=${dateDebut}&dateFin=${dateFin}`)
+       .then((r) => r.data?.pointages || r.data || []),
+
+   // Pointages par type et statut
+   getByType: (type) => api.get(`/api/pointages/type/${type}`).then((r) => r.data?.pointages || r.data || []),
+   getByStatut: (statut) => api.get(`/api/pointages/statut/${statut}`).then((r) => r.data?.pointages || r.data || []),
+
+   // Actions de pointage rapide
+   pointerEntree: (payload) => api.post(`/api/pointages/entree`, payload).then((r) => r.data?.pointage || r.data || null),
+   pointerSortie: (payload) => api.post(`/api/pointages/sortie`, payload).then((r) => r.data?.pointage || r.data || null),
+
+   // Calculs et statistiques
+   calculateHeuresTravaillees: (employeId, dateDebut, dateFin) =>
+     api.get(`/api/pointages/employe/${employeId}/heures?dateDebut=${dateDebut}&dateFin=${dateFin}`)
+       .then((r) => r.data?.heuresTravaillees || 0),
+
+   getStatistiques: (entrepriseId, dateDebut, dateFin) =>
+     api.get(`/api/pointages/entreprise/${entrepriseId}/statistiques?dateDebut=${dateDebut}&dateFin=${dateFin}`)
+       .then((r) => r.data?.statistiques || {}),
+
+   // Import/Export
+   bulkCreate: (pointages) => api.post(`/api/pointages/bulk`, { pointages }).then((r) => r.data),
+
+   // Filtres avancés
+   filter: (params) => api.get(`/api/pointages/filter${toQuery(params)}`).then((r) => r.data?.pointages || r.data || []),
+};
+
+export const qrcodesApi = {
+   // Génération de QR codes
+   generateQrCode: (employeId) => api.post(`/api/qrcodes/employe/${employeId}/generate`).then((r) => r.data),
+   regenerateQrCode: (employeId) => api.post(`/api/qrcodes/employe/${employeId}/regenerate`).then((r) => r.data),
+   generateMultipleQrCodes: (entrepriseId) => api.post(`/api/qrcodes/entreprise/${entrepriseId}/generate-all`).then((r) => r.data),
+
+   // Informations sur les QR codes
+   getQrCodeInfo: (employeId) => api.get(`/api/qrcodes/employe/${employeId}/info`).then((r) => r.data),
+
+   // Actions avec QR codes (sans authentification)
+       scanQrCode: (qrContent) => axios.post(`${API_BASE_URL}/api/qrcodes/scan`, { qrContent }).then((r) => r.data),
+       pointerParQrCode: (payload) => axios.post(`${API_BASE_URL}/api/qrcodes/pointer`, payload).then((r) => r.data),
+
+   // Gestion des images QR code
+   getQrCodeImage: (employeId) => api.get(`/api/employes/${employeId}/qr-image`, { responseType: 'blob' }).then((r) => r.data),
 };
 
 export default api;

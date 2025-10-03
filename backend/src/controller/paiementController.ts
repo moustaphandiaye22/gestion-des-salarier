@@ -11,7 +11,12 @@ export class PaiementController {
   async create(req: Request, res: Response) {
     try {
       const data = paiementSchema.parse(req.body);
-      const paiement = await paiementService.createPaiement(data);
+      // Add user ID for audit logging
+      const paiementData = {
+        ...data,
+        utilisateurId: req.user?.id
+      };
+      const paiement = await paiementService.createPaiement(paiementData);
       res.status(201).json({ message: 'Paiement créé avec succès.', paiement });
     } catch (err: any) {
       if (err.errors) {
@@ -88,6 +93,15 @@ export class PaiementController {
       const id = Number(req.params.id);
       const data = paiementSchema.partial().parse(req.body);
       const paiement = await paiementService.updatePaiement(id, data);
+
+      // If payment status changed to PAYE, generate the bulletin PDF automatically
+      if (data.statut === 'PAYE') {
+        const pdfBuffer = await PDFService.generatePaymentReceipt(paiement);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=receipt_${id}.pdf`);
+        return res.send(pdfBuffer);
+      }
+
       res.json({ message: 'Paiement mis à jour avec succès.', paiement });
     } catch (err: any) {
       if (err.errors) {

@@ -19,7 +19,7 @@ export class paiementRepository implements InterfaceRepository  <Paiement>{
   }
 
   async findById(id: number) : Promise <Paiement | null> {
-  return mnprisma.paiement.findUnique({ where: { id }, include: { bulletin: true, entreprise: true } });
+  return mnprisma.paiement.findUnique({ where: { id }, include: { bulletin: { include: { employe: true } }, entreprise: true } });
   }
 
   async findAll() : Promise <Paiement[]> {
@@ -30,7 +30,7 @@ export class paiementRepository implements InterfaceRepository  <Paiement>{
     // Super Admin voit tous les paiements
     if (user.profil === 'SUPER_ADMIN') {
       return mnprisma.paiement.findMany({
-        include: { bulletin: true, entreprise: true }
+        include: { bulletin: { include: { employe: true } }, entreprise: true }
       });
     }
 
@@ -38,7 +38,7 @@ export class paiementRepository implements InterfaceRepository  <Paiement>{
     if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
       return mnprisma.paiement.findMany({
         where: { entrepriseId: user.entrepriseId },
-        include: { bulletin: true, entreprise: true }
+        include: { bulletin: { include: { employe: true } }, entreprise: true }
       });
     }
 

@@ -5,64 +5,64 @@ export declare class ParametreGlobalRepository implements InterfaceRepository<Pa
     findById(id: number): Promise<ParametreGlobal | null>;
     create(data: any): Promise<{
         id: number;
+        dateCreation: Date;
+        dateModification: Date;
         cle: string;
         valeur: string;
         description: string | null;
         categorie: string | null;
         estModifiable: boolean;
-        dateCreation: Date;
-        dateModification: Date;
     }>;
     getAll(): Promise<{
         id: number;
+        dateCreation: Date;
+        dateModification: Date;
         cle: string;
         valeur: string;
         description: string | null;
         categorie: string | null;
         estModifiable: boolean;
-        dateCreation: Date;
-        dateModification: Date;
     }[]>;
     getById(id: number): Promise<{
         id: number;
+        dateCreation: Date;
+        dateModification: Date;
         cle: string;
         valeur: string;
         description: string | null;
         categorie: string | null;
         estModifiable: boolean;
-        dateCreation: Date;
-        dateModification: Date;
     } | null>;
     getByKey(cle: string): Promise<{
         id: number;
+        dateCreation: Date;
+        dateModification: Date;
         cle: string;
         valeur: string;
         description: string | null;
         categorie: string | null;
         estModifiable: boolean;
-        dateCreation: Date;
-        dateModification: Date;
     } | null>;
     update(id: number, data: any): Promise<{
         id: number;
+        dateCreation: Date;
+        dateModification: Date;
         cle: string;
         valeur: string;
         description: string | null;
         categorie: string | null;
         estModifiable: boolean;
-        dateCreation: Date;
-        dateModification: Date;
     }>;
     delete(id: number): Promise<void>;
     getByCategory(categorie: string): Promise<{
         id: number;
+        dateCreation: Date;
+        dateModification: Date;
         cle: string;
         valeur: string;
         description: string | null;
         categorie: string | null;
         estModifiable: boolean;
-        dateCreation: Date;
-        dateModification: Date;
     }[]>;
 }
 //# sourceMappingURL=parametreGlobal.d.ts.map

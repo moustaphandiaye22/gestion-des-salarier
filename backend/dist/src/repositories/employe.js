@@ -57,6 +57,12 @@ export class employeRepository {
     async delete(id) {
         await mnprisma.employe.delete({ where: { id } });
     }
+    async getEmployePointages(employeId) {
+        return mnprisma.pointage.findMany({
+            where: { employeId },
+            orderBy: { datePointage: 'desc' }
+        });
+    }
 }
 ;
 //# sourceMappingURL=employe.js.map

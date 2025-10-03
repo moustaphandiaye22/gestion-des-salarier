@@ -1071,6 +1071,56 @@ async function main() {
 
   console.log('Employee professions updated');
 
+  // Générer automatiquement les QR codes pour tous les employés existants
+  console.log('Génération des QR codes pour les employés...');
+
+  try {
+    // Importer les services nécessaires (fichiers compilés)
+    const { QrCodeService } = await import('../dist/src/service/qrCodeService.js');
+    const { FileService } = await import('../dist/src/service/fileService.js');
+    const { EmployeService } = await import('../dist/src/service/employeService.js');
+
+    const qrCodeService = new QrCodeService();
+    const fileService = new FileService();
+    const employeService = new EmployeService();
+
+    // Récupérer tous les employés
+    const allEmployes = await prisma.employe.findMany({
+      include: { entreprise: true }
+    });
+
+    for (const employe of allEmployes) {
+      try {
+        // Générer le QR code
+        const qrCodeDataURL = await qrCodeService.generateEmployeeQrCode(employe.id, employe.entrepriseId);
+
+        // Sauvegarder l'image
+        const imagePath = await fileService.saveQrCodeImage(qrCodeDataURL, employe.id, employe.entrepriseId);
+
+        // Générer le contenu du QR code
+        const qrContent = qrCodeService.generateQrContent(employe.id, employe.entrepriseId);
+
+        // Mettre à jour l'employé
+        await prisma.employe.update({
+          where: { id: employe.id },
+          data: {
+            qrCode: qrContent,
+            qrCodeGenere: new Date(),
+            qrCodeImagePath: imagePath
+          }
+        });
+
+        console.log(`QR code généré pour ${employe.prenom} ${employe.nom} (${employe.matricule})`);
+      } catch (error) {
+        console.error(`Erreur génération QR code pour ${employe.prenom} ${employe.nom}:`, error.message);
+      }
+    }
+
+    console.log('Génération des QR codes terminée');
+  } catch (error) {
+    console.error('Erreur lors de la génération des QR codes:', error.message);
+  }
+
   console.log('Seeding completed successfully!');
 }
 
