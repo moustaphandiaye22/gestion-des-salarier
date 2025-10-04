@@ -16,7 +16,16 @@ export class cyclePaieRepository implements InterfaceRepository<CyclePaie> {
   }
 
   async create(data: Omit<CyclePaie, "id">) : Promise<CyclePaie>{
-    return mnprisma.cyclePaie.create({ data });
+    try {
+      return await mnprisma.cyclePaie.create({ data });
+    } catch (error: any) {
+      // Handle unique constraint violation
+      if (error.code === 'P2002' && error.meta?.target?.includes('pay_cycles_entrepriseId_nom_key')) {
+        const errorMessage = `Un cycle de paie avec le nom "${data.nom}" existe déjà pour cette entreprise.`;
+        throw new Error(errorMessage);
+      }
+      throw error;
+    }
   }
 
   async findById(id: number) : Promise<CyclePaie | null> {
@@ -48,7 +57,18 @@ export class cyclePaieRepository implements InterfaceRepository<CyclePaie> {
   }
 
   async update(id: number, data: Partial <Omit<CyclePaie,"id">>) : Promise<CyclePaie> {
-    return mnprisma.cyclePaie.update({ where: { id }, data });
+    try {
+      return await mnprisma.cyclePaie.update({ where: { id }, data });
+    } catch (error: any) {
+      // Handle unique constraint violation
+      if (error.code === 'P2002' && error.meta?.target?.includes('pay_cycles_entrepriseId_nom_key')) {
+        const errorMessage = data.nom
+          ? `Un cycle de paie avec le nom "${data.nom}" existe déjà pour cette entreprise.`
+          : 'Un cycle de paie avec ce nom existe déjà pour cette entreprise.';
+        throw new Error(errorMessage);
+      }
+      throw error;
+    }
   }
 
   async delete(id: number) : Promise<void> {

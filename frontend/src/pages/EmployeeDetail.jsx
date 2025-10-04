@@ -6,9 +6,12 @@ import { formatCFA } from "../utils/format";
 import { PencilSquareIcon, TrashIcon, ArrowLeftIcon, CurrencyDollarIcon, QrCodeIcon, ChartBarIcon, ClockIcon } from "@heroicons/react/24/outline";
 
 import { useToast } from "../context/ToastContext";
+import { useAuth } from "../context/AuthContext";
+import { useWebSocket } from "../hooks/useWebSocket";
 
 export default function EmployeeDetail() {
   const { showSuccess, showError } = useToast();
+  const { user } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const [employee, setEmployee] = useState(null);
@@ -19,6 +22,13 @@ export default function EmployeeDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [toDelete, setToDelete] = useState(null);
+
+  // WebSocket pour les mises à jour en temps réel - utilise les infos de l'utilisateur connecté
+  const { isConnected, sendMessage } = useWebSocket(
+    user?.entrepriseId,
+    null, // tableauDeBordId - pas nécessaire pour les détails employé
+    user?.id
+  );
 
   async function downloadQrCode() {
     if (!qrCode || !qrCode.hasQrCode) return;
@@ -87,21 +97,20 @@ export default function EmployeeDetail() {
 
   async function loadStats() {
     try {
-      // Simulation des statistiques - à remplacer par l'appel réel
-      // const statsData = await employesApi.getStats(id);
-      // setStats(statsData.statistiques);
-
-      // Données de simulation
-      setStats({
-        totalPresences: 45,
-        totalAbsences: 2,
-        totalRetards: 3,
-        heuresTravaillees: 180.5,
-        dernierPointage: new Date().toISOString()
-      });
+      // Récupérer les vraies statistiques depuis l'API
+      const statsData = await employesApi.getEmployeStats(id);
+      setStats(statsData);
     } catch (err) {
       console.error("Error loading stats:", err);
-      setStats(null);
+      // Fallback avec des données par défaut si l'API échoue
+      setStats({
+        totalPresences: 0,
+        totalAbsences: 0,
+        totalRetards: 0,
+        totalHours: 0,
+        attendanceRate: 0,
+        lastPointage: null
+      });
     }
   }
 
@@ -130,13 +139,61 @@ export default function EmployeeDetail() {
   }
 
   useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      await Promise.all([loadEmployee(), loadPayments(), loadStats(), loadQrCode()]);
-      setLoading(false);
+    // Attendre que l'utilisateur soit chargé avant de charger les données
+    if (user) {
+      console.log('Utilisateur connecté:', user);
+      async function loadData() {
+        setLoading(true);
+        try {
+          console.log('Chargement des données employé ID:', id);
+          await Promise.all([loadEmployee(), loadPayments(), loadStats(), loadQrCode()]);
+          console.log('Données chargées avec succès');
+        } catch (error) {
+          console.error('Erreur lors du chargement des données:', error);
+        } finally {
+          setLoading(false);
+        }
+      }
+      loadData();
+    } else {
+      console.log('En attente de l\'utilisateur...');
     }
-    loadData();
-  }, [id]);
+  }, [id, user]);
+
+  // Écouter les mises à jour WebSocket pour rafraîchir les statistiques
+  useEffect(() => {
+    if (isConnected && user && employee) {
+      console.log('WebSocket connecté, écoute des événements de pointage...');
+
+      // Rafraîchir les statistiques quand on reçoit une mise à jour
+      const handleStatsUpdate = () => {
+        console.log('Mise à jour des statistiques reçue');
+        loadStats();
+      };
+
+      // Écouter les événements de pointage
+      const handlePointageUpdate = (data) => {
+        console.log('Événement de pointage reçu:', data);
+        if (data.employeId === parseInt(id)) {
+          console.log('Pointage détecté pour cet employé, rafraîchissement des statistiques...');
+          loadStats();
+        }
+      };
+
+      // S'abonner aux événements WebSocket si disponibles
+      if (window.socket) {
+        window.socket.on('pointage-update', handlePointageUpdate);
+        window.socket.on('stats-update', handleStatsUpdate);
+      }
+
+      return () => {
+        if (window.socket) {
+          window.socket.off('pointage-update', handlePointageUpdate);
+          window.socket.off('stats-update', handleStatsUpdate);
+        }
+      };
+    }
+  }, [isConnected, user, employee, id]);
 
   async function confirmDelete() {
     if (!toDelete) return;
@@ -151,11 +208,13 @@ export default function EmployeeDetail() {
     }
   }
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <main className="min-h-[calc(100vh-4rem)] bg-gray-50">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">Chargement...</div>
+          <div className="text-center">
+            {loading ? 'Chargement...' : 'Vérification de l\'authentification...'}
+          </div>
         </div>
       </main>
     );
@@ -389,7 +448,7 @@ export default function EmployeeDetail() {
                       <span className="text-sm font-medium text-gray-700">Présences</span>
                     </div>
                     <span className="text-lg font-semibold text-green-600">
-                      {stats.totalPresences}
+                      {stats.totalPresences || 0}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -398,7 +457,7 @@ export default function EmployeeDetail() {
                       <span className="text-sm font-medium text-gray-700">Absences</span>
                     </div>
                     <span className="text-lg font-semibold text-red-600">
-                      {stats.totalAbsences}
+                      {stats.totalAbsences || 0}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -407,7 +466,7 @@ export default function EmployeeDetail() {
                       <span className="text-sm font-medium text-gray-700">Retards</span>
                     </div>
                     <span className="text-lg font-semibold text-yellow-600">
-                      {stats.totalRetards}
+                      {stats.totalRetards || 0}
                     </span>
                   </div>
                   <div className="flex justify-between items-center pt-2 border-t">
@@ -416,17 +475,28 @@ export default function EmployeeDetail() {
                       <span className="text-sm font-medium text-gray-700">Heures travaillées</span>
                     </div>
                     <span className="text-lg font-semibold text-blue-600">
-                      {stats.heuresTravaillees}h
+                      {stats.totalHours ? `${stats.totalHours}h` : '0h'}
                     </span>
                   </div>
-                  {stats.dernierPointage && (
+                  {stats.lastPointage && (
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium text-gray-700">Dernier pointage</span>
                       <span className="text-sm text-gray-600">
-                        {new Date(stats.dernierPointage).toLocaleDateString()}
+                        {new Date(stats.lastPointage).toLocaleDateString()}
                       </span>
                     </div>
                   )}
+
+                  {/* Indicateur de connexion WebSocket */}
+                  <div className="flex justify-between items-center pt-2 border-t">
+                    <span className="text-sm font-medium text-gray-700">Mise à jour temps réel</span>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                      <span className={`text-xs ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
+                        {isConnected ? 'Connecté' : 'Déconnecté'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </CardBody>
             </Card>

@@ -3,6 +3,7 @@ import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog, Input, Select
 import Pagination from "../components/Pagination";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { pointagesApi } from "../utils/api";
 import {
   PencilSquareIcon,
   TrashIcon,
@@ -11,7 +12,8 @@ import {
   MapPinIcon,
   MagnifyingGlassIcon,
   CalendarDaysIcon,
-  UserIcon
+  UserIcon,
+  ArrowPathIcon
 } from "@heroicons/react/24/outline";
 
 export default function Pointages() {
@@ -34,50 +36,8 @@ export default function Pointages() {
     setLoading(true);
     setError(null);
     try {
-      // Simulation de l'API - à remplacer par l'appel réel
-      const mockData = [
-        {
-          id: 1,
-          datePointage: "2024-01-15T08:00:00Z",
-          heureEntree: "2024-01-15T08:00:00Z",
-          heureSortie: "2024-01-15T17:00:00Z",
-          dureeTravail: 8.0,
-          typePointage: "PRESENCE",
-          statut: "PRESENT",
-          lieu: "Bureau principal",
-          commentaire: "Journée normale",
-          employe: {
-            id: 1,
-            prenom: "Jean",
-            nom: "Dupont",
-            matricule: "EMP001"
-          },
-          entreprise: {
-            nom: "Entreprise ABC"
-          }
-        },
-        {
-          id: 2,
-          datePointage: "2024-01-15T09:30:00Z",
-          heureEntree: "2024-01-15T09:30:00Z",
-          heureSortie: "2024-01-15T18:30:00Z",
-          dureeTravail: 8.0,
-          typePointage: "HEURE_SUPPLEMENTAIRE",
-          statut: "PRESENT",
-          lieu: "Bureau principal",
-          commentaire: "Heures supplémentaires",
-          employe: {
-            id: 2,
-            prenom: "Marie",
-            nom: "Martin",
-            matricule: "EMP002"
-          },
-          entreprise: {
-            nom: "Entreprise ABC"
-          }
-        }
-      ];
-      setRows(Array.isArray(mockData) ? mockData : []);
+      const data = await pointagesApi.list();
+      setRows(Array.isArray(data) ? data : []);
     } catch (err) {
       const errorMessage = err?.response?.data?.message || err.message || "Erreur";
       setError(errorMessage);
@@ -140,11 +100,25 @@ export default function Pointages() {
     load();
   }, [selectedCompanyId]);
 
+  // Listen for pointage creation/update events
+  useEffect(() => {
+    const handlePointageUpdate = (event) => {
+      console.log('Pointage créé/mis à jour, rafraîchissement de la liste...', event.detail);
+      showSuccess('Pointage ajouté', 'Le pointage a été ajouté avec succès à la liste.');
+      load();
+    };
+
+    window.addEventListener('pointageCreated', handlePointageUpdate);
+
+    return () => {
+      window.removeEventListener('pointageCreated', handlePointageUpdate);
+    };
+  }, [showSuccess]);
+
   async function confirmDelete() {
     if (!toDelete) return;
     try {
-      // Simulation de la suppression - à remplacer par l'appel réel
-      // await pointagesApi.remove(toDelete.id);
+      await pointagesApi.remove(toDelete.id);
       setToDelete(null);
       load();
       showSuccess("Succès", "Pointage supprimé avec succès");
@@ -207,6 +181,15 @@ export default function Pointages() {
             subtitle="Suivi moderne des présences par QR Code"
             actions={
               <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={load}
+                  disabled={loading}
+                  className="flex items-center gap-2"
+                >
+                  <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                  Actualiser
+                </Button>
                 <Button className="flex items-center gap-2">
                   <PlusIcon className="h-5 w-5" />
                   Nouveau Pointage

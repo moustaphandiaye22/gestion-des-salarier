@@ -42,6 +42,18 @@ export class paiementRepository implements InterfaceRepository  <Paiement>{
       });
     }
 
+    // Employé voit seulement ses propres paiements
+    if (user.profil === 'EMPLOYE' && user.employeId) {
+      return mnprisma.paiement.findMany({
+        where: {
+          bulletin: {
+            employeId: user.employeId
+          }
+        },
+        include: { bulletin: { include: { employe: true } }, entreprise: true }
+      });
+    }
+
     // Autres rôles n'ont pas accès aux paiements
     return [];
   }

@@ -83,7 +83,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 and refresh
+// Handle errors and provide better error messages
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
@@ -91,6 +91,23 @@ api.interceptors.response.use(
 
     // If network/canceled or status not 401, propagate
     if (!error.response || error.response.status !== 401) {
+      // Enhance error object with better error information
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data || {};
+
+        // Create enhanced error with better messaging
+        const enhancedError = new Error(data.message || data.error || `Erreur HTTP ${status}`);
+        enhancedError.status = status;
+        enhancedError.details = data.details;
+        enhancedError.success = false;
+
+        // Add original error for debugging
+        enhancedError.originalError = error;
+
+        return Promise.reject(enhancedError);
+      }
+
       return Promise.reject(error);
     }
 
@@ -184,6 +201,78 @@ function toQuery(params = {}) {
   return qs ? `?${qs}` : "";
 }
 
+// Enhanced error handling utility
+export const handleApiError = (error) => {
+  if (error.response) {
+    const status = error.response.status;
+    const data = error.response.data || {};
+
+    // Return structured error information with French translations
+    return {
+      status,
+      message: data.message || data.error || getFrenchErrorMessage(status),
+      details: data.details,
+      success: false,
+      originalError: error
+    };
+  }
+
+  if (error.message) {
+    // Translate common technical errors to French
+    let frenchMessage = error.message;
+
+    if (error.message.includes('Network Error')) {
+      frenchMessage = 'Erreur de connexion réseau. Vérifiez votre connexion internet.';
+    } else if (error.message.includes('timeout')) {
+      frenchMessage = 'Délai d\'attente dépassé. Veuillez réessayer.';
+    } else if (error.message.includes('ECONNREFUSED')) {
+      frenchMessage = 'Impossible de contacter le serveur. Veuillez réessayer plus tard.';
+    } else {
+      frenchMessage = 'Une erreur inattendue s\'est produite.';
+    }
+
+    return {
+      status: 0,
+      message: frenchMessage,
+      success: false,
+      originalError: error
+    };
+  }
+
+  return {
+    status: 0,
+    message: 'Une erreur inattendue s\'est produite.',
+    success: false,
+    originalError: error
+  };
+};
+
+// Get French error messages for HTTP status codes
+const getFrenchErrorMessage = (status) => {
+  const statusMessages = {
+    400: 'Requête invalide. Vérifiez les données saisies.',
+    401: 'Accès non autorisé. Veuillez vous reconnecter.',
+    403: 'Accès refusé. Vous n\'avez pas les permissions nécessaires.',
+    404: 'Élément non trouvé.',
+    409: 'Conflit de données. Cette action n\'est pas autorisée.',
+    422: 'Données invalides. Vérifiez votre saisie.',
+    429: 'Trop de tentatives. Veuillez patienter avant de réessayer.',
+    500: 'Erreur serveur. Veuillez réessayer plus tard.',
+    502: 'Service indisponible. Veuillez réessayer plus tard.',
+    503: 'Service temporairement indisponible. Veuillez réessayer plus tard.',
+    504: 'Délai d\'attente du serveur dépassé. Veuillez réessayer.'
+  };
+
+  return statusMessages[status] || `Erreur HTTP ${status}`;
+};
+
+// Format validation errors for display
+export const formatValidationErrors = (errors) => {
+  if (!errors || !Array.isArray(errors)) return '';
+
+  return errors.map(err => `• ${err.message}`).join('\n');
+};
+
 // Domain APIs mapping your backend routes (normalized to data shapes)
 export const employesApi = {
   list: (params) => api.get(`/api/employes${toQuery(params)}`).then((r) => r.data?.employes || r.data || []),
@@ -207,6 +296,7 @@ export const employesApi = {
   },
   update: (id, payload) => api.put(`/api/employes/${id}`, payload).then((r) => r.data?.employe || r.data || null),
   remove: (id) => api.delete(`/api/employes/${id}`).then((r) => r.data),
+  getEmployeStats: (employeId) => api.get(`/api/employes/${employeId}/statistiques`).then((r) => r.data),
   exportTemplate: () => api.get(`/api/employes/export/template`, { responseType: 'blob' }).then((r) => r),
 };
 

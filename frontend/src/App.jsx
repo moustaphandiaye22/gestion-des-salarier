@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import MainLayout from "./layouts/MainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import EmployeeOnlyRoute from "./components/EmployeeOnlyRoute";
 import { useAuth } from "./context/AuthContext";
 
 // Auth
@@ -44,7 +45,11 @@ function RoleBasedDashboard() {
   }
 
   if (user?.role === 'EMPLOYE') {
-    return <EmployeeDashboard />;
+    return (
+      <EmployeeOnlyRoute>
+        <EmployeeDashboard />
+      </EmployeeOnlyRoute>
+    );
   }
 
   // Default to admin dashboard for ADMIN_ENTREPRISE, SUPER_ADMIN
@@ -357,9 +362,11 @@ function App() {
         path="/mon-dashboard"
         element={
           <ProtectedRoute>
-            <MainLayout>
-              <EmployeeDashboard />
-            </MainLayout>
+            <EmployeeOnlyRoute>
+              <MainLayout>
+                <EmployeeDashboard />
+              </MainLayout>
+            </EmployeeOnlyRoute>
           </ProtectedRoute>
         }
       />

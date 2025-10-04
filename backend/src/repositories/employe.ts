@@ -63,6 +63,14 @@ export class employeRepository implements InterfaceRepository<Employe> {
       });
     }
 
+    // Employé voit seulement ses propres informations
+    if (user.profil === 'EMPLOYE' && user.employeId) {
+      return mnprisma.employe.findMany({
+        where: { id: user.employeId },
+        include: { entreprise: true, bulletins: true, profession: true }
+      });
+    }
+
     // Autres rôles n'ont pas accès à la liste des employés
     return [];
   }

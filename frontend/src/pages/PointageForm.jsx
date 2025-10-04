@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardHeader, CardBody, Button, Input, Select, Textarea } from "../components/ui";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { pointagesApi } from "../utils/api";
 import { ArrowLeftIcon, ClockIcon, MapPinIcon, UserIcon } from "@heroicons/react/24/outline";
 
 export default function PointageForm() {
@@ -38,15 +39,18 @@ export default function PointageForm() {
 
   async function loadEmployes() {
     try {
-      // Simulation des employés - à remplacer par l'appel réel
+      const data = await pointagesApi.getEmployes ? await pointagesApi.getEmployes() : [];
+      setEmployes(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Erreur lors du chargement des employés:", err);
+      showError("Erreur", "Impossible de charger la liste des employés");
+      // Fallback to mock data if API fails
       const mockEmployes = [
         { id: 1, prenom: 'Jean', nom: 'Dupont', matricule: 'EMP001' },
         { id: 2, prenom: 'Marie', nom: 'Martin', matricule: 'EMP002' },
         { id: 3, prenom: 'Pierre', nom: 'Durand', matricule: 'EMP003' }
       ];
       setEmployes(mockEmployes);
-    } catch (err) {
-      showError("Erreur", "Impossible de charger la liste des employés");
     }
   }
 
@@ -121,14 +125,20 @@ export default function PointageForm() {
         dureeTravail: parseFloat(formData.dureeTravail) || 0
       };
 
-      // Simulation de la sauvegarde - à remplacer par l'appel réel
-      // if (isEditing) {
-      //   await pointagesApi.update(id, dataToSend);
-      // } else {
-      //   await pointagesApi.create(dataToSend);
-      // }
+      // Real API calls
+      if (isEditing) {
+        await pointagesApi.update(id, dataToSend);
+      } else {
+        await pointagesApi.create(dataToSend);
+      }
 
       showSuccess("Succès", `Pointage ${isEditing ? 'modifié' : 'créé'} avec succès`);
+
+      // Dispatch custom event to refresh pointages list
+      window.dispatchEvent(new CustomEvent('pointageCreated', {
+        detail: { action: isEditing ? 'updated' : 'created' }
+      }));
+
       navigate('/pointages');
     } catch (err) {
       const errorMessage = err?.response?.data?.message || err.message || "Erreur";
