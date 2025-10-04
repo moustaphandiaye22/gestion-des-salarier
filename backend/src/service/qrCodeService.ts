@@ -23,21 +23,40 @@ export class QrCodeService {
   }
 
   /**
-   * Génère le contenu du QR code (le texte encodé)
-   */
-  generateQrContent(employeId: number, entrepriseId: number): string {
-    return `EMP_${employeId}_${entrepriseId}_${Date.now()}`;
-  }
+    * Génère le contenu du QR code (le texte encodé)
+    */
+   generateQrContent(employeId: number, entrepriseId: number): string {
+     return `EMP_${employeId}_${entrepriseId}_${Date.now()}`;
+   }
+
+   /**
+    * Extrait les informations d'un QR code sans validation complète
+    */
+   extractQrInfo(qrContent: string): { employeId?: number; entrepriseId?: number } | null {
+     try {
+       const parts = qrContent.split('_');
+       if (parts.length >= 3 && parts[0] === 'EMP' && parts[1] && parts[2]) {
+         const employeId = parseInt(parts[1]);
+         const entrepriseId = parseInt(parts[2]);
+         if (!isNaN(employeId) && !isNaN(entrepriseId)) {
+           return { employeId, entrepriseId };
+         }
+       }
+       return null;
+     } catch (error) {
+       return null;
+     }
+   }
 
   /**
    * Valide un QR code scanné
    */
   validateQrCode(qrContent: string): { isValid: boolean; employeId?: number; entrepriseId?: number } {
     try {
-      // Format attendu: EMP_[employeId]_[entrepriseId]_[timestamp]
+      // Format attendu: EMP_[employeId]_[entrepriseId]_[timestamp]_[randomHex]
       const parts = qrContent.split('_');
 
-      if (parts.length < 4 || parts[0] !== 'EMP') {
+      if (parts.length < 3 || parts[0] !== 'EMP') {
         return { isValid: false };
       }
 
@@ -61,6 +80,7 @@ export class QrCodeService {
         entrepriseId
       };
     } catch (error) {
+      console.error('Erreur lors de la validation du QR code:', error);
       return { isValid: false };
     }
   }

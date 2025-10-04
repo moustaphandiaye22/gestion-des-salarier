@@ -123,9 +123,30 @@ export class QrCodeController {
         new Date(p.datePointage).toDateString() === today.toDateString()
       );
 
+      // Check if employee already has complete entry/exit for today
+      const completePointagesToday = todayPointages.filter(p => p.heureEntree && p.heureSortie).length;
+      if (completePointagesToday >= 1) {
+        return res.status(400).json({
+          error: 'Pointage déjà complété',
+          message: `L'employé ${employe.prenom} ${employe.nom} a déjà effectué son pointage complet (entrée et sortie) aujourd'hui.`,
+          code: 'ALREADY_POINTED_TODAY'
+        });
+      }
+
       const hasEntree = todayPointages.some(p => p.heureEntree && !p.heureSortie);
 
       if (hasEntree) {
+        // Check if employee already has an exit for today
+        const hasSortie = todayPointages.some(p => p.heureSortie);
+
+        if (hasSortie) {
+          return res.status(400).json({
+            error: 'Pointage déjà complété',
+            message: `L'employé ${employe.prenom} ${employe.nom} a déjà pointé sa sortie aujourd'hui. Un employé ne peut pointer que deux fois par jour (entrée et sortie).`,
+            code: 'ALREADY_HAS_EXIT'
+          });
+        }
+
         // Pointer la sortie
         const pointage = await pointageService.pointerSortie(
           employe.id,
@@ -137,9 +158,21 @@ export class QrCodeController {
         res.json({
           message: 'Sortie pointée avec succès via QR code.',
           action: 'sortie',
-          pointage
+          pointage,
+          refreshList: true // Flag to indicate frontend should refresh pointages list
         });
       } else {
+        // Check if employee already has an entry for today
+        const hasEntreeToday = todayPointages.some(p => p.heureEntree);
+
+        if (hasEntreeToday) {
+          return res.status(400).json({
+            error: 'Entrée déjà pointée',
+            message: `L'employé ${employe.prenom} ${employe.nom} a déjà pointé son entrée aujourd'hui. Veuillez pointer la sortie ou attendre demain pour une nouvelle entrée.`,
+            code: 'ALREADY_HAS_ENTRY'
+          });
+        }
+
         // Pointer l'entrée
         const pointage = await pointageService.pointerEntree(
           employe.id,
@@ -151,7 +184,8 @@ export class QrCodeController {
         res.json({
           message: 'Entrée pointée avec succès via QR code.',
           action: 'entree',
-          pointage
+          pointage,
+          refreshList: true // Flag to indicate frontend should refresh pointages list
         });
       }
     } catch (err: any) {

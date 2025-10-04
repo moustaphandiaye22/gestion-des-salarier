@@ -56,7 +56,7 @@ export default function MainLayout({ children }) {
   // Fetch company logo and name when user is authenticated
   useEffect(() => {
     async function loadCompanyInfo() {
-      if (isAuthenticated) {
+      if (isAuthenticated && user?.role !== 'EMPLOYE') {
         if (user?.role === 'SUPER_ADMIN' && selectedCompanyId) {
           try {
             const entreprise = await entreprisesApi.get(parseInt(selectedCompanyId));
@@ -75,7 +75,7 @@ export default function MainLayout({ children }) {
             setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
             setCompanyName("SalairePro");
           }
-        } else if (user?.entrepriseId && user?.role !== 'SUPER_ADMIN') {
+        } else if (user?.entrepriseId && user?.role !== 'SUPER_ADMIN' && user?.role !== 'EMPLOYE') {
           try {
             const entreprise = await entreprisesApi.get(user.entrepriseId);
             if (entreprise?.logo) {
@@ -96,6 +96,10 @@ export default function MainLayout({ children }) {
           setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg"); // default logo for super admin
           setCompanyName("SalairePro");
         }
+      } else if (isAuthenticated && user?.role === 'EMPLOYE') {
+        // For employees, use default logo and company name
+        setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
+        setCompanyName("SalairePro");
       }
     }
 
@@ -152,6 +156,10 @@ export default function MainLayout({ children }) {
           '/professions',
         ];
         return allowedPaths.includes(it.to);
+      }
+      // For EMPLOYE, only show their personal dashboard
+      if (user.role === 'EMPLOYE') {
+        return it.to === '/mon-dashboard' || it.to === '/dashboard';
       }
       return true;
     });

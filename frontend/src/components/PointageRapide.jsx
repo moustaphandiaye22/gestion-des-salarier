@@ -12,31 +12,52 @@ export default function PointageRapide({ onPointageCreated, className = "" }) {
 
   // Gestion du pointage par QR code
   async function handleQrCodePointage(qrContent) {
+    console.log('🔍 PointageRapide - QR Code scanné:', qrContent);
     setLoading(true);
+
     try {
       // First, scan the QR code to get employee information
+      console.log('📡 PointageRapide - Appel API scanQrCode...');
       const scanResult = await qrcodesApi.scanQrCode(qrContent);
+      console.log('✅ PointageRapide - Résultat API:', scanResult);
 
-      if (scanResult.employe) {
+      if (scanResult && scanResult.employe) {
+        console.log('👤 PointageRapide - Employé trouvé:', scanResult.employe);
+
         // Show employee information for confirmation
         const confirmed = window.confirm(
-          `Employé identifié: ${scanResult.employe.prenom} ${scanResult.employe.nom} (Matricule: ${scanResult.employe.matricule})\n\nConfirmer le pointage pour cet employé ?`
+          `Employé identifié: ${scanResult.employe.prenom} ${scanResult.employe.nom}\nMatricule: ${scanResult.employe.matricule}\nID: ${scanResult.employe.id}\n\nConfirmer le pointage pour cet employé ?`
         );
 
         if (confirmed) {
+          console.log('🚀 PointageRapide - Confirmation reçue, création du pointage...');
+
           // Now create the pointage
           const result = await qrcodesApi.pointerParQrCode({
             qrContent,
-            lieu: 'Bureau via QR',
+            lieu: 'Bureau via QR rapide',
             ipAddress: '192.168.1.100',
             localisation: null
           });
 
+          console.log('✅ PointageRapide - Pointage créé:', result);
           showSuccess('Succès', `Pointage ${result.action} effectué avec succès`);
+
+          // Dispatch event to refresh pointages list
+          window.dispatchEvent(new CustomEvent('pointageCreated', {
+            detail: { action: result.action, source: 'qr' }
+          }));
+
           onPointageCreated?.();
+        } else {
+          console.log('❌ PointageRapide - Pointage annulé par l\'utilisateur');
         }
+      } else {
+        console.error('❌ PointageRapide - Aucun employé trouvé');
+        showError('Erreur', 'QR code non reconnu');
       }
     } catch (err) {
+      console.error('💥 PointageRapide - Erreur lors du pointage:', err);
       const errorMessage = err?.response?.data?.error || err.message || 'Erreur lors du pointage';
       showError('Erreur', errorMessage);
     } finally {

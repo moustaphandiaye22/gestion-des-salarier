@@ -238,7 +238,7 @@ export class EmployeService {
       }
 
       // Dernier pointage
-      if (pointage.datePointage && (!dernierPointage || new Date(pointage.datePointage) > dernierPointage)) {
+      if (pointage.datePointage && (!dernierPointage || (pointage.datePointage && new Date(pointage.datePointage) > dernierPointage))) {
         dernierPointage = new Date(pointage.datePointage);
       }
     }
@@ -268,27 +268,92 @@ export class EmployeService {
       throw new Error('Employé non trouvé');
     }
 
-    // Mettre à jour les statistiques si nécessaire
-    await this.updatePresenceStats(employeId);
+    // Get current month dates
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-    // Récupérer l'employé avec les statistiques mises à jour
-    const updatedEmploye = await this.employeRepository.findById(employeId);
+    // Get pointages for current month
+    const pointages = await this.pointageRepository.findByEmployeAndPeriode(
+      employeId,
+      startOfMonth,
+      endOfMonth
+    );
+
+    // Calculate comprehensive statistics
+    const totalPointages = pointages.length;
+    const presentDays = pointages.filter(p => p.statut === 'PRESENT').length;
+    const absentDays = pointages.filter(p => p.statut === 'ABSENT').length;
+    const lateDays = pointages.filter(p => {
+      if (p.heureEntree) {
+        const entreeTime = new Date(`1970-01-01T${p.heureEntree}`);
+        const expectedTime = new Date(`1970-01-01T09:00:00`); // 9h00
+        return entreeTime > expectedTime;
+      }
+      return false;
+    }).length;
+
+    const totalHours = pointages.reduce((sum, p) => sum + (Number(p.dureeTravail) || 0), 0);
+
+    // Calculate attendance rate
+    const attendanceRate = totalPointages > 0 ? (presentDays / totalPointages) * 100 : 0;
+
+    // Calculate average hours per day
+    const avgHoursPerDay = totalPointages > 0 ? totalHours / totalPointages : 0;
+
+    // Get last pointage
+    const lastPointage = pointages.length > 0 ? pointages[0] : null;
 
     return {
       employe: {
-        id: updatedEmploye?.id,
-        nom: updatedEmploye?.nom,
-        prenom: updatedEmploye?.prenom,
-        matricule: updatedEmploye?.matricule
+        id: employe.id,
+        nom: employe.nom,
+        prenom: employe.prenom,
+        matricule: employe.matricule
       },
-      statistiques: {
-        totalPresences: (updatedEmploye as any)?.totalPresences || 0,
-        totalAbsences: (updatedEmploye as any)?.totalAbsences || 0,
-        totalRetards: (updatedEmploye as any)?.totalRetards || 0,
-        heuresTravaillees: (updatedEmploye as any)?.heuresTravaillees || 0,
-        dernierPointage: (updatedEmploye as any)?.dernierPointage
+      period: {
+        month: now.getMonth() + 1,
+        year: now.getFullYear(),
+        monthName: now.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }),
+        startDate: startOfMonth,
+        endDate: endOfMonth
+      },
+      statistics: {
+        totalPointages,
+        presentDays,
+        absentDays,
+        lateDays,
+        totalHours: Math.round(totalHours * 100) / 100,
+        attendanceRate: Math.round(attendanceRate * 100) / 100,
+        avgHoursPerDay: Math.round(avgHoursPerDay * 100) / 100,
+        lastPointage: lastPointage?.datePointage || null,
+        lastEntryTime: lastPointage?.heureEntree || null,
+        lastExitTime: lastPointage?.heureSortie || null
       }
     };
+  }
+
+  async updateEmployeStatsAfterPointage(employeId: number) {
+    try {
+      const stats = await this.getEmployeStats(employeId);
+
+      // Update employee record with latest statistics
+      const updateData: any = {
+        dernierPointage: stats.statistics.lastPointage,
+        heuresTravaillees: stats.statistics.totalHours,
+        totalPresences: stats.statistics.presentDays,
+        totalAbsences: stats.statistics.absentDays,
+        totalRetards: stats.statistics.lateDays
+      };
+
+      await this.employeRepository.update(employeId, updateData);
+
+      return stats;
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour des statistiques après pointage:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      throw new Error(`Erreur lors de la mise à jour des statistiques: ${errorMessage}`);
+    }
   }
 
   async generateAllQrCodesForEntreprise(entrepriseId: number) {

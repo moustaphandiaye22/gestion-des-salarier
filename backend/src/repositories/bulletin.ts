@@ -61,6 +61,14 @@ export class bulletinRepository implements InterfaceRepository<Bulletin> {
       });
     }
 
+    // Employé voit seulement ses propres bulletins
+    if (user.profil === 'EMPLOYE' && user.employeId) {
+      return mnprisma.bulletin.findMany({
+        where: { employeId: user.employeId },
+        include: { employe: true, cycle: true, paiements: true }
+      });
+    }
+
     // Autres rôles n'ont pas accès aux bulletins
     return [];
   }

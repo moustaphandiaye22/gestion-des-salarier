@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardHeader, CardBody, Input, Select, Button } from "../components/ui";
-import { cyclesPaieApi, entreprisesApi } from "../utils/api";
+import { cyclesPaieApi, entreprisesApi, handleApiError, formatValidationErrors } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 
@@ -132,9 +132,41 @@ export default function CyclePaieForm() {
       showSuccess("Succès", isEdit ? "Cycle de paie modifié avec succès" : "Cycle de paie créé avec succès");
       navigate("/cycles-paie");
     } catch (err) {
-      const errorMessage = err?.response?.data?.message || err.message;
+      // Use the enhanced error handler
+      const apiError = handleApiError(err);
+      const errorMessage = apiError.message;
+      const detailedErrors = apiError.details || [];
+
       setError(errorMessage);
-      showError("Erreur d'enregistrement", errorMessage);
+
+      // Show detailed errors if available
+      if (detailedErrors.length > 0) {
+        const detailsText = formatValidationErrors(detailedErrors);
+        showError("Erreur de validation", `${errorMessage}\n\n${detailsText}`);
+      } else {
+        showError("Erreur d'enregistrement", errorMessage);
+      }
+
+      // Set field-specific errors if available
+      if (detailedErrors.length > 0) {
+        const fieldErrors = {};
+        detailedErrors.forEach(err => {
+          if (err.champ && err.message) {
+            // Map field names to form fields with French translations
+            const fieldMapping = {
+              'nom': 'nom',
+              'description': 'description',
+              'dateDebut': 'dateDebut',
+              'dateFin': 'dateFin',
+              'frequence': 'frequence',
+              'entrepriseId': 'entrepriseId'
+            };
+            const fieldName = fieldMapping[err.champ] || err.champ;
+            fieldErrors[fieldName] = err.message;
+          }
+        });
+        setErrors(prev => ({ ...prev, ...fieldErrors }));
+      }
     } finally {
       setLoading(false);
     }

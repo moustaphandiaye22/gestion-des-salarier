@@ -15,15 +15,16 @@ export default function QRCodeManagement() {
   const [scanResult, setScanResult] = useState(null);
 
   const handleScanSuccess = async (qrContent) => {
-    console.log('QR Code scanné:', qrContent);
+    console.log('🔍 QR Code scanné:', qrContent);
 
     try {
       // First, scan the QR code to get employee information
-      console.log('Appel API scanQrCode...');
+      console.log('📡 Appel API scanQrCode...');
       const scanResult = await qrcodesApi.scanQrCode(qrContent);
-      console.log('Résultat API:', scanResult);
+      console.log('✅ Résultat API:', scanResult);
 
-      if (scanResult.employe) {
+      if (scanResult && scanResult.employe) {
+        console.log('👤 Employé trouvé:', scanResult.employe);
         // Show employee information for confirmation
         setScanResult({
           success: true,
@@ -35,6 +36,7 @@ export default function QRCodeManagement() {
         // Don't close scanner yet, wait for user confirmation
         return;
       } else {
+        console.error('❌ Aucun employé trouvé dans la réponse API');
         // API returned but no employee data
         setScanResult({
           success: false,
@@ -45,7 +47,13 @@ export default function QRCodeManagement() {
         setScannerOpen(false);
       }
     } catch (err) {
-      console.error('Erreur lors de la lecture du QR code:', err);
+      console.error('💥 Erreur lors de la lecture du QR code:', err);
+      console.error('📋 Détails de l\'erreur:', {
+        message: err.message,
+        status: err.response?.status,
+        data: err.response?.data
+      });
+
       setScanResult({
         success: false,
         error: err?.response?.data?.error || err.message || 'Erreur lors de la lecture du QR code',
@@ -58,16 +66,24 @@ export default function QRCodeManagement() {
   };
 
   const confirmPointage = async () => {
-    if (!scanResult?.employee || !scanResult?.qrContent) return;
+    if (!scanResult?.employee || !scanResult?.qrContent) {
+      console.error('❌ Données manquantes pour le pointage:', scanResult);
+      return;
+    }
+
+    console.log('🚀 Confirmation du pointage pour:', scanResult.employee);
 
     try {
       // Now create the pointage
+      console.log('📡 Appel API pointerParQrCode...');
       const result = await qrcodesApi.pointerParQrCode({
         qrContent: scanResult.qrContent,
         lieu: 'Bureau via scan QR',
         ipAddress: '192.168.1.100',
         localisation: null
       });
+
+      console.log('✅ Pointage créé avec succès:', result);
 
       setScanResult({
         success: true,
@@ -78,8 +94,19 @@ export default function QRCodeManagement() {
       });
 
       showSuccess('Succès', `Pointage ${result.action} enregistré avec succès`);
+
+      // Dispatch event to refresh pointages list
+      window.dispatchEvent(new CustomEvent('pointageCreated', {
+        detail: { action: result.action, source: 'qr-management' }
+      }));
     } catch (err) {
-      console.error('Erreur lors du pointage par QR code:', err);
+      console.error('💥 Erreur lors du pointage par QR code:', err);
+      console.error('📋 Détails de l\'erreur:', {
+        message: err.message,
+        status: err.response?.status,
+        data: err.response?.data
+      });
+
       setScanResult({
         success: false,
         error: err?.response?.data?.error || err.message || 'Erreur lors du pointage',
