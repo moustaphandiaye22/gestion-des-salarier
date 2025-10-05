@@ -105,7 +105,11 @@ export declare class SalaryCalculationService {
                 adresse: string | null;
                 dateCreation: Date;
                 description: string | null;
+                siteWeb: string | null;
+                secteurActivite: string | null;
                 logo: string | null;
+                couleurPrimaire: string | null;
+                couleurSecondaire: string | null;
                 estActive: boolean;
             };
         } & {
@@ -159,7 +163,11 @@ export declare class SalaryCalculationService {
             adresse: string | null;
             dateCreation: Date;
             description: string | null;
+            siteWeb: string | null;
+            secteurActivite: string | null;
             logo: string | null;
+            couleurPrimaire: string | null;
+            couleurSecondaire: string | null;
             estActive: boolean;
         };
         latestBulletin: ({

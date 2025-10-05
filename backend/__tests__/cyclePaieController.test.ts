@@ -1,6 +1,6 @@
 import request from 'supertest';
-import app from '../src/index.js'; // Adjust path if needed
-import { prisma } from '../src/config/db.js';
+import app from '../index.js'; // Adjust path if needed
+import { mnprisma as prisma } from '../src/config/db.js';
 
 describe('CyclePaieController', () => {
   let tokenAdmin: string;

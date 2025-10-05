@@ -148,6 +148,100 @@ export class AuthService implements IAuthService {
     }
   }
 
+  async updateProfile(userId: string, profileData: any): Promise<{ utilisateur: Utilisateur }> {
+    try {
+      Logger.info("Tentative de mise à jour du profil", { userId });
+
+      const userIdNum = parseInt(userId, 10);
+      if (isNaN(userIdNum)) {
+        throw new ValidationError("ID utilisateur invalide");
+      }
+
+      // Validation des données
+      const allowedFields = ["nom", "email"];
+      const updateData: any = {};
+
+      for (const field of allowedFields) {
+        if (profileData[field] !== undefined) {
+          updateData[field] = profileData[field];
+        }
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        throw new ValidationError("Aucune donnée valide à mettre à jour");
+      }
+
+      // Vérifier si l'email est déjà utilisé par un autre utilisateur
+      if (updateData.email) {
+        const existingUser = await this.userRepository.findByEmail(updateData.email);
+        if (existingUser && existingUser.id !== userIdNum) {
+          throw new ValidationError("Cet email est déjà utilisé par un autre utilisateur");
+        }
+      }
+
+      // Mettre à jour l'utilisateur
+      const utilisateur = await this.userRepository.update(userIdNum, updateData);
+      if (!utilisateur) {
+        throw new NotFoundError("Utilisateur non trouvé");
+      }
+
+      Logger.info("Profil mis à jour avec succès", { userId, updatedFields: Object.keys(updateData) });
+      return { utilisateur };
+    } catch (error: any) {
+      Logger.error("Erreur lors de la mise à jour du profil", error, { userId });
+      if (error instanceof ValidationError || error instanceof NotFoundError) {
+        throw error;
+      }
+      throw new InternalServerError("Impossible de mettre à jour le profil");
+    }
+  }
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+    try {
+      Logger.info("Tentative de changement de mot de passe", { userId });
+
+      const userIdNum = parseInt(userId, 10);
+      if (isNaN(userIdNum)) {
+        throw new ValidationError("ID utilisateur invalide");
+      }
+
+      // Validation des données
+      if (!currentPassword || !newPassword) {
+        throw new ValidationError("Mot de passe actuel et nouveau mot de passe requis");
+      }
+
+      if (newPassword.length < 6) {
+        throw new ValidationError("Le nouveau mot de passe doit contenir au moins 6 caractères");
+      }
+
+      // Récupérer l'utilisateur
+      const utilisateur = await this.userRepository.findById(userIdNum);
+      if (!utilisateur) {
+        throw new NotFoundError("Utilisateur non trouvé");
+      }
+
+      // Vérifier le mot de passe actuel
+      const isValidPassword = await AuthUtils.verifyPassword(currentPassword, utilisateur.motDePasse);
+      if (!isValidPassword) {
+        throw new AuthenticationError("Mot de passe actuel incorrect");
+      }
+
+      // Hash du nouveau mot de passe
+      const hashedNewPassword = await AuthUtils.hashPassword(newPassword);
+
+      // Mettre à jour le mot de passe
+      await this.userRepository.update(userIdNum, { motDePasse: hashedNewPassword });
+
+      Logger.info("Mot de passe changé avec succès", { userId });
+    } catch (error: any) {
+      Logger.error("Erreur lors du changement de mot de passe", error, { userId });
+      if (error instanceof ValidationError || error instanceof AuthenticationError || error instanceof NotFoundError) {
+        throw error;
+      }
+      throw new InternalServerError("Impossible de changer le mot de passe");
+    }
+  }
+
   private generateTokens(utilisateur: Utilisateur) {
     const payload = {
       email: utilisateur.email,

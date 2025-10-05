@@ -1,4 +1,4 @@
-// src/utils/api.js
+// /!/ src/utils/api.js
 // API client with JWT access/refresh token handling
 // - Single responsibility: networking and token persistence helpers
 // - No UI concerns
@@ -73,9 +73,9 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
-  // Add selected company ID for super admin
+  // Add selected company ID for super admin, but not for auth endpoints
   const selectedCompanyId = localStorage.getItem('selectedCompanyId');
-  if (selectedCompanyId && !config.params?.entrepriseId) {
+  if (selectedCompanyId && !config.params?.entrepriseId && config.url && config.url.indexOf('/api/auth/') === -1) {
     config.params = config.params || {};
     config.params.entrepriseId = selectedCompanyId;
   }
@@ -188,6 +188,14 @@ export const authApi = {
     } finally {
       clearTokens();
     }
+  },
+  async updateProfile(profileData) {
+    const res = await api.put("/api/auth/profile", profileData);
+    return res.data;
+  },
+  async changePassword(passwordData) {
+    const res = await api.put("/api/auth/change-password", passwordData);
+    return res.data;
   },
 };
 

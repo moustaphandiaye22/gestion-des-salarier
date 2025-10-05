@@ -119,6 +119,32 @@ export function AuthProvider({ children }) {
       clearTokens();
     },
     fetchCurrentUser,
+    async updateUserProfile(profileData) {
+      try {
+        const data = await authApi.updateProfile(profileData);
+        const utilisateur = data?.utilisateur;
+        setUser({
+          id: utilisateur?.id,
+          email: utilisateur?.email,
+          role: utilisateur?.role,
+          entrepriseId: utilisateur?.entrepriseId,
+          entreprise: utilisateur?.entreprise,
+          name: utilisateur?.name,
+        });
+        return utilisateur;
+      } catch (error) {
+        console.error("Erreur lors de la mise à jour du profil utilisateur:", error);
+        throw error;
+      }
+    },
+    async changePassword(currentPassword, newPassword) {
+      try {
+        await authApi.changePassword({ currentPassword, newPassword });
+      } catch (error) {
+        console.error("Erreur lors du changement de mot de passe:", error);
+        throw error;
+      }
+    },
   }), [user, isLoading, isAuthenticating]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

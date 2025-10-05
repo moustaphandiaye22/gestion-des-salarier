@@ -16,6 +16,12 @@ export class employeRepository {
     async findInactifs() {
         return mnprisma.employe.findMany({ where: { estActif: false }, include: { entreprise: true, bulletins: true, profession: true } });
     }
+    async findByMatricule(matricule) {
+        return mnprisma.employe.findFirst({
+            where: { matricule },
+            include: { entreprise: true, bulletins: true, profession: true }
+        });
+    }
     async setStatus(id, statutEmploi) {
         return mnprisma.employe.update({ where: { id }, data: { statutEmploi } });
     }
@@ -45,6 +51,13 @@ export class employeRepository {
         if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
             return mnprisma.employe.findMany({
                 where: { entrepriseId: user.entrepriseId },
+                include: { entreprise: true, bulletins: true, profession: true }
+            });
+        }
+        // Employé voit seulement ses propres informations
+        if (user.profil === 'EMPLOYE' && user.employeId) {
+            return mnprisma.employe.findMany({
+                where: { id: user.employeId },
                 include: { entreprise: true, bulletins: true, profession: true }
             });
         }

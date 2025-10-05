@@ -259,17 +259,56 @@ export declare class EmployeService {
     }>;
     getEmployeStats(employeId: number): Promise<{
         employe: {
-            id: number | undefined;
-            nom: string | undefined;
-            prenom: string | undefined;
-            matricule: string | undefined;
+            id: number;
+            nom: string;
+            prenom: string;
+            matricule: string;
         };
-        statistiques: {
-            totalPresences: any;
-            totalAbsences: any;
-            totalRetards: any;
-            heuresTravaillees: any;
-            dernierPointage: any;
+        period: {
+            month: number;
+            year: number;
+            monthName: string;
+            startDate: Date;
+            endDate: Date;
+        };
+        statistics: {
+            totalPointages: number;
+            presentDays: number;
+            absentDays: number;
+            lateDays: number;
+            totalHours: number;
+            attendanceRate: number;
+            avgHoursPerDay: number;
+            lastPointage: Date | null;
+            lastEntryTime: Date | null;
+            lastExitTime: Date | null;
+        };
+    }>;
+    updateEmployeStatsAfterPointage(employeId: number): Promise<{
+        employe: {
+            id: number;
+            nom: string;
+            prenom: string;
+            matricule: string;
+        };
+        period: {
+            month: number;
+            year: number;
+            monthName: string;
+            startDate: Date;
+            endDate: Date;
+        };
+        statistics: {
+            totalPointages: number;
+            presentDays: number;
+            absentDays: number;
+            lateDays: number;
+            totalHours: number;
+            attendanceRate: number;
+            avgHoursPerDay: number;
+            lastPointage: Date | null;
+            lastEntryTime: Date | null;
+            lastExitTime: Date | null;
         };
     }>;
     generateAllQrCodesForEntreprise(entrepriseId: number): Promise<{

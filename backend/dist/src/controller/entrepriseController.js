@@ -9,17 +9,20 @@ export class EntrepriseController {
             if (req.file) {
                 logoPath = `/assets/images/logos/${req.file.filename}`;
             }
-            // Remove logo from req.body if it exists (it might be a File object from FormData)
-            const { logo, estActive, ...bodyData } = req.body;
+            // Extract adminUser data and remove it from body
+            const { adminUser, logo, estActive, ...bodyData } = req.body;
             // Convert estActive string to boolean if needed
             const estActiveBool = estActive === 'true' || estActive === true;
-            const data = entrepriseSchema.parse({
+            const dataToParse = {
                 ...bodyData,
                 estActive: estActiveBool,
-                logo: logoPath
-            });
-            const entreprise = await entrepriseService.createEntreprise(data);
-            res.status(201).json({ message: 'Entreprise créée avec succès.', entreprise });
+                ...(logoPath !== null && { logo: logoPath }),
+                adminUser: adminUser ? JSON.parse(adminUser) : undefined
+            };
+            console.log('Data to parse:', JSON.stringify(dataToParse, null, 2));
+            const data = entrepriseSchema.parse(dataToParse);
+            const result = await entrepriseService.createEntreprise(data);
+            res.status(201).json({ message: 'Entreprise créée avec succès.', ...result });
         }
         catch (err) {
             if (err.errors) {

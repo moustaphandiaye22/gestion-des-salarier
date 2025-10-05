@@ -25,6 +25,13 @@ export class employeRepository implements InterfaceRepository<Employe> {
     return mnprisma.employe.findMany({ where: { estActif: false }, include: { entreprise: true, bulletins: true, profession: true } });
   }
 
+  async findByMatricule(matricule: string): Promise<Employe | null> {
+    return mnprisma.employe.findFirst({
+      where: { matricule },
+      include: { entreprise: true, bulletins: true, profession: true }
+    });
+  }
+
   async setStatus(id: number, statutEmploi: StatutEmploi): Promise<Employe> {
         return mnprisma.employe.update({ where: { id }, data: { statutEmploi } });
   }

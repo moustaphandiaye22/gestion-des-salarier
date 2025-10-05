@@ -1,9 +1,12 @@
 import { pointageRepository } from '../repositories/pointage.js';
 import { pointageSchema } from '../validators/pointage.js';
+import { EmployeService } from './employeService.js';
 export class PointageService {
     pointageRepository;
+    employeService;
     constructor() {
         this.pointageRepository = new pointageRepository();
+        this.employeService = new EmployeService();
     }
     async createPointage(data) {
         const parsed = pointageSchema.safeParse(data);
@@ -97,6 +100,10 @@ export class PointageService {
         today.setHours(0, 0, 0, 0);
         // Vérifier s'il y a déjà un pointage d'entrée aujourd'hui
         const existingPointages = await this.pointageRepository.findByEmployeAndDate(employeId, today);
+        const existingEntree = existingPointages.find(p => p.heureEntree && !p.heureSortie);
+        if (existingEntree) {
+            throw new Error('Vous avez déjà pointé votre entrée aujourd\'hui. Veuillez pointer votre sortie ou attendre demain pour une nouvelle entrée.');
+        }
         const pointageData = {
             datePointage: new Date(),
             heureEntree: new Date(),
@@ -108,7 +115,10 @@ export class PointageService {
             employeId,
             entrepriseId
         };
-        return this.pointageRepository.create(pointageData);
+        const pointage = await this.pointageRepository.create(pointageData);
+        // Mettre à jour les statistiques de présence de l'employé
+        await this.employeService.updateEmployeStatsAfterPointage(employeId);
+        return pointage;
     }
     async pointerSortie(employeId, entrepriseId, lieu, ipAddress, localisation) {
         const today = new Date();
@@ -117,17 +127,20 @@ export class PointageService {
         const existingPointages = await this.pointageRepository.findByEmployeAndDate(employeId, today);
         const pointageEntree = existingPointages.find(p => p.heureEntree && !p.heureSortie);
         if (!pointageEntree) {
-            throw new Error('Aucun pointage d\'entrée trouvé pour aujourd\'hui');
+            throw new Error('Vous devez d\'abord pointer votre entrée avant de pouvoir pointer votre sortie.');
         }
         const heureSortie = new Date();
         const dureeTravail = this.calculateDureeTravail(pointageEntree.heureEntree, heureSortie);
-        return this.pointageRepository.update(pointageEntree.id, {
+        const updatedPointage = await this.pointageRepository.update(pointageEntree.id, {
             heureSortie,
             dureeTravail,
             lieu,
             ipAddress,
             localisation
         });
+        // Mettre à jour les statistiques de présence de l'employé
+        await this.employeService.updateEmployeStatsAfterPointage(employeId);
+        return updatedPointage;
     }
     calculateDureeTravail(heureEntree, heureSortie) {
         const entree = new Date(heureEntree);

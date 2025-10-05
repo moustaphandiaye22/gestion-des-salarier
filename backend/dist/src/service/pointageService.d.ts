@@ -1,5 +1,6 @@
 export declare class PointageService {
     private pointageRepository;
+    private employeService;
     constructor();
     createPointage(data: any): Promise<any>;
     getPointage(id: number): Promise<any>;

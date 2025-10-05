@@ -8,11 +8,35 @@ import type { InterfaceRepository } from './InterfaceRepository.js';
 export class bulletinRepository implements InterfaceRepository<Bulletin> {
 
   async findByEmploye(employeId: number): Promise<Bulletin[]> {
-    return mnprisma.bulletin.findMany({ where: { employeId }, include: { employe: true, cycle: true, paiements: true } });
+    return mnprisma.bulletin.findMany({
+      where: { employeId },
+      include: {
+        employe: {
+          include: {
+            entreprise: true,
+            profession: true
+          }
+        },
+        cycle: true,
+        paiements: true
+      }
+    });
   }
 
   async findByCycle(cycleId: number): Promise<Bulletin[]> {
-  return mnprisma.bulletin.findMany({ where: { cycleId }, include: { employe: true, cycle: true, paiements: true } });
+  return mnprisma.bulletin.findMany({
+    where: { cycleId },
+    include: {
+      employe: {
+        include: {
+          entreprise: true,
+          profession: true
+        }
+      },
+      cycle: true,
+      paiements: true
+    }
+  });
   }
 
   async findByEmployeeAndCycle(employeId: number, cycleId: number): Promise<Bulletin | null> {
@@ -21,7 +45,16 @@ export class bulletinRepository implements InterfaceRepository<Bulletin> {
         employeId,
         cycleId
       },
-      include: { employe: true, cycle: true, paiements: true }
+      include: {
+        employe: {
+          include: {
+            entreprise: true,
+            profession: true
+          }
+        },
+        cycle: true,
+        paiements: true
+      }
     });
   }
 
@@ -34,18 +67,52 @@ export class bulletinRepository implements InterfaceRepository<Bulletin> {
   }
 
   async findById(id: number): Promise<Bulletin | null> {
-  return mnprisma.bulletin.findUnique({ where: { id }, include: { employe: true, cycle: true, paiements: true } });
+  return mnprisma.bulletin.findUnique({
+    where: { id },
+    include: {
+      employe: {
+        include: {
+          entreprise: true,
+          profession: true
+        }
+      },
+      cycle: true,
+      paiements: true
+    }
+  });
   }
 
   async findAll() : Promise<Bulletin[]> {
-  return mnprisma.bulletin.findMany({ include: { employe: true, cycle: true, paiements: true } });
+  return mnprisma.bulletin.findMany({
+    include: {
+      employe: {
+        include: {
+          entreprise: true,
+          profession: true
+        }
+      },
+      cycle: true,
+      paiements: true
+    }
+  });
   }
 
   async findAllByUser(user: any) : Promise<Bulletin[]> {
+    const includeClause = {
+      employe: {
+        include: {
+          entreprise: true,
+          profession: true
+        }
+      },
+      cycle: true,
+      paiements: true
+    };
+
     // Super Admin voit tous les bulletins
     if (user.profil === 'SUPER_ADMIN') {
       return mnprisma.bulletin.findMany({
-        include: { employe: true, cycle: true, paiements: true }
+        include: includeClause
       });
     }
 
@@ -57,7 +124,7 @@ export class bulletinRepository implements InterfaceRepository<Bulletin> {
             entrepriseId: user.entrepriseId
           }
         },
-        include: { employe: true, cycle: true, paiements: true }
+        include: includeClause
       });
     }
 
@@ -65,7 +132,7 @@ export class bulletinRepository implements InterfaceRepository<Bulletin> {
     if (user.profil === 'EMPLOYE' && user.employeId) {
       return mnprisma.bulletin.findMany({
         where: { employeId: user.employeId },
-        include: { employe: true, cycle: true, paiements: true }
+        include: includeClause
       });
     }
 

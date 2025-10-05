@@ -11,4 +11,7 @@ router.get('/me', authenticateToken, container.authController.getCurrentUser);
 router.post('/refresh', container.authController.refreshToken);
 router.post('/logout', container.authController.logout);
 
+router.put('/profile', authenticateToken, container.authController.updateProfile);
+router.put('/change-password', authenticateToken, container.authController.changePassword);
+
 export default router;

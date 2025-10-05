@@ -77,6 +77,24 @@ export default function Bulletins() {
     }
   }
 
+  async function handleDownloadPdf(bulletinId) {
+    try {
+      const blob = await bulletinsApi.downloadPdf(bulletinId);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `bulletin-${bulletinId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      showSuccess("Succès", "Bulletin téléchargé avec succès");
+    } catch (err) {
+      const errorMessage = err?.response?.data?.message || err.message;
+      showError("Erreur de téléchargement", errorMessage);
+    }
+  }
+
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-gray-50">
       <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8 py-8">
@@ -162,8 +180,18 @@ export default function Bulletins() {
                       </div>
                     </td>
                     <td className="px-2 py-2 text-sm">
-                      <div className="text-xs text-gray-500">
-                        {Array.isArray(row.paiements) ? row.paiements.length : 0} paiement(s)
+                      <div className="flex items-center space-x-2">
+                        <div className="text-xs text-gray-500">
+                          {Array.isArray(row.paiements) ? row.paiements.length : 0} paiement(s)
+                        </div>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleDownloadPdf(row.id)}
+                          className="text-xs px-2 py-1"
+                        >
+                          PDF
+                        </Button>
                       </div>
                     </td>
                   </tr>

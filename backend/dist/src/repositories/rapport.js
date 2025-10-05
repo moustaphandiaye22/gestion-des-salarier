@@ -21,6 +21,14 @@ export class rapportRepository {
                 where: { entrepriseId: user.entrepriseId }
             });
         }
+        // Employé voit seulement les rapports qui le concernent directement
+        if (user.profil === 'EMPLOYE' && user.employeId) {
+            return mnprisma.rapport.findMany({
+                where: {
+                    typeRapport: 'EMPLOYES' // Pour l'instant, seulement les rapports généraux sur les employés
+                }
+            });
+        }
         // Autres rôles n'ont pas accès aux rapports
         return [];
     }

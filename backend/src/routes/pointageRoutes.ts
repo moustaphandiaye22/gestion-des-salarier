@@ -17,14 +17,14 @@ router.post('/entree', requireReadAccess, pointageController.pointerEntree);
 // Pointer la sortie - employé, caissier, admin entreprise ou super admin
 router.post('/sortie', requireReadAccess, pointageController.pointerSortie);
 
-// Lister les pointages - caissier, admin entreprise (de leur entreprise) ou super admin
-router.get('/', requireReadAccess, pointageController.getAll);
+// Lister les pointages - admin entreprise ou super admin
+router.get('/', requireAdminOrSuper, pointageController.getAll);
 
-// Filtrer les pointages - caissier, admin entreprise ou super admin
-router.get('/filter', requireReadAccess, pointageController.filter);
+// Filtrer les pointages - admin entreprise ou super admin
+router.get('/filter', requireAdminOrSuper, pointageController.filter);
 
-// Obtenir un pointage par ID - caissier, admin entreprise ou super admin
-router.get('/:id', requireReadAccess, pointageController.getById);
+// Obtenir un pointage par ID - admin entreprise ou super admin
+router.get('/:id', requireAdminOrSuper, pointageController.getById);
 
 // Mettre à jour un pointage - admin entreprise ou super admin
 router.put('/:id', requireAdminOrSuper, pointageController.update);
@@ -32,25 +32,25 @@ router.put('/:id', requireAdminOrSuper, pointageController.update);
 // Supprimer un pointage - admin entreprise ou super admin
 router.delete('/:id', requireAdminOrSuper, pointageController.delete);
 
-// Obtenir les pointages d'un employé - caissier, admin entreprise ou super admin
-router.get('/employe/:employeId', requireReadAccess, pointageController.getByEmploye);
+// Obtenir les pointages d'un employé - admin entreprise ou super admin
+router.get('/employe/:employeId', requireAdminOrSuper, pointageController.getByEmploye);
 
-// Obtenir les pointages d'un employé pour une période - caissier, admin entreprise ou super admin
-router.get('/employe/:employeId/periode', requireReadAccess, pointageController.getByEmployeAndPeriode);
+// Obtenir les pointages d'un employé pour une période - admin entreprise ou super admin
+router.get('/employe/:employeId/periode', requireAdminOrSuper, pointageController.getByEmployeAndPeriode);
 
-// Obtenir les pointages d'une entreprise pour une période - caissier, admin entreprise ou super admin
-router.get('/entreprise/:entrepriseId/periode', requireReadAccess, pointageController.getByEntrepriseAndDate);
+// Obtenir les pointages d'une entreprise pour une période - admin entreprise ou super admin
+router.get('/entreprise/:entrepriseId/periode', requireAdminOrSuper, pointageController.getByEntrepriseAndDate);
 
-// Obtenir les pointages par type - caissier, admin entreprise ou super admin
-router.get('/type/:type', requireReadAccess, pointageController.getByType);
+// Obtenir les pointages par type - admin entreprise ou super admin
+router.get('/type/:type', requireAdminOrSuper, pointageController.getByType);
 
-// Obtenir les pointages par statut - caissier, admin entreprise ou super admin
-router.get('/statut/:statut', requireReadAccess, pointageController.getByStatut);
+// Obtenir les pointages par statut - admin entreprise ou super admin
+router.get('/statut/:statut', requireAdminOrSuper, pointageController.getByStatut);
 
-// Calculer les heures travaillées d'un employé - caissier, admin entreprise ou super admin
-router.get('/employe/:employeId/heures', requireReadAccess, pointageController.calculateHeuresTravaillees);
+// Calculer les heures travaillées d'un employé - admin entreprise ou super admin
+router.get('/employe/:employeId/heures', requireAdminOrSuper, pointageController.calculateHeuresTravaillees);
 
-// Obtenir les statistiques de pointage d'une entreprise - caissier, admin entreprise ou super admin
-router.get('/entreprise/:entrepriseId/statistiques', requireReadAccess, pointageController.getStatistiques);
+// Obtenir les statistiques de pointage d'une entreprise - admin entreprise ou super admin
+router.get('/entreprise/:entrepriseId/statistiques', requireAdminOrSuper, pointageController.getStatistiques);
 
 export default router;

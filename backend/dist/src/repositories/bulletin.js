@@ -2,10 +2,34 @@ import { PrismaClient, Prisma } from '@prisma/client';
 import { mnprisma } from '../config/db.js';
 export class bulletinRepository {
     async findByEmploye(employeId) {
-        return mnprisma.bulletin.findMany({ where: { employeId }, include: { employe: true, cycle: true, paiements: true } });
+        return mnprisma.bulletin.findMany({
+            where: { employeId },
+            include: {
+                employe: {
+                    include: {
+                        entreprise: true,
+                        profession: true
+                    }
+                },
+                cycle: true,
+                paiements: true
+            }
+        });
     }
     async findByCycle(cycleId) {
-        return mnprisma.bulletin.findMany({ where: { cycleId }, include: { employe: true, cycle: true, paiements: true } });
+        return mnprisma.bulletin.findMany({
+            where: { cycleId },
+            include: {
+                employe: {
+                    include: {
+                        entreprise: true,
+                        profession: true
+                    }
+                },
+                cycle: true,
+                paiements: true
+            }
+        });
     }
     async findByEmployeeAndCycle(employeId, cycleId) {
         return mnprisma.bulletin.findFirst({
@@ -13,7 +37,16 @@ export class bulletinRepository {
                 employeId,
                 cycleId
             },
-            include: { employe: true, cycle: true, paiements: true }
+            include: {
+                employe: {
+                    include: {
+                        entreprise: true,
+                        profession: true
+                    }
+                },
+                cycle: true,
+                paiements: true
+            }
         });
     }
     async setStatutPaiement(id, statutPaiement) {
@@ -23,16 +56,49 @@ export class bulletinRepository {
         return mnprisma.bulletin.create({ data });
     }
     async findById(id) {
-        return mnprisma.bulletin.findUnique({ where: { id }, include: { employe: true, cycle: true, paiements: true } });
+        return mnprisma.bulletin.findUnique({
+            where: { id },
+            include: {
+                employe: {
+                    include: {
+                        entreprise: true,
+                        profession: true
+                    }
+                },
+                cycle: true,
+                paiements: true
+            }
+        });
     }
     async findAll() {
-        return mnprisma.bulletin.findMany({ include: { employe: true, cycle: true, paiements: true } });
+        return mnprisma.bulletin.findMany({
+            include: {
+                employe: {
+                    include: {
+                        entreprise: true,
+                        profession: true
+                    }
+                },
+                cycle: true,
+                paiements: true
+            }
+        });
     }
     async findAllByUser(user) {
+        const includeClause = {
+            employe: {
+                include: {
+                    entreprise: true,
+                    profession: true
+                }
+            },
+            cycle: true,
+            paiements: true
+        };
         // Super Admin voit tous les bulletins
         if (user.profil === 'SUPER_ADMIN') {
             return mnprisma.bulletin.findMany({
-                include: { employe: true, cycle: true, paiements: true }
+                include: includeClause
             });
         }
         // Admin d'Entreprise et Caissier voient seulement les bulletins de leur entreprise
@@ -43,7 +109,14 @@ export class bulletinRepository {
                         entrepriseId: user.entrepriseId
                     }
                 },
-                include: { employe: true, cycle: true, paiements: true }
+                include: includeClause
+            });
+        }
+        // Employé voit seulement ses propres bulletins
+        if (user.profil === 'EMPLOYE' && user.employeId) {
+            return mnprisma.bulletin.findMany({
+                where: { employeId: user.employeId },
+                include: includeClause
             });
         }
         // Autres rôles n'ont pas accès aux bulletins

@@ -51,7 +51,8 @@ app.use('/api/bulletins', authenticateToken, bulletinRoutes);
 app.use('/api/paiements', authenticateToken, paiementRoutes);
 app.use('/api/cycles-paie', authenticateToken, cyclePaieRoutes);
 app.use('/api/pointages', authenticateToken, pointageRoutes);
-app.use('/api/qrcodes', authenticateToken, qrCodeRoutes);
+// QR Code routes (scan and pointer don't require auth, others do)
+app.use('/api/qrcodes', qrCodeRoutes);
 app.use('/api/parametres-entreprise', authenticateToken, parametreEntrepriseRoutes);
 app.use('/api/parametres-globaux', authenticateToken, parametreGlobalRoutes);
 app.use('/api/rapports', authenticateToken, rapportRoutes);
@@ -81,4 +82,6 @@ process.on('SIGINT', async () => {
     await prisma.$disconnect();
     process.exit(0);
 });
+// Export app for testing
+export default app;
 //# sourceMappingURL=index.js.map

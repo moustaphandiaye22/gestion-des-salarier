@@ -173,11 +173,23 @@ export default function Entreprises() {
                   <div key={row.id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                     <div className="p-4">
                       <div className="flex items-start justify-between mb-3">
-                        <h3 className="text-lg font-semibold text-gray-900 truncate">
-                          <Link to={`/entreprises/${row.id}`} className="text-blue-600 hover:text-blue-800 hover:underline">
-                            {row.nom}
-                          </Link>
-                        </h3>
+                        <div className="flex items-center gap-3">
+                          {row.logo && (
+                            <img
+                              src={row.logo}
+                              alt={`Logo ${row.nom}`}
+                              className="w-12 h-12 object-cover rounded-lg border border-gray-200"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                          )}
+                          <h3 className="text-lg font-semibold text-gray-900 truncate">
+                            <Link to={`/entreprises/${row.id}`} className="text-blue-600 hover:text-blue-800 hover:underline">
+                              {row.nom}
+                            </Link>
+                          </h3>
+                        </div>
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                           row.estActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>

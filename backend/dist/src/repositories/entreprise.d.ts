@@ -74,7 +74,11 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
         adresse: string | null;
         dateCreation: Date;
         description: string | null;
+        siteWeb: string | null;
+        secteurActivite: string | null;
         logo: string | null;
+        couleurPrimaire: string | null;
+        couleurSecondaire: string | null;
         estActive: boolean;
     }) | null>;
     findAll(): Promise<({
@@ -147,7 +151,11 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
         adresse: string | null;
         dateCreation: Date;
         description: string | null;
+        siteWeb: string | null;
+        secteurActivite: string | null;
         logo: string | null;
+        couleurPrimaire: string | null;
+        couleurSecondaire: string | null;
         estActive: boolean;
     })[]>;
     findAllByUser(user: any): Promise<({
@@ -220,7 +228,11 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
         adresse: string | null;
         dateCreation: Date;
         description: string | null;
+        siteWeb: string | null;
+        secteurActivite: string | null;
         logo: string | null;
+        couleurPrimaire: string | null;
+        couleurSecondaire: string | null;
         estActive: boolean;
     })[]>;
     update(id: number, data: Partial<Entreprise>): Promise<{
@@ -231,7 +243,11 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
         adresse: string | null;
         dateCreation: Date;
         description: string | null;
+        siteWeb: string | null;
+        secteurActivite: string | null;
         logo: string | null;
+        couleurPrimaire: string | null;
+        couleurSecondaire: string | null;
         estActive: boolean;
     }>;
     delete(id: number): Promise<void>;

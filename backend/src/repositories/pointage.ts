@@ -280,20 +280,26 @@ export class pointageRepository implements InterfaceRepository<Pointage> {
   }
 
   async bulkCreate(pointages: any[]): Promise<any[]> {
-    return mnprisma.pointage.createManyAndReturn({
-      data: pointages,
-      include: {
-        employe: {
-          select: {
-            id: true,
-            prenom: true,
-            nom: true,
-            matricule: true
-          }
-        },
-        entreprise: true
-      }
-    });
+    // Create pointages one by one since createManyAndReturn doesn't exist
+    const createdPointages = [];
+    for (const pointageData of pointages) {
+      const created = await mnprisma.pointage.create({
+        data: pointageData,
+        include: {
+          employe: {
+            select: {
+              id: true,
+              prenom: true,
+              nom: true,
+              matricule: true
+            }
+          },
+          entreprise: true
+        }
+      });
+      createdPointages.push(created);
+    }
+    return createdPointages;
   }
 
   async getStatistiques(entrepriseId: number, dateDebut: Date, dateFin: Date) {

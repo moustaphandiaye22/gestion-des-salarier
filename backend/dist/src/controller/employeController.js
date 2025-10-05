@@ -2,6 +2,7 @@ import { EmployeService } from '../service/employeService.js';
 import { SalaryCalculationService } from '../service/salaryCalculationService.js';
 import { ExportService } from '../service/exportService.js';
 import { employeSchema } from '../validators/employe.js';
+import { createErrorResponse, createSuccessResponse, createValidationErrorResponse } from '../utils/httpStatus.js';
 import * as XLSX from 'xlsx';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -18,10 +19,15 @@ export class EmployeController {
         }
         catch (err) {
             if (err.errors) {
-                res.status(400).json({ error: 'Erreur de validation des données.', details: err.errors });
+                const validationErrors = err.errors.map((error) => ({
+                    champ: error.path.join('.'),
+                    message: error.message,
+                    valeur: error.input
+                }));
+                res.status(400).json(createValidationErrorResponse(err.errors));
             }
             else {
-                res.status(400).json({ error: `Échec de la création de l'employé : ${err.message}` });
+                res.status(400).json(createErrorResponse('Création impossible', 'Une erreur technique s\'est produite lors de la création de l\'employé. Veuillez réessayer ou contacter le support si le problème persiste.'));
             }
         }
     }
@@ -38,29 +44,44 @@ export class EmployeController {
     async getById(req, res) {
         try {
             const id = Number(req.params.id);
+            if (isNaN(id) || id <= 0) {
+                return res.status(400).json({
+                    error: 'Identifiant d\'employé invalide',
+                    message: 'L\'identifiant de l\'employé doit être un nombre positif.',
+                    success: false
+                });
+            }
             const employe = await employeService.getEmploye(id);
             if (!employe) {
-                return res.status(404).json({ error: `Aucun employé trouvé avec l'identifiant ${id}.` });
+                return res.status(404).json(createErrorResponse('Employé non trouvé', `Aucun employé n'existe avec l'identifiant ${id}.`, 404));
             }
             res.json({ message: 'Employé récupéré avec succès.', employe });
         }
         catch (err) {
-            res.status(500).json({ error: `Impossible de récupérer l'employé : ${err.message}` });
+            res.status(500).json(createErrorResponse('Erreur serveur', 'Une erreur technique s\'est produite lors de la récupération de l\'employé. Veuillez réessayer ou contacter le support si le problème persiste.', 500));
         }
     }
     async update(req, res) {
         try {
             const id = Number(req.params.id);
+            if (isNaN(id) || id <= 0) {
+                return res.status(400).json(createErrorResponse('Identifiant d\'employé invalide', 'L\'identifiant de l\'employé doit être un nombre positif.'));
+            }
             const data = employeSchema.partial().parse(req.body);
             const employe = await employeService.updateEmploye(id, data);
             res.json({ message: 'Employé mis à jour avec succès.', employe });
         }
         catch (err) {
             if (err.errors) {
-                res.status(400).json({ error: 'Erreur de validation des données.', details: err.errors });
+                const validationErrors = err.errors.map((error) => ({
+                    champ: error.path.join('.'),
+                    message: error.message,
+                    valeur: error.input
+                }));
+                res.status(400).json(createValidationErrorResponse(err.errors));
             }
             else {
-                res.status(400).json({ error: `Échec de la mise à jour de l'employé : ${err.message}` });
+                res.status(400).json(createErrorResponse('Modification impossible', 'Une erreur technique s\'est produite lors de la modification de l\'employé. Veuillez réessayer ou contacter le support si le problème persiste.'));
             }
         }
     }

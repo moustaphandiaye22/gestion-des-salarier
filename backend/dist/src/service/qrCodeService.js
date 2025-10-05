@@ -19,19 +19,38 @@ export class QrCodeService {
         return qrCodeDataURL;
     }
     /**
-     * Génère le contenu du QR code (le texte encodé)
-     */
+      * Génère le contenu du QR code (le texte encodé)
+      */
     generateQrContent(employeId, entrepriseId) {
         return `EMP_${employeId}_${entrepriseId}_${Date.now()}`;
+    }
+    /**
+     * Extrait les informations d'un QR code sans validation complète
+     */
+    extractQrInfo(qrContent) {
+        try {
+            const parts = qrContent.split('_');
+            if (parts.length >= 3 && parts[0] === 'EMP' && parts[1] && parts[2]) {
+                const employeId = parseInt(parts[1]);
+                const entrepriseId = parseInt(parts[2]);
+                if (!isNaN(employeId) && !isNaN(entrepriseId)) {
+                    return { employeId, entrepriseId };
+                }
+            }
+            return null;
+        }
+        catch (error) {
+            return null;
+        }
     }
     /**
      * Valide un QR code scanné
      */
     validateQrCode(qrContent) {
         try {
-            // Format attendu: EMP_[employeId]_[entrepriseId]_[timestamp]
+            // Format attendu: EMP_[employeId]_[entrepriseId]_[timestamp]_[randomHex]
             const parts = qrContent.split('_');
-            if (parts.length < 4 || parts[0] !== 'EMP') {
+            if (parts.length < 3 || parts[0] !== 'EMP') {
                 return { isValid: false };
             }
             const employeIdStr = parts[1];
@@ -51,6 +70,7 @@ export class QrCodeService {
             };
         }
         catch (error) {
+            console.error('Erreur lors de la validation du QR code:', error);
             return { isValid: false };
         }
     }

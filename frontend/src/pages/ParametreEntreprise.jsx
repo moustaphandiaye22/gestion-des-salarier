@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardBody, Input, Select, Button } from "../components/ui";
-import { parametreEntrepriseApi, entreprisesApi } from "../utils/api";
+import { parametresGlobauxApi, entreprisesApi } from "../utils/api";
 import { PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useToast } from "../context/ToastContext";
 
@@ -11,16 +11,16 @@ export default function ParametreEntreprise() {
   const [entreprises, setEntreprises] = useState([]);
 
   const [selected, setSelected] = useState(null);
-  const [form, setForm] = useState({ cle: "", valeur: "", type: "STRING", entrepriseId: "" });
+  const [form, setForm] = useState({ cle: "", valeur: "", description: "", categorie: "GENERAL" });
   const [saving, setSaving] = useState(false);
 
   function update(k, v) { setForm((f) => ({ ...f, [k]: v })); }
 
   function load() {
     setError(null);
-    parametreEntrepriseApi
+    parametresGlobauxApi
       .list()
-      .then((data) => setList(Array.isArray(data) ? data : data?.items || []))
+      .then((data) => setList(Array.isArray(data) ? data : data?.parametres || []))
       .catch((err) => {
         const errorMessage = err?.response?.data?.message || err.message;
         setError(errorMessage);
@@ -39,16 +39,16 @@ export default function ParametreEntreprise() {
 
   useEffect(() => {
     if (!selected) return;
-    setForm({ cle: selected.cle || "", valeur: selected.valeur || "", type: selected.type || "STRING", entrepriseId: selected.entrepriseId || "" });
+    setForm({ cle: selected.cle || "", valeur: selected.valeur || "", description: selected.description || "", categorie: selected.categorie || "GENERAL" });
   }, [selected]);
 
   async function save() {
     setSaving(true);
     try {
-      if (selected?.id) await parametreEntrepriseApi.update(selected.id, form);
-      else await parametreEntrepriseApi.create(form);
+      if (selected?.id) await parametresGlobauxApi.update(selected.id, form);
+      else await parametresGlobauxApi.create(form);
       setSelected(null);
-      setForm({ cle: "", valeur: "", type: "STRING", entrepriseId: "" });
+      setForm({ cle: "", valeur: "", description: "", categorie: "GENERAL" });
       load();
       showSuccess("Succès", selected?.id ? "Paramètre modifié avec succès" : "Paramètre créé avec succès");
     } catch (err) {
