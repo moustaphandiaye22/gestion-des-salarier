@@ -12,6 +12,7 @@ export declare class SalaryCalculationService {
             id: number;
             nom: string;
             email: string | null;
+            motDePasse: string | null;
             estActif: boolean;
             entrepriseId: number;
             matricule: string;
@@ -28,6 +29,7 @@ export declare class SalaryCalculationService {
             allocations: import("@prisma/client/runtime/library").Decimal;
             deductions: import("@prisma/client/runtime/library").Decimal;
             professionId: number | null;
+            roleUtilisateur: import("@prisma/client").$Enums.RoleUtilisateur | null;
             qrCode: string | null;
             qrCodeGenere: Date | null;
             qrCodeImagePath: string | null;
@@ -105,13 +107,18 @@ export declare class SalaryCalculationService {
                 adresse: string | null;
                 dateCreation: Date;
                 description: string | null;
+                siteWeb: string | null;
+                secteurActivite: string | null;
                 logo: string | null;
+                couleurPrimaire: string | null;
+                couleurSecondaire: string | null;
                 estActive: boolean;
             };
         } & {
             id: number;
             nom: string;
             email: string | null;
+            motDePasse: string | null;
             estActif: boolean;
             entrepriseId: number;
             matricule: string;
@@ -128,6 +135,7 @@ export declare class SalaryCalculationService {
             allocations: import("@prisma/client/runtime/library").Decimal;
             deductions: import("@prisma/client/runtime/library").Decimal;
             professionId: number | null;
+            roleUtilisateur: import("@prisma/client").$Enums.RoleUtilisateur | null;
             qrCode: string | null;
             qrCodeGenere: Date | null;
             qrCodeImagePath: string | null;
@@ -159,7 +167,11 @@ export declare class SalaryCalculationService {
             adresse: string | null;
             dateCreation: Date;
             description: string | null;
+            siteWeb: string | null;
+            secteurActivite: string | null;
             logo: string | null;
+            couleurPrimaire: string | null;
+            couleurSecondaire: string | null;
             estActive: boolean;
         };
         latestBulletin: ({
@@ -167,6 +179,7 @@ export declare class SalaryCalculationService {
                 id: number;
                 nom: string;
                 email: string | null;
+                motDePasse: string | null;
                 estActif: boolean;
                 entrepriseId: number;
                 matricule: string;
@@ -183,6 +196,7 @@ export declare class SalaryCalculationService {
                 allocations: import("@prisma/client/runtime/library").Decimal;
                 deductions: import("@prisma/client/runtime/library").Decimal;
                 professionId: number | null;
+                roleUtilisateur: import("@prisma/client").$Enums.RoleUtilisateur | null;
                 qrCode: string | null;
                 qrCodeGenere: Date | null;
                 qrCodeImagePath: string | null;

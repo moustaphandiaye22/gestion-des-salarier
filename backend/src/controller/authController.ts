@@ -58,6 +58,32 @@ export class AuthController {
       utilisateur
     });
   });
+
+  updateProfile = asyncHandler(async (req: Request, res: Response) => {
+    Logger.info('Requête de mise à jour du profil reçue');
+    const utilisateur = (req as any).user;
+    if (!utilisateur) {
+      return res.status(401).json({ message: 'Utilisateur non authentifié' });
+    }
+    const result = await this.authService.updateProfile(utilisateur.id, req.body);
+    res.json({
+      message: 'Profil mis à jour avec succès.',
+      utilisateur: result.utilisateur
+    });
+  });
+
+  changePassword = asyncHandler(async (req: Request, res: Response) => {
+    Logger.info('Requête de changement de mot de passe reçue');
+    const utilisateur = (req as any).user;
+    if (!utilisateur) {
+      return res.status(401).json({ message: 'Utilisateur non authentifié' });
+    }
+    const { currentPassword, newPassword } = req.body;
+    await this.authService.changePassword(utilisateur.id, currentPassword, newPassword);
+    res.json({
+      message: 'Mot de passe changé avec succès.'
+    });
+  });
 }
 
 // Factory function pour créer le controller avec les dépendances

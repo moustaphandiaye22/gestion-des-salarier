@@ -8,6 +8,8 @@ export declare class AuthController {
     refreshToken: (req: Request, res: Response, next: NextFunction) => void;
     logout: (req: Request, res: Response, next: NextFunction) => void;
     getCurrentUser: (req: Request, res: Response, next: NextFunction) => void;
+    updateProfile: (req: Request, res: Response, next: NextFunction) => void;
+    changePassword: (req: Request, res: Response, next: NextFunction) => void;
 }
 export declare const createAuthController: (authService: IAuthService) => AuthController;
 //# sourceMappingURL=authController.d.ts.map

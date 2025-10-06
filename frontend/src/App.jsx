@@ -35,6 +35,7 @@ import Pointages from "./pages/Pointages";
 import PointageForm from "./pages/PointageForm";
 import QRCodeManagement from "./pages/QRCodeManagement";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
+import ChangePassword from "./pages/ChangePassword";
 
 // Role-based dashboard component
 function RoleBasedDashboard() {
@@ -61,6 +62,7 @@ function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/change-password" element={<ChangePassword />} />
 
       <Route
         path="/"
@@ -79,6 +81,17 @@ function App() {
           <ProtectedRoute>
             <MainLayout>
               <RoleBasedDashboard />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/cashier-dashboard"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <CaissierDashboard />
             </MainLayout>
           </ProtectedRoute>
         }
@@ -294,16 +307,7 @@ function App() {
         }
       />
 
-      <Route
-        path="/utilisateurs"
-        element={
-          <ProtectedRoute>
-            <MainLayout>
-              <Utilisateurs />
-            </MainLayout>
-          </ProtectedRoute>
-        }
-      />
+
 
       <Route
         path="/professions"

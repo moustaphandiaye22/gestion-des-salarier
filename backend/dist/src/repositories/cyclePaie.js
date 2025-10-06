@@ -8,7 +8,17 @@ export class cyclePaieRepository {
         return mnprisma.cyclePaie.update({ where: { id }, data: { statut } });
     }
     async create(data) {
-        return mnprisma.cyclePaie.create({ data });
+        try {
+            return await mnprisma.cyclePaie.create({ data });
+        }
+        catch (error) {
+            // Handle unique constraint violation
+            if (error.code === 'P2002' && error.meta?.target?.includes('pay_cycles_entrepriseId_nom_key')) {
+                const errorMessage = `Un cycle de paie avec le nom "${data.nom}" existe déjà pour cette entreprise.`;
+                throw new Error(errorMessage);
+            }
+            throw error;
+        }
     }
     async findById(id) {
         return mnprisma.cyclePaie.findUnique({ where: { id }, include: { entreprise: true, bulletins: true } });
@@ -34,7 +44,19 @@ export class cyclePaieRepository {
         return [];
     }
     async update(id, data) {
-        return mnprisma.cyclePaie.update({ where: { id }, data });
+        try {
+            return await mnprisma.cyclePaie.update({ where: { id }, data });
+        }
+        catch (error) {
+            // Handle unique constraint violation
+            if (error.code === 'P2002' && error.meta?.target?.includes('pay_cycles_entrepriseId_nom_key')) {
+                const errorMessage = data.nom
+                    ? `Un cycle de paie avec le nom "${data.nom}" existe déjà pour cette entreprise.`
+                    : 'Un cycle de paie avec ce nom existe déjà pour cette entreprise.';
+                throw new Error(errorMessage);
+            }
+            throw error;
+        }
     }
     async delete(id) {
         await mnprisma.cyclePaie.delete({ where: { id } });

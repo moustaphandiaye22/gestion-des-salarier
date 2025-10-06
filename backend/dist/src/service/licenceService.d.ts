@@ -22,7 +22,11 @@ export declare class LicenceService {
             adresse: string | null;
             dateCreation: Date;
             description: string | null;
+            siteWeb: string | null;
+            secteurActivite: string | null;
             logo: string | null;
+            couleurPrimaire: string | null;
+            couleurSecondaire: string | null;
             estActive: boolean;
         } | null;
     } & {
@@ -47,7 +51,11 @@ export declare class LicenceService {
             adresse: string | null;
             dateCreation: Date;
             description: string | null;
+            siteWeb: string | null;
+            secteurActivite: string | null;
             logo: string | null;
+            couleurPrimaire: string | null;
+            couleurSecondaire: string | null;
             estActive: boolean;
         } | null;
     } & {
@@ -72,7 +80,11 @@ export declare class LicenceService {
             adresse: string | null;
             dateCreation: Date;
             description: string | null;
+            siteWeb: string | null;
+            secteurActivite: string | null;
             logo: string | null;
+            couleurPrimaire: string | null;
+            couleurSecondaire: string | null;
             estActive: boolean;
         } | null;
     } & {
@@ -97,7 +109,11 @@ export declare class LicenceService {
             adresse: string | null;
             dateCreation: Date;
             description: string | null;
+            siteWeb: string | null;
+            secteurActivite: string | null;
             logo: string | null;
+            couleurPrimaire: string | null;
+            couleurSecondaire: string | null;
             estActive: boolean;
         } | null;
     } & {
@@ -135,7 +151,11 @@ export declare class LicenceService {
             adresse: string | null;
             dateCreation: Date;
             description: string | null;
+            siteWeb: string | null;
+            secteurActivite: string | null;
             logo: string | null;
+            couleurPrimaire: string | null;
+            couleurSecondaire: string | null;
             estActive: boolean;
         } | null;
     } & {
@@ -160,7 +180,11 @@ export declare class LicenceService {
             adresse: string | null;
             dateCreation: Date;
             description: string | null;
+            siteWeb: string | null;
+            secteurActivite: string | null;
             logo: string | null;
+            couleurPrimaire: string | null;
+            couleurSecondaire: string | null;
             estActive: boolean;
         } | null;
     } & {
@@ -185,7 +209,11 @@ export declare class LicenceService {
             adresse: string | null;
             dateCreation: Date;
             description: string | null;
+            siteWeb: string | null;
+            secteurActivite: string | null;
             logo: string | null;
+            couleurPrimaire: string | null;
+            couleurSecondaire: string | null;
             estActive: boolean;
         } | null;
     } & {
@@ -210,7 +238,11 @@ export declare class LicenceService {
             adresse: string | null;
             dateCreation: Date;
             description: string | null;
+            siteWeb: string | null;
+            secteurActivite: string | null;
             logo: string | null;
+            couleurPrimaire: string | null;
+            couleurSecondaire: string | null;
             estActive: boolean;
         } | null;
     } & {
@@ -235,7 +267,11 @@ export declare class LicenceService {
             adresse: string | null;
             dateCreation: Date;
             description: string | null;
+            siteWeb: string | null;
+            secteurActivite: string | null;
             logo: string | null;
+            couleurPrimaire: string | null;
+            couleurSecondaire: string | null;
             estActive: boolean;
         } | null;
     } & {

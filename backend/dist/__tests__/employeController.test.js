@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../index.js'; // Adjust path as needed
-import { ExportService } from './src/service/exportService.js';
+import { ExportService } from '../src/service/exportService.js';
 jest.mock('../src/service/exportService');
 describe('EmployeController', () => {
     describe('GET /api/employes/export/template', () => {

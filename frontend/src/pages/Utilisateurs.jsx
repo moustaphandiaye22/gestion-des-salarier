@@ -4,6 +4,7 @@ import { utilisateursApi } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { TrashIcon, PlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import UserForm from "../components/UserForm";
 
 export default function Utilisateurs() {
   const { selectedCompanyId } = useAuth();
@@ -12,6 +13,10 @@ export default function Utilisateurs() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [toDelete, setToDelete] = useState(null);
+
+  // Modal states
+  const [isUserFormOpen, setIsUserFormOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,6 +56,25 @@ export default function Utilisateurs() {
       showError("Erreur de suppression", errorMessage);
     }
   }
+
+  const handleAddUser = () => {
+    setEditingUser(null);
+    setIsUserFormOpen(true);
+  };
+
+  const handleEditUser = (user) => {
+    setEditingUser(user);
+    setIsUserFormOpen(true);
+  };
+
+  const handleUserFormSuccess = () => {
+    load();
+  };
+
+  const handleUserFormClose = () => {
+    setIsUserFormOpen(false);
+    setEditingUser(null);
+  };
 
   // Filtered rows based on search and filters
   const filteredRows = useMemo(() => {
@@ -129,7 +153,7 @@ export default function Utilisateurs() {
                     <option key={entreprise.id} value={entreprise.id}>{entreprise.nom}</option>
                   ))}
                 </Select>
-                <Button className="flex items-center gap-2">
+                <Button className="flex items-center gap-2" onClick={handleAddUser}>
                   <PlusIcon className="h-5 w-5" />
                   Ajouter
                 </Button>
@@ -164,6 +188,9 @@ export default function Utilisateurs() {
                      <td className="px-2 py-2 text-sm text-gray-700">{row.entreprise?.nom || '-'}</td>
                      <td className="px-2 py-2 text-sm">
                        <div className="flex gap-2">
+                         <Button variant="secondary" onClick={() => handleEditUser(row)} className="flex items-center gap-1">
+                           Modifier
+                         </Button>
                          <Button variant="danger" onClick={() => setToDelete(row)} className="flex items-center gap-1">
                            <TrashIcon className="h-4 w-4" />
                            Supprimer
@@ -182,6 +209,13 @@ export default function Utilisateurs() {
               message={`Confirmer la suppression de ${toDelete?.email || ''} ?`}
               onCancel={() => setToDelete(null)}
               onConfirm={handleDelete}
+            />
+
+            <UserForm
+              isOpen={isUserFormOpen}
+              onClose={handleUserFormClose}
+              onSuccess={handleUserFormSuccess}
+              user={editingUser}
             />
           </CardBody>
         </Card>

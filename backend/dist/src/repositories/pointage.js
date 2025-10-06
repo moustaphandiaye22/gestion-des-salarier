@@ -259,20 +259,26 @@ export class pointageRepository {
         await mnprisma.pointage.delete({ where: { id } });
     }
     async bulkCreate(pointages) {
-        return mnprisma.pointage.createManyAndReturn({
-            data: pointages,
-            include: {
-                employe: {
-                    select: {
-                        id: true,
-                        prenom: true,
-                        nom: true,
-                        matricule: true
-                    }
-                },
-                entreprise: true
-            }
-        });
+        // Create pointages one by one since createManyAndReturn doesn't exist
+        const createdPointages = [];
+        for (const pointageData of pointages) {
+            const created = await mnprisma.pointage.create({
+                data: pointageData,
+                include: {
+                    employe: {
+                        select: {
+                            id: true,
+                            prenom: true,
+                            nom: true,
+                            matricule: true
+                        }
+                    },
+                    entreprise: true
+                }
+            });
+            createdPointages.push(created);
+        }
+        return createdPointages;
     }
     async getStatistiques(entrepriseId, dateDebut, dateFin) {
         const totalPointages = await mnprisma.pointage.count({

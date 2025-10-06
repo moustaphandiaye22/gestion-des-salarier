@@ -9,11 +9,11 @@ router.post('/employe/:employeId/generate', requireAdminOrSuper, qrCodeControlle
 router.post('/employe/:employeId/regenerate', requireAdminOrSuper, qrCodeController.regenerateEmployeeQr);
 // Générer des QR codes pour tous les employés d'une entreprise - admin entreprise ou super admin
 router.post('/entreprise/:entrepriseId/generate-all', requireAdminOrSuper, qrCodeController.generateMultipleQrCodes);
-// Obtenir les informations QR code d'un employé - caissier, admin entreprise ou super admin
-router.get('/employe/:employeId/info', requireReadAccess, qrCodeController.getQrCodeInfo);
-// Scanner un QR code (validation) - accessible à tous les rôles authentifiés
-router.post('/scan', requireReadAccess, qrCodeController.scanQrCode);
-// Pointer via QR code (entrée ou sortie automatique) - accessible à tous les rôles authentifiés
-router.post('/pointer', requireReadAccess, qrCodeController.pointerParQrCode);
+// Obtenir les informations QR code d'un employé - accessible sans authentification pour l'affichage
+router.get('/employe/:employeId/info', qrCodeController.getQrCodeInfo);
+// Scanner un QR code (validation) - accessible sans authentification pour le pointage
+router.post('/scan', qrCodeController.scanQrCode);
+// Pointer via QR code (entrée ou sortie automatique) - accessible sans authentification pour le pointage
+router.post('/pointer', qrCodeController.pointerParQrCode);
 export default router;
 //# sourceMappingURL=qrCodeRoutes.js.map

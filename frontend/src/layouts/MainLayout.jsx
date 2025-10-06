@@ -3,6 +3,7 @@ import { NavLink, Link, useLocation } from "react-router-dom";
 import { Button } from "../components/ui";
 import { useAuth } from "../context/AuthContext";
 import { entreprisesApi, API_BASE_URL } from "../utils/api";
+import UserProfileDropdown from "../components/UserProfileDropdown";
 import {
   HomeIcon,
   UsersIcon,
@@ -27,7 +28,9 @@ function cx(...cls) {
 
 const NAV = [
     { to: "/dashboard", label: "Tableau de bord", icon: ChartPieIcon },
+    { to: "/cashier-dashboard", label: "Tableau de bord Caissier", icon: ChartPieIcon, cashierOnly: true },
     { to: "/employees", label: "Employés", icon: UsersIcon },
+    { to: "/utilisateurs", label: "Utilisateurs", icon: UserCircleIcon },
   { to: "/pointages", label: "Pointages", icon: ClockIcon },
   { to: "/qrcodes", label: "QR Codes", icon: QrCodeIcon },
   { to: "/entreprises", label: "Entreprises", icon: BuildingOfficeIcon },
@@ -53,6 +56,15 @@ export default function MainLayout({ children }) {
   const [selectedCompanyName, setSelectedCompanyName] = useState(null);
   const [companies, setCompanies] = useState([]);
 
+  // Show loading if user is not loaded yet
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
   // Fetch company logo and name when user is authenticated
   useEffect(() => {
     async function loadCompanyInfo() {
@@ -72,6 +84,9 @@ export default function MainLayout({ children }) {
             }
           } catch (error) {
             console.error('Error loading selected company info:', error);
+            // Reset selected company if loading fails
+            setSelectedCompanyId(null);
+            setSelectedCompanyName(null);
             setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
             setCompanyName("SalairePro");
           }
@@ -136,9 +151,12 @@ export default function MainLayout({ children }) {
       if (it.superAdminOnly) {
         return user.role === 'SUPER_ADMIN';
       }
-      // For CAISSIER, only show payment-related items
+      if (it.cashierOnly) {
+        return user.role === 'CAISSIER';
+      }
+      // For CAISSIER, only show payment-related items and cashier dashboard
       if (user.role === 'CAISSIER') {
-        return ['/paiements', '/bulletins', '/pointages', '/qrcodes', '/rapports', '/journal-audit'].includes(it.to);
+        return ['/cashier-dashboard', '/paiements', '/bulletins', '/rapports', '/journal-audit'].includes(it.to);
       }
       // For ADMIN_ENTREPRISE, filter menu items to only allowed ones
       if (user.role === 'ADMIN_ENTREPRISE') {
@@ -199,7 +217,7 @@ export default function MainLayout({ children }) {
       <aside className="hidden lg:flex lg:flex-col lg:w-64 bg-white border-r border-surface-200 shadow-soft">
         {/* Logo et titre */}
         <div className="flex items-center gap-3 px-6 py-4 border-b border-surface-200">
-          <img src={companyLogo} alt="Logo" className="h-8 w-8" />
+          <img src={companyLogo} alt="Logo" className="h-8 w-8" onError={(e) => e.target.src = "/img/logo-ct.png"} />
           <div>
             <h1 className="text-lg font-bold text-primary-900">{companyName}</h1>
             <p className="text-xs text-surface-500">Gestion intelligente</p>
@@ -274,16 +292,7 @@ export default function MainLayout({ children }) {
                 </div>
               )}
 
-              {/* User info */}
-              <div className="flex items-center gap-3 p-3 bg-surface-50 rounded-lg">
-                <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                  <UserCircleIcon className="w-5 h-5 text-primary-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-primary-900 truncate">{user?.email}</p>
-                  <p className="text-xs text-surface-500 capitalize">{user?.role}</p>
-                </div>
-              </div>
+
             </div>
           )}
         </div>
@@ -302,7 +311,7 @@ export default function MainLayout({ children }) {
           {/* Logo mobile */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-surface-200">
             <div className="flex items-center gap-3">
-              <img src={companyLogo} alt="Logo" className="h-8 w-8" />
+              <img src={companyLogo} alt="Logo" className="h-8 w-8" onError={(e) => e.target.src = "/img/logo-ct.png"} />
               <div>
                 <h1 className="text-lg font-bold text-primary-900">{companyName}</h1>
                 <p className="text-xs text-surface-500">Gestion intelligente</p>
@@ -403,14 +412,7 @@ export default function MainLayout({ children }) {
 
             <div className="flex items-center gap-4">
               {isAuthenticated ? (
-                <Button
-                  variant="outline"
-                  onClick={logout}
-                  className="flex items-center gap-2"
-                >
-                  <ArrowRightOnRectangleIcon className="w-4 h-4" />
-                  Déconnexion
-                </Button>
+                <UserProfileDropdown />
               ) : (
                 <div className="flex items-center gap-4">
                   <Link

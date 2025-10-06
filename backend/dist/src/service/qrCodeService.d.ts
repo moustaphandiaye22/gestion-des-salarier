@@ -4,9 +4,16 @@ export declare class QrCodeService {
      */
     generateEmployeeQrCode(employeId: number, entrepriseId: number): Promise<string>;
     /**
-     * Génère le contenu du QR code (le texte encodé)
-     */
+      * Génère le contenu du QR code (le texte encodé)
+      */
     generateQrContent(employeId: number, entrepriseId: number): string;
+    /**
+     * Extrait les informations d'un QR code sans validation complète
+     */
+    extractQrInfo(qrContent: string): {
+        employeId?: number;
+        entrepriseId?: number;
+    } | null;
     /**
      * Valide un QR code scanné
      */

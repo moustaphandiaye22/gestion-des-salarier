@@ -126,6 +126,8 @@ export default function EmployeeForm() {
     tauxJournalier: "",
     allocations: "",
     deductions: "",
+    roleUtilisateur: "EMPLOYE",
+    motDePasse: "",
     estActif: true,
     entrepriseId: "",
     professionId: "",
@@ -224,6 +226,8 @@ export default function EmployeeForm() {
           tauxJournalier: data.tauxJournalier || "",
           allocations: data.allocations || "",
           deductions: data.deductions || "",
+          roleUtilisateur: data.roleUtilisateur || "EMPLOYE",
+          motDePasse: "", // Ne pas pré-remplir le mot de passe en édition
           estActif: data.estActif ?? true,
           entrepriseId: data.entrepriseId || "",
           professionId: data.professionId || "",
@@ -300,6 +304,8 @@ export default function EmployeeForm() {
         tauxJournalier: form.tauxJournalier ? parseFloat(form.tauxJournalier) : null,
         allocations: form.allocations ? parseFloat(form.allocations) : 0,
         deductions: form.deductions ? parseFloat(form.deductions) : 0,
+        roleUtilisateur: form.roleUtilisateur,
+        motDePasse: form.motDePasse || null,
         estActif: form.estActif,
         entrepriseId: parseInt(form.entrepriseId),
         professionId: form.professionId ? parseInt(form.professionId) : null,
@@ -455,6 +461,25 @@ export default function EmployeeForm() {
                   error={errors.deductions}
                 />
               </div>
+              <Select label="Rôle utilisateur" value={form.roleUtilisateur} onChange={(e) => update("roleUtilisateur", e.target.value)} required>
+                <option value="EMPLOYE">Employé (pas d'accès système)</option>
+                <option value="CAISSIER">Caissier (accès au système)</option>
+              </Select>
+              {form.roleUtilisateur === 'CAISSIER' && (
+                <div>
+                  <Input
+                    label="Mot de passe"
+                    type="password"
+                    value={form.motDePasse}
+                    onChange={(e) => update("motDePasse", e.target.value)}
+                    placeholder="Mot de passe pour l'accès caissier"
+                    required={!isEdit}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {!isEdit ? "Requis pour créer un compte caissier" : "Laisser vide pour conserver le mot de passe actuel"}
+                  </p>
+                </div>
+              )}
               {(form.salaireBase || form.allocations || form.deductions) && (
                 <div className="md:col-span-2 bg-blue-50 p-4 rounded-lg border border-blue-200">
                   <h3 className="text-lg font-semibold text-blue-900 mb-3">Aperçu du salaire</h3>

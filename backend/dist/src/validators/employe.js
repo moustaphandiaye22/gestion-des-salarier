@@ -36,6 +36,8 @@ export const employeSchema = z.object({
     tauxJournalier: z.number().min(0, 'Le taux journalier doit être positif.').optional().nullable(),
     allocations: z.number().min(0, 'Les allocations doivent être positives ou nulles.').optional().default(0),
     deductions: z.number().min(0, 'Les déductions doivent être positives ou nulles.').optional().default(0),
+    roleUtilisateur: z.enum(['EMPLOYE', 'CAISSIER']).default('EMPLOYE'),
+    motDePasse: z.string().optional().nullable(),
     estActif: z.boolean().optional().default(true),
     entrepriseId: z.number(),
     professionId: z.number().optional().nullable(),

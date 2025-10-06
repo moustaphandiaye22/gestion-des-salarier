@@ -73,7 +73,7 @@ export default function CaissierDashboard() {
 
   async function handleDownloadReport(rapportId) {
     try {
-      const blob = await rapportsApi.downloadPdf(rapportId);
+      const blob = await rapportsApi.getPdf(rapportId);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

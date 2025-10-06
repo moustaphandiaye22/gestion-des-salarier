@@ -5,6 +5,7 @@ export declare class employeRepository implements InterfaceRepository<Employe> {
     findByTypeContrat(typeContrat: TypeContrat): Promise<Employe[]>;
     findActifs(): Promise<Employe[]>;
     findInactifs(): Promise<Employe[]>;
+    findByMatricule(matricule: string): Promise<Employe | null>;
     setStatus(id: number, statutEmploi: StatutEmploi): Promise<Employe>;
     create(data: Omit<Employe, "id">): Promise<Employe>;
     findById(id: number): Promise<Employe | null>;

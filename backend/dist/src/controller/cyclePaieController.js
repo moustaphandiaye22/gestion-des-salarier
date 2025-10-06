@@ -1,19 +1,31 @@
 import { CyclePaieService } from '../service/cyclePaieService.js';
 import { cyclePaieSchema } from '../validators/cyclePaie.js';
+import { createErrorResponse, createSuccessResponse, createValidationErrorResponse } from '../utils/httpStatus.js';
 const cyclePaieService = new CyclePaieService();
 export class CyclePaieController {
     async create(req, res) {
         try {
             const data = cyclePaieSchema.parse(req.body);
             const cycle = await cyclePaieService.createCyclePaie(data);
-            res.status(201).json({ message: 'Cycle de paie créé avec succès.', cycle });
+            res.status(201).json(createSuccessResponse('Cycle de paie créé avec succès.', cycle));
         }
         catch (err) {
             if (err.errors) {
-                res.status(400).json({ error: 'Erreur de validation des données.', details: err.errors });
+                const validationErrors = err.errors.map((error) => ({
+                    champ: error.path.join('.'),
+                    message: error.message,
+                    valeur: error.input
+                }));
+                res.status(400).json(createValidationErrorResponse(err.errors));
             }
             else {
-                res.status(400).json({ error: `Échec de la création du cycle de paie : ${err.message}` });
+                // Handle unique constraint errors with user-friendly messages
+                if (err.message.includes('existe déjà')) {
+                    res.status(400).json(createErrorResponse('Nom de cycle déjà utilisé', err.message));
+                }
+                else {
+                    res.status(400).json(createErrorResponse('Création impossible', 'Une erreur technique s\'est produite lors de la création du cycle de paie. Veuillez réessayer ou contacter le support si le problème persiste.'));
+                }
             }
         }
     }
@@ -29,29 +41,56 @@ export class CyclePaieController {
     async getById(req, res) {
         try {
             const id = Number(req.params.id);
+            if (isNaN(id) || id <= 0) {
+                return res.status(400).json({
+                    error: 'Identifiant invalide',
+                    message: 'L\'identifiant du cycle de paie doit être un nombre positif.',
+                    success: false
+                });
+            }
             const cycle = await cyclePaieService.getCyclePaie(id);
             if (!cycle) {
-                return res.status(404).json({ error: `Aucun cycle de paie trouvé avec l'identifiant ${id}.` });
+                return res.status(404).json(createErrorResponse('Cycle de paie non trouvé', `Aucun cycle de paie n'existe avec l'identifiant ${id}.`, 404));
             }
-            res.json({ message: 'Cycle de paie récupéré avec succès.', cycle });
+            res.json(createSuccessResponse('Cycle de paie récupéré avec succès.', cycle));
         }
         catch (err) {
-            res.status(500).json({ error: `Impossible de récupérer le cycle de paie : ${err.message}` });
+            res.status(500).json(createErrorResponse('Erreur serveur', 'Une erreur technique s\'est produite lors de la récupération du cycle de paie. Veuillez réessayer ou contacter le support si le problème persiste.', 500));
         }
     }
     async update(req, res) {
         try {
             const id = Number(req.params.id);
-            const data = cyclePaieSchema.partial().parse(req.body);
+            // Validate that the ID is a valid number
+            if (isNaN(id) || id <= 0) {
+                return res.status(400).json(createErrorResponse('Identifiant de cycle invalide', 'L\'identifiant du cycle de paie doit être un nombre positif.'));
+            }
+            // If entrepriseId is in query params but not in body, add it to body for validation
+            const bodyWithEntrepriseId = { ...req.body };
+            if (req.query.entrepriseId && !req.body.entrepriseId) {
+                bodyWithEntrepriseId.entrepriseId = parseInt(req.query.entrepriseId);
+            }
+            const data = cyclePaieSchema.partial().parse(bodyWithEntrepriseId);
             const cycle = await cyclePaieService.updateCyclePaie(id, data);
-            res.json({ message: 'Cycle de paie mis à jour avec succès.', cycle });
+            res.json(createSuccessResponse('Cycle de paie mis à jour avec succès.', cycle));
         }
         catch (err) {
             if (err.errors) {
-                res.status(400).json({ error: 'Erreur de validation des données.', details: err.errors });
+                const validationErrors = err.errors.map((error) => ({
+                    champ: error.path.join('.'),
+                    message: error.message,
+                    valeur: error.input
+                }));
+                res.status(400).json(createValidationErrorResponse(err.errors));
             }
             else {
-                res.status(400).json({ error: `Échec de la mise à jour du cycle de paie : ${err.message}` });
+                // Handle unique constraint errors with user-friendly messages
+                if (err.message.includes('existe déjà')) {
+                    res.status(400).json(createErrorResponse('Nom de cycle déjà utilisé', err.message));
+                }
+                else {
+                    res.status(400).json(createErrorResponse('Modification impossible', 'Une erreur technique s\'est produite lors de la modification du cycle de paie. Veuillez réessayer ou contacter le support si le problème persiste.'));
+                }
             }
         }
     }

@@ -760,69 +760,13 @@ async function main() {
 
   console.log('Sample exports created');
 
-  // Check if company parameters already exist
-  const existingCompanyParams = await prisma.parametreEntreprise.findMany({
-    where: {
-      OR: [
-        { entrepriseId: entreprise1.id, cle: 'devise' },
-        { entrepriseId: entreprise1.id, cle: 'langue' },
-        { entrepriseId: entreprise1.id, cle: 'frequence_paie' },
-        { entrepriseId: entreprise2.id, cle: 'devise' },
-        { entrepriseId: entreprise2.id, cle: 'langue' },
-      ],
-    },
-  });
-
-  if (existingCompanyParams.length === 0) {
-    // Create ParametreEntreprise
-    await prisma.parametreEntreprise.create({
-      data: {
-        cle: 'devise',
-        valeur: 'XOF',
-        entrepriseId: entreprise1.id,
-      },
-    });
-
-    await prisma.parametreEntreprise.create({
-      data: {
-        cle: 'langue',
-        valeur: 'fr',
-        entrepriseId: entreprise1.id,
-      },
-    });
-
-    await prisma.parametreEntreprise.create({
-      data: {
-        cle: 'frequence_paie',
-        valeur: 'mensuelle',
-        entrepriseId: entreprise1.id,
-      },
-    });
-
-    await prisma.parametreEntreprise.create({
-      data: {
-        cle: 'devise',
-        valeur: 'XOF',
-        entrepriseId: entreprise2.id,
-      },
-    });
-
-    await prisma.parametreEntreprise.create({
-      data: {
-        cle: 'langue',
-        valeur: 'fr',
-        entrepriseId: entreprise2.id,
-      },
-    });
-  }
-
-  console.log('Parametres entreprise created');
+  console.log('Parametres entreprise skipped - moved to global parameters');
 
   // Check if global parameters already exist
   const existingGlobalParams = await prisma.parametreGlobal.findMany({
     where: {
       cle: {
-        in: ['app_name', 'app_version', 'max_file_size', 'session_timeout', 'support_email', 'maintenance_mode'],
+        in: ['app_name', 'app_version', 'max_file_size', 'session_timeout', 'support_email', 'maintenance_mode', 'devise', 'langue', 'frequence_paie'],
       },
     },
   });
@@ -880,6 +824,34 @@ async function main() {
         valeur: 'false',
         description: 'Mode maintenance activé/désactivé',
         categorie: 'MAINTENANCE',
+      },
+    });
+
+    // Company parameters moved to global
+    await prisma.parametreGlobal.create({
+      data: {
+        cle: 'devise',
+        valeur: 'XOF',
+        description: 'Devise par défaut (Franc CFA)',
+        categorie: 'FINANCE',
+      },
+    });
+
+    await prisma.parametreGlobal.create({
+      data: {
+        cle: 'langue',
+        valeur: 'fr',
+        description: 'Langue par défaut de l\'application',
+        categorie: 'GENERAL',
+      },
+    });
+
+    await prisma.parametreGlobal.create({
+      data: {
+        cle: 'frequence_paie',
+        valeur: 'mensuelle',
+        description: 'Fréquence de paie par défaut',
+        categorie: 'PAIE',
       },
     });
   }

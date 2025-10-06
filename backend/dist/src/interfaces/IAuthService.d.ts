@@ -26,5 +26,9 @@ export interface IAuthService {
     login(data: LoginData): Promise<AuthResponse>;
     refreshToken(refreshToken: string): Promise<RefreshResponse>;
     logout(refreshToken: string): Promise<LogoutResponse>;
+    updateProfile(userId: string, profileData: any): Promise<{
+        utilisateur: Utilisateur;
+    }>;
+    changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void>;
 }
 //# sourceMappingURL=IAuthService.d.ts.map

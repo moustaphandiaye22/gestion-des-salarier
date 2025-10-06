@@ -55,7 +55,7 @@ export class EmployeService {
   }
 
   async getEmploye(id: number) {
-   return this.employeRepository.findById(id); 
+   return this.employeRepository.findById(id);
   }
 
   async getAllEmployes(user?: any, entrepriseId?: number) {
@@ -68,11 +68,11 @@ export class EmployeService {
   async updateEmploye(id: number, data: any) {
     const parsed = employeSchema.partial().safeParse(data);
     if (!parsed.success) throw parsed.error;
-   return this.employeRepository.update(id, data); 
+   return this.employeRepository.update(id, data);
   }
 
   async deleteEmploye(id: number) {
-   return this.employeRepository.delete(id); 
+   return this.employeRepository.delete(id);
   }
 
   async filterEmployes(filters: any) {
@@ -143,20 +143,29 @@ export class EmployeService {
   }
 
   async getEmployeByQrCode(qrContent: string) {
+    // D'abord essayer de valider comme QR code système (format EMP_...)
     const validation = this.qrCodeService.validateQrCode(qrContent);
-    if (!validation.isValid) {
-      throw new Error('QR code invalide');
+    if (validation.isValid) {
+      const employe = await this.employeRepository.findById(validation.employeId!);
+      if (!employe) {
+        throw new Error('Employé non trouvé');
+      }
+
+      if (employe.entrepriseId !== validation.entrepriseId) {
+        throw new Error('QR code ne correspond pas à l\'entreprise');
+      }
+
+      return employe;
     }
 
-    const employe = await this.employeRepository.findById(validation.employeId!);
+    // Si ce n'est pas un QR code système, essayer de chercher par matricule
+    console.log(`QR code "${qrContent}" n'est pas un QR code système, recherche par matricule...`);
+    const employe = await this.employeRepository.findByMatricule(qrContent);
     if (!employe) {
-      throw new Error('Employé non trouvé');
+      throw new Error(`Aucun employé trouvé avec le matricule "${qrContent}"`);
     }
 
-    if (employe.entrepriseId !== validation.entrepriseId) {
-      throw new Error('QR code ne correspond pas à l\'entreprise');
-    }
-
+    console.log(`Employé trouvé par matricule: ${employe.prenom} ${employe.nom} (${employe.matricule})`);
     return employe;
   }
 

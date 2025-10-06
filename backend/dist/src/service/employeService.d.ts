@@ -9,6 +9,7 @@ export declare class EmployeService {
         id: number;
         nom: string;
         email: string | null;
+        motDePasse: string | null;
         estActif: boolean;
         entrepriseId: number;
         matricule: string;
@@ -25,6 +26,7 @@ export declare class EmployeService {
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
         professionId: number | null;
+        roleUtilisateur: import("@prisma/client").$Enums.RoleUtilisateur | null;
         qrCode: string | null;
         qrCodeGenere: Date | null;
         qrCodeImagePath: string | null;
@@ -38,6 +40,7 @@ export declare class EmployeService {
         id: number;
         nom: string;
         email: string | null;
+        motDePasse: string | null;
         estActif: boolean;
         entrepriseId: number;
         matricule: string;
@@ -54,6 +57,7 @@ export declare class EmployeService {
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
         professionId: number | null;
+        roleUtilisateur: import("@prisma/client").$Enums.RoleUtilisateur | null;
         qrCode: string | null;
         qrCodeGenere: Date | null;
         qrCodeImagePath: string | null;
@@ -67,6 +71,7 @@ export declare class EmployeService {
         id: number;
         nom: string;
         email: string | null;
+        motDePasse: string | null;
         estActif: boolean;
         entrepriseId: number;
         matricule: string;
@@ -83,6 +88,7 @@ export declare class EmployeService {
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
         professionId: number | null;
+        roleUtilisateur: import("@prisma/client").$Enums.RoleUtilisateur | null;
         qrCode: string | null;
         qrCodeGenere: Date | null;
         qrCodeImagePath: string | null;
@@ -96,6 +102,7 @@ export declare class EmployeService {
         id: number;
         nom: string;
         email: string | null;
+        motDePasse: string | null;
         estActif: boolean;
         entrepriseId: number;
         matricule: string;
@@ -112,6 +119,7 @@ export declare class EmployeService {
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
         professionId: number | null;
+        roleUtilisateur: import("@prisma/client").$Enums.RoleUtilisateur | null;
         qrCode: string | null;
         qrCodeGenere: Date | null;
         qrCodeImagePath: string | null;
@@ -126,6 +134,7 @@ export declare class EmployeService {
         id: number;
         nom: string;
         email: string | null;
+        motDePasse: string | null;
         estActif: boolean;
         entrepriseId: number;
         matricule: string;
@@ -142,6 +151,7 @@ export declare class EmployeService {
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
         professionId: number | null;
+        roleUtilisateur: import("@prisma/client").$Enums.RoleUtilisateur | null;
         qrCode: string | null;
         qrCodeGenere: Date | null;
         qrCodeImagePath: string | null;
@@ -155,6 +165,7 @@ export declare class EmployeService {
         id: number;
         nom: string;
         email: string | null;
+        motDePasse: string | null;
         estActif: boolean;
         entrepriseId: number;
         matricule: string;
@@ -171,6 +182,7 @@ export declare class EmployeService {
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
         professionId: number | null;
+        roleUtilisateur: import("@prisma/client").$Enums.RoleUtilisateur | null;
         qrCode: string | null;
         qrCodeGenere: Date | null;
         qrCodeImagePath: string | null;
@@ -211,6 +223,7 @@ export declare class EmployeService {
         id: number;
         nom: string;
         email: string | null;
+        motDePasse: string | null;
         estActif: boolean;
         entrepriseId: number;
         matricule: string;
@@ -227,6 +240,7 @@ export declare class EmployeService {
         allocations: import("@prisma/client/runtime/library").Decimal;
         deductions: import("@prisma/client/runtime/library").Decimal;
         professionId: number | null;
+        roleUtilisateur: import("@prisma/client").$Enums.RoleUtilisateur | null;
         qrCode: string | null;
         qrCodeGenere: Date | null;
         qrCodeImagePath: string | null;
@@ -259,17 +273,56 @@ export declare class EmployeService {
     }>;
     getEmployeStats(employeId: number): Promise<{
         employe: {
-            id: number | undefined;
-            nom: string | undefined;
-            prenom: string | undefined;
-            matricule: string | undefined;
+            id: number;
+            nom: string;
+            prenom: string;
+            matricule: string;
         };
-        statistiques: {
-            totalPresences: any;
-            totalAbsences: any;
-            totalRetards: any;
-            heuresTravaillees: any;
-            dernierPointage: any;
+        period: {
+            month: number;
+            year: number;
+            monthName: string;
+            startDate: Date;
+            endDate: Date;
+        };
+        statistics: {
+            totalPointages: number;
+            presentDays: number;
+            absentDays: number;
+            lateDays: number;
+            totalHours: number;
+            attendanceRate: number;
+            avgHoursPerDay: number;
+            lastPointage: Date | null;
+            lastEntryTime: Date | null;
+            lastExitTime: Date | null;
+        };
+    }>;
+    updateEmployeStatsAfterPointage(employeId: number): Promise<{
+        employe: {
+            id: number;
+            nom: string;
+            prenom: string;
+            matricule: string;
+        };
+        period: {
+            month: number;
+            year: number;
+            monthName: string;
+            startDate: Date;
+            endDate: Date;
+        };
+        statistics: {
+            totalPointages: number;
+            presentDays: number;
+            absentDays: number;
+            lateDays: number;
+            totalHours: number;
+            attendanceRate: number;
+            avgHoursPerDay: number;
+            lastPointage: Date | null;
+            lastEntryTime: Date | null;
+            lastExitTime: Date | null;
         };
     }>;
     generateAllQrCodesForEntreprise(entrepriseId: number): Promise<{

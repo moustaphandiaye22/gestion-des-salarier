@@ -1,1 +1,1 @@
-{"version":3,"file":"httpStatus.d.ts","sourceRoot":"","sources":["../../../src/utils/httpStatus.ts"],"names":[],"mappings":"AAAA,eAAO,MAAM,UAAU;;;;;;;;;CAStB,CAAC"}
+{"version":3,"file":"httpStatus.d.ts","sourceRoot":"","sources":["../../../src/utils/httpStatus.ts"],"names":[],"mappings":"AACA,eAAO,MAAM,mBAAmB,GAAI,OAAO,MAAM,EAAE,SAAS,MAAM,EAAE,SAAQ,MAAY,EAAE,UAAU,GAAG;;;;;;CAMrG,CAAC;AAEH,eAAO,MAAM,qBAAqB,GAAI,SAAS,MAAM,EAAE,OAAO,GAAG;;;;;CAK/D,CAAC;AAEH,eAAO,MAAM,6BAA6B,GAAI,QAAQ,GAAG,EAAE;;;;;;CAa1D,CAAC;AAEF,eAAO,MAAM,UAAU;;;;;;;;;CAStB,CAAC"}
