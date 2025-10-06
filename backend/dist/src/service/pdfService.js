@@ -108,7 +108,7 @@ export class PDFService {
                 doc.moveDown(2);
                 doc.fontSize(14).font('Helvetica-Bold');
                 doc.fillColor(primaryColor);
-                doc.text('DÉTAIL DES RÉMUNÉRATIONS', { align: 'center' });
+                doc.text('DÉTAIL DES RÉMUNÉRATIONS', { align: 'left' });
                 // Convert Decimal to number
                 const salaireBase = Number(bulletinData.salaireBase);
                 const allocations = Number(bulletinData.allocations);
@@ -159,7 +159,7 @@ export class PDFService {
                 doc.moveDown(3);
                 doc.fontSize(14).font('Helvetica-Bold');
                 doc.fillColor(primaryColor);
-                doc.text('DÉDUCTIONS ET RETENUES', { align: 'center' });
+                doc.text('DÉDUCTIONS ET RETENUES', { align: 'left' });
                 doc.moveDown(1);
                 // Deductions table header
                 doc.fillColor(primaryColor);

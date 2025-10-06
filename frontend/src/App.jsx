@@ -307,16 +307,7 @@ function App() {
         }
       />
 
-      <Route
-        path="/utilisateurs"
-        element={
-          <ProtectedRoute>
-            <MainLayout>
-              <Utilisateurs />
-            </MainLayout>
-          </ProtectedRoute>
-        }
-      />
+
 
       <Route
         path="/professions"

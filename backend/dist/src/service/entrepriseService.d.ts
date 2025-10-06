@@ -52,6 +52,7 @@ export declare class EntrepriseService {
             id: number;
             nom: string;
             email: string | null;
+            motDePasse: string | null;
             estActif: boolean;
             entrepriseId: number;
             matricule: string;
@@ -68,6 +69,7 @@ export declare class EntrepriseService {
             allocations: import("@prisma/client/runtime/library").Decimal;
             deductions: import("@prisma/client/runtime/library").Decimal;
             professionId: number | null;
+            roleUtilisateur: import("@prisma/client").$Enums.RoleUtilisateur | null;
             qrCode: string | null;
             qrCodeGenere: Date | null;
             qrCodeImagePath: string | null;
@@ -129,6 +131,7 @@ export declare class EntrepriseService {
             id: number;
             nom: string;
             email: string | null;
+            motDePasse: string | null;
             estActif: boolean;
             entrepriseId: number;
             matricule: string;
@@ -145,6 +148,7 @@ export declare class EntrepriseService {
             allocations: import("@prisma/client/runtime/library").Decimal;
             deductions: import("@prisma/client/runtime/library").Decimal;
             professionId: number | null;
+            roleUtilisateur: import("@prisma/client").$Enums.RoleUtilisateur | null;
             qrCode: string | null;
             qrCodeGenere: Date | null;
             qrCodeImagePath: string | null;

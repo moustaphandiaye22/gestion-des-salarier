@@ -21,6 +21,7 @@ export default function EmployeeList() {
   const [statusFilter, setStatusFilter] = useState("");
   const [contractFilter, setContractFilter] = useState("");
   const [activeFilter, setActiveFilter] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -71,8 +72,13 @@ export default function EmployeeList() {
       filtered = filtered.filter(employee => employee.estActif === isActive);
     }
 
+    // Role filter
+    if (roleFilter) {
+      filtered = filtered.filter(employee => employee.roleUtilisateur === roleFilter);
+    }
+
     return filtered;
-  }, [rows, searchTerm, statusFilter, contractFilter, activeFilter]);
+  }, [rows, searchTerm, statusFilter, contractFilter, activeFilter, roleFilter]);
 
   // Paginated rows
   const paginatedRows = useMemo(() => {
@@ -84,7 +90,7 @@ export default function EmployeeList() {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, contractFilter, activeFilter]);
+  }, [searchTerm, statusFilter, contractFilter, activeFilter, roleFilter]);
 
   const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
 
@@ -248,14 +254,15 @@ export default function EmployeeList() {
                     <option value="CDD">CDD</option>
                     <option value="STAGE">Stage</option>
                   </Select>
+                  
                   <Select
-                    value={activeFilter}
-                    onChange={(e) => setActiveFilter(e.target.value)}
-                    className="w-32"
+                    value={roleFilter}
+                    onChange={(e) => setRoleFilter(e.target.value)}
+                    className="w-40"
                   >
-                    <option value="">Tous</option>
-                    <option value="true">Actif</option>
-                    <option value="false">Inactif</option>
+                    <option value="">Tous rôles</option>
+                    <option value="EMPLOYE">Employé</option>
+                    <option value="CAISSIER">Caissier</option>
                   </Select>
                 </div>
               </div>
@@ -274,6 +281,7 @@ export default function EmployeeList() {
                   "Embauche",
                   "Statut",
                   "Contrat",
+                  "Rôle",
                   "Salaire",
                   "Finances",
                   "Actif",
@@ -309,6 +317,13 @@ export default function EmployeeList() {
                       </span>
                     </td>
                     <td className="px-2 py-2 text-sm text-gray-700 hidden sm:table-cell">{row.typeContrat}</td>
+                    <td className="px-2 py-2 text-sm text-gray-700">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        row.roleUtilisateur === 'CAISSIER' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {row.roleUtilisateur === 'CAISSIER' ? 'Caissier' : 'Employé'}
+                      </span>
+                    </td>
                     <td className="px-2 py-2 text-sm text-gray-700 text-right font-medium">
                       {row.salaireBase?.toLocaleString()} CFA
                     </td>

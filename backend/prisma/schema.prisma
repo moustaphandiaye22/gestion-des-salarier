@@ -89,6 +89,8 @@ model Employe {
    allocations   Decimal           @default(0.0) @db.Decimal(15, 2)
    deductions    Decimal           @default(0.0) @db.Decimal(15, 2)
    professionId  Int?
+   roleUtilisateur RoleUtilisateur? @default(EMPLOYE) // Rôle utilisateur si l'employé a accès au système
+   motDePasse    String?           @db.VarChar(255) // Mot de passe si c'est un utilisateur système
    estActif      Boolean           @default(true)
    qrCode        String?           @unique @db.VarChar(255) // Code QR unique pour le pointage
    qrCodeGenere  DateTime?         // Date de génération du QR code

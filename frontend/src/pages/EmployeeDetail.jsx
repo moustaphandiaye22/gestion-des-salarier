@@ -379,6 +379,14 @@ export default function EmployeeDetail() {
                     <p className="mt-1 text-sm text-gray-900">{employee.typeContrat}</p>
                   </div>
                   <div>
+                    <label className="block text-sm font-medium text-gray-700">Rôle utilisateur</label>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      employee.roleUtilisateur === 'CAISSIER' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {employee.roleUtilisateur === 'CAISSIER' ? 'Caissier' : 'Employé'}
+                    </span>
+                  </div>
+                  <div>
                     <label className="block text-sm font-medium text-gray-700">Type de salaire</label>
                     <p className="mt-1 text-sm text-gray-900">{employee.typeSalaire}</p>
                   </div>

@@ -28,6 +28,7 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             id: number;
             nom: string;
             email: string | null;
+            motDePasse: string | null;
             estActif: boolean;
             entrepriseId: number;
             matricule: string;
@@ -44,6 +45,7 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             allocations: Prisma.Decimal;
             deductions: Prisma.Decimal;
             professionId: number | null;
+            roleUtilisateur: import("@prisma/client").$Enums.RoleUtilisateur | null;
             qrCode: string | null;
             qrCodeGenere: Date | null;
             qrCodeImagePath: string | null;
@@ -105,6 +107,7 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             id: number;
             nom: string;
             email: string | null;
+            motDePasse: string | null;
             estActif: boolean;
             entrepriseId: number;
             matricule: string;
@@ -121,6 +124,7 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             allocations: Prisma.Decimal;
             deductions: Prisma.Decimal;
             professionId: number | null;
+            roleUtilisateur: import("@prisma/client").$Enums.RoleUtilisateur | null;
             qrCode: string | null;
             qrCodeGenere: Date | null;
             qrCodeImagePath: string | null;
@@ -182,6 +186,7 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             id: number;
             nom: string;
             email: string | null;
+            motDePasse: string | null;
             estActif: boolean;
             entrepriseId: number;
             matricule: string;
@@ -198,6 +203,7 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             allocations: Prisma.Decimal;
             deductions: Prisma.Decimal;
             professionId: number | null;
+            roleUtilisateur: import("@prisma/client").$Enums.RoleUtilisateur | null;
             qrCode: string | null;
             qrCodeGenere: Date | null;
             qrCodeImagePath: string | null;

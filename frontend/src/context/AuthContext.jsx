@@ -30,7 +30,7 @@ export function AuthProvider({ children }) {
       setUser({
         id: utilisateur?.id,
         email: utilisateur?.email,
-        role: utilisateur?.role,
+        role: utilisateur?.role || utilisateur?.profil,
         entrepriseId: utilisateur?.entrepriseId,
         entreprise: utilisateur?.entreprise
       });
@@ -94,7 +94,7 @@ export function AuthProvider({ children }) {
       const newUser = {
         id: utilisateur?.id,
         email: utilisateur?.email,
-        role: utilisateur?.role,
+        role: utilisateur?.role || utilisateur?.profil,
         entrepriseId: utilisateur?.entrepriseId,
         entreprise: utilisateur?.entreprise
       };
@@ -107,7 +107,7 @@ export function AuthProvider({ children }) {
       setUser({
         id: utilisateur?.id,
         email: utilisateur?.email,
-        role: utilisateur?.role,
+        role: utilisateur?.role || utilisateur?.profil,
         entrepriseId: utilisateur?.entrepriseId,
         entreprise: utilisateur?.entreprise
       });
@@ -126,7 +126,7 @@ export function AuthProvider({ children }) {
         setUser({
           id: utilisateur?.id,
           email: utilisateur?.email,
-          role: utilisateur?.role,
+          role: utilisateur?.role || utilisateur?.profil,
           entrepriseId: utilisateur?.entrepriseId,
           entreprise: utilisateur?.entreprise,
           name: utilisateur?.name,

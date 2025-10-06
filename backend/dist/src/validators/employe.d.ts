@@ -29,6 +29,11 @@ export declare const employeSchema: z.ZodObject<{
     tauxJournalier: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
     allocations: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
     deductions: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
+    roleUtilisateur: z.ZodDefault<z.ZodEnum<{
+        CAISSIER: "CAISSIER";
+        EMPLOYE: "EMPLOYE";
+    }>>;
+    motDePasse: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     estActif: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
     entrepriseId: z.ZodNumber;
     professionId: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;

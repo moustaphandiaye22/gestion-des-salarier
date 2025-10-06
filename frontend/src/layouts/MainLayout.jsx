@@ -30,6 +30,7 @@ const NAV = [
     { to: "/dashboard", label: "Tableau de bord", icon: ChartPieIcon },
     { to: "/cashier-dashboard", label: "Tableau de bord Caissier", icon: ChartPieIcon, cashierOnly: true },
     { to: "/employees", label: "Employés", icon: UsersIcon },
+    { to: "/utilisateurs", label: "Utilisateurs", icon: UserCircleIcon },
   { to: "/pointages", label: "Pointages", icon: ClockIcon },
   { to: "/qrcodes", label: "QR Codes", icon: QrCodeIcon },
   { to: "/entreprises", label: "Entreprises", icon: BuildingOfficeIcon },
