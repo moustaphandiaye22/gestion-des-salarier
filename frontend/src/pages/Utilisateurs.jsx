@@ -7,7 +7,7 @@ import { TrashIcon, PlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/ou
 import UserForm from "../components/UserForm";
 
 export default function Utilisateurs() {
-  const { selectedCompanyId } = useAuth();
+  const { selectedCompanyId, user } = useAuth();
   const { showSuccess, showError } = useToast();
   const [rows, setRows] = useState([]);
   const [error, setError] = useState(null);
@@ -153,7 +153,7 @@ export default function Utilisateurs() {
                     <option key={entreprise.id} value={entreprise.id}>{entreprise.nom}</option>
                   ))}
                 </Select>
-                <Button className="flex items-center gap-2" onClick={handleAddUser}>
+                <Button className="flex items-center gap-2" onClick={handleAddUser} primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                   <PlusIcon className="h-5 w-5" />
                   Ajouter
                 </Button>
@@ -188,10 +188,10 @@ export default function Utilisateurs() {
                      <td className="px-2 py-2 text-sm text-gray-700">{row.entreprise?.nom || '-'}</td>
                      <td className="px-2 py-2 text-sm">
                        <div className="flex gap-2">
-                         <Button variant="secondary" onClick={() => handleEditUser(row)} className="flex items-center gap-1">
+                         <Button variant="secondary" onClick={() => handleEditUser(row)} className="flex items-center gap-1" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                            Modifier
                          </Button>
-                         <Button variant="danger" onClick={() => setToDelete(row)} className="flex items-center gap-1">
+                         <Button variant="danger" onClick={() => setToDelete(row)} className="flex items-center gap-1" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                            <TrashIcon className="h-4 w-4" />
                            Supprimer
                          </Button>

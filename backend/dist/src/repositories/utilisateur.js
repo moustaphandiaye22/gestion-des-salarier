@@ -102,7 +102,20 @@ export class utilisateurRepository {
     async findByEmail(email) {
         try {
             Logger.info('Recherche d\'un utilisateur par email', { email });
-            const utilisateur = await mnprisma.utilisateur.findUnique({ where: { email } });
+            const utilisateur = await mnprisma.utilisateur.findUnique({
+                where: { email },
+                include: {
+                    entreprise: {
+                        select: {
+                            id: true,
+                            nom: true,
+                            logo: true,
+                            couleurPrimaire: true,
+                            couleurSecondaire: true
+                        }
+                    }
+                }
+            });
             if (!utilisateur) {
                 Logger.warn('Utilisateur non trouvé par email', { email });
             }

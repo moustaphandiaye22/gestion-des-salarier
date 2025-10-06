@@ -194,7 +194,7 @@ export default function CyclePaieForm() {
                 <label className="block">
                   <span className="text-sm font-medium text-gray-700 mb-1 block">Description</span>
                   <textarea
-                    className={`block w-full rounded-lg border px-3 py-2.5 text-sm transition-all duration-200 bg-white shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed resize-vertical ${errors.description ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+                    className={`block w-full rounded-lg border px-3 py-2.5 text-sm transition-all duration-200 bg-white shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed resize-vertical ${errors.description ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`}
                     rows={3}
                     value={form.description}
                     onChange={(e) => update("description", e.target.value)}

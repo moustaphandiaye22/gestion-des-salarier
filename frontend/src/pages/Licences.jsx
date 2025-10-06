@@ -173,7 +173,7 @@ export default function Licences() {
 
   const getTypeColor = (type) => {
     switch (type) {
-      case 'STANDARD': return 'bg-blue-100 text-blue-800';
+      case 'STANDARD': return 'bg-primary-100 text-primary-800';
       case 'PREMIUM': return 'bg-purple-100 text-purple-800';
       case 'ENTERPRISE': return 'bg-indigo-100 text-indigo-800';
       default: return 'bg-gray-100 text-gray-800';

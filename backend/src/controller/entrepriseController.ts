@@ -14,7 +14,7 @@ export class EntrepriseController {
       }
 
       // Extract adminUser data and remove it from body
-      const { adminUser, logo, estActive, ...bodyData } = req.body;
+      const { adminUser, logo, estActive, couleurPrimaire, couleurSecondaire, ...bodyData } = req.body;
 
       // Convert estActive string to boolean if needed
       const estActiveBool = estActive === 'true' || estActive === true;
@@ -23,6 +23,9 @@ export class EntrepriseController {
         ...bodyData,
         estActive: estActiveBool,
         ...(logoPath !== null && { logo: logoPath }),
+        ...(couleurPrimaire && { couleurPrimaire }),
+        ...(couleurSecondaire && { couleurSecondaire }),
+        ...(req.body.email && { email: req.body.email }), // Only include email if provided
         adminUser: adminUser ? JSON.parse(adminUser) : undefined
       };
       console.log('Data to parse:', JSON.stringify(dataToParse, null, 2));
@@ -71,7 +74,7 @@ export class EntrepriseController {
       }
 
       // Remove logo from req.body if it exists (it might be a File object from FormData)
-      const { logo, estActive, ...bodyData } = req.body;
+      const { logo, estActive, couleurPrimaire, couleurSecondaire, ...bodyData } = req.body;
 
       // Convert estActive string to boolean if needed
       const estActiveBool = estActive === 'true' || estActive === true;
@@ -79,7 +82,9 @@ export class EntrepriseController {
       const data = entrepriseSchema.partial().parse({
         ...bodyData,
         ...(estActive !== undefined && { estActive: estActiveBool }),
-        ...(logoPath !== undefined && { logo: logoPath })
+        ...(logoPath !== undefined && { logo: logoPath }),
+        ...(couleurPrimaire !== undefined && { couleurPrimaire }),
+        ...(couleurSecondaire !== undefined && { couleurSecondaire })
       });
       const entreprise = await entrepriseService.updateEntreprise(id, data);
       res.json({ message: 'Entreprise mise à jour avec succès.', entreprise });

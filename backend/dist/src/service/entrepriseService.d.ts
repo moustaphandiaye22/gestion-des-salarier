@@ -7,16 +7,16 @@ export declare class EntrepriseService {
             id: number;
             nom: string;
             email: string | null;
-            telephone: string | null;
-            adresse: string | null;
-            dateCreation: Date;
             description: string | null;
+            adresse: string | null;
+            telephone: string | null;
             siteWeb: string | null;
             secteurActivite: string | null;
             logo: string | null;
             couleurPrimaire: string | null;
             couleurSecondaire: string | null;
             estActive: boolean;
+            dateCreation: Date;
         };
         adminUtilisateur: {
             id: number;
@@ -28,17 +28,20 @@ export declare class EntrepriseService {
             entrepriseId: number | null;
         } | null;
     }>;
-    getEntreprise(id: number): Promise<({
-        paiements: {
-            id: number;
-            entrepriseId: number;
-            statut: import("@prisma/client").$Enums.StatutPaiement;
-            montant: import("@prisma/client/runtime/library").Decimal;
-            datePaiement: Date;
-            modePaiement: import("@prisma/client").$Enums.ModePaiement;
-            reference: string | null;
-            bulletinId: number;
-        }[];
+    getEntreprise(id: number): Promise<{
+        id: number;
+        nom: string;
+        email: string | null;
+        description: string | null;
+        adresse: string | null;
+        telephone: string | null;
+        siteWeb: string | null;
+        secteurActivite: string | null;
+        logo: string | null;
+        couleurPrimaire: string | null;
+        couleurSecondaire: string | null;
+        estActive: boolean;
+        dateCreation: Date;
         utilisateurs: {
             id: number;
             nom: string;
@@ -55,10 +58,10 @@ export declare class EntrepriseService {
             motDePasse: string | null;
             estActif: boolean;
             entrepriseId: number;
+            adresse: string | null;
+            telephone: string | null;
             matricule: string;
             prenom: string;
-            telephone: string | null;
-            adresse: string | null;
             dateEmbauche: Date;
             statutEmploi: import("@prisma/client").$Enums.StatutEmploi;
             typeContrat: import("@prisma/client").$Enums.TypeContrat;
@@ -83,8 +86,8 @@ export declare class EntrepriseService {
             id: number;
             nom: string;
             entrepriseId: number;
-            statut: import("@prisma/client").$Enums.StatutCyclePaie;
             description: string | null;
+            statut: import("@prisma/client").$Enums.StatutCyclePaie;
             dateDebut: Date;
             dateFin: Date;
             statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
@@ -92,32 +95,18 @@ export declare class EntrepriseService {
             createdAt: Date;
             updatedAt: Date;
         }[];
-    } & {
-        id: number;
-        nom: string;
-        email: string | null;
-        telephone: string | null;
-        adresse: string | null;
-        dateCreation: Date;
-        description: string | null;
-        siteWeb: string | null;
-        secteurActivite: string | null;
-        logo: string | null;
-        couleurPrimaire: string | null;
-        couleurSecondaire: string | null;
-        estActive: boolean;
-    }) | null>;
+        paiements: {
+            id: number;
+            entrepriseId: number;
+            statut: import("@prisma/client").$Enums.StatutPaiement;
+            montant: import("@prisma/client/runtime/library").Decimal;
+            datePaiement: Date;
+            modePaiement: import("@prisma/client").$Enums.ModePaiement;
+            reference: string | null;
+            bulletinId: number;
+        }[];
+    } | null>;
     getAllEntreprises(user?: any): Promise<({
-        paiements: {
-            id: number;
-            entrepriseId: number;
-            statut: import("@prisma/client").$Enums.StatutPaiement;
-            montant: import("@prisma/client/runtime/library").Decimal;
-            datePaiement: Date;
-            modePaiement: import("@prisma/client").$Enums.ModePaiement;
-            reference: string | null;
-            bulletinId: number;
-        }[];
         utilisateurs: {
             id: number;
             nom: string;
@@ -134,10 +123,10 @@ export declare class EntrepriseService {
             motDePasse: string | null;
             estActif: boolean;
             entrepriseId: number;
+            adresse: string | null;
+            telephone: string | null;
             matricule: string;
             prenom: string;
-            telephone: string | null;
-            adresse: string | null;
             dateEmbauche: Date;
             statutEmploi: import("@prisma/client").$Enums.StatutEmploi;
             typeContrat: import("@prisma/client").$Enums.TypeContrat;
@@ -162,8 +151,8 @@ export declare class EntrepriseService {
             id: number;
             nom: string;
             entrepriseId: number;
-            statut: import("@prisma/client").$Enums.StatutCyclePaie;
             description: string | null;
+            statut: import("@prisma/client").$Enums.StatutCyclePaie;
             dateDebut: Date;
             dateFin: Date;
             statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
@@ -171,35 +160,45 @@ export declare class EntrepriseService {
             createdAt: Date;
             updatedAt: Date;
         }[];
+        paiements: {
+            id: number;
+            entrepriseId: number;
+            statut: import("@prisma/client").$Enums.StatutPaiement;
+            montant: import("@prisma/client/runtime/library").Decimal;
+            datePaiement: Date;
+            modePaiement: import("@prisma/client").$Enums.ModePaiement;
+            reference: string | null;
+            bulletinId: number;
+        }[];
     } & {
         id: number;
         nom: string;
         email: string | null;
-        telephone: string | null;
-        adresse: string | null;
-        dateCreation: Date;
         description: string | null;
+        adresse: string | null;
+        telephone: string | null;
         siteWeb: string | null;
         secteurActivite: string | null;
         logo: string | null;
         couleurPrimaire: string | null;
         couleurSecondaire: string | null;
         estActive: boolean;
+        dateCreation: Date;
     })[]>;
     updateEntreprise(id: number, data: any): Promise<{
         id: number;
         nom: string;
         email: string | null;
-        telephone: string | null;
-        adresse: string | null;
-        dateCreation: Date;
         description: string | null;
+        adresse: string | null;
+        telephone: string | null;
         siteWeb: string | null;
         secteurActivite: string | null;
         logo: string | null;
         couleurPrimaire: string | null;
         couleurSecondaire: string | null;
         estActive: boolean;
+        dateCreation: Date;
     }>;
     deleteEntreprise(id: number): Promise<void>;
 }

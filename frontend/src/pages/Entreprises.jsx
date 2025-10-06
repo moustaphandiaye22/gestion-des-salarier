@@ -138,21 +138,21 @@ export default function Entreprises() {
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setViewMode('card')}
-                    className={`p-1 rounded ${viewMode === 'card' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-200'}`}
+                    className={`p-1 rounded ${viewMode === 'card' ? 'bg-primary-600 text-white' : 'text-gray-600 hover:bg-gray-200'}`}
                     title="Vue en cartes"
                   >
                     <Squares2X2Icon className="h-5 w-5" />
                   </button>
                   <button
                     onClick={() => setViewMode('table')}
-                    className={`p-1 rounded ${viewMode === 'table' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-200'}`}
+                    className={`p-1 rounded ${viewMode === 'table' ? 'bg-primary-600 text-white' : 'text-gray-600 hover:bg-gray-200'}`}
                     title="Vue en liste"
                   >
                     <ListBulletIcon className="h-5 w-5" />
                   </button>
                 </div>
                 <Link to="/entreprises/new">
-                  <Button className="flex items-center gap-2">
+                  <Button className="flex items-center gap-2" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                     <PlusIcon className="h-5 w-5" />
                     Ajouter
                   </Button>
@@ -220,13 +220,13 @@ export default function Entreprises() {
 
                       <div className="flex gap-2 mt-4">
                         <Link to={`/entreprises/${row.id}`} className="flex-1">
-                          <Button variant="outline" className="w-full text-xs">
+                          <Button variant="outline" className="w-full text-xs" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                             <EyeIcon className="h-3 w-3 mr-1" />
                             Voir
                           </Button>
                         </Link>
                         <Link to={`/entreprises/${row.id}/edit`} className="flex-1">
-                          <Button variant="outline" className="w-full text-xs">
+                          <Button variant="outline" className="w-full text-xs" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                             <PencilSquareIcon className="h-3 w-3 mr-1" />
                             Éditer
                           </Button>
@@ -235,6 +235,8 @@ export default function Entreprises() {
                           variant="danger"
                           onClick={() => setToDelete(row)}
                           className="text-xs px-2"
+                          primaryColor={user?.entreprise?.couleurPrimaire}
+                          secondaryColor={user?.entreprise?.couleurSecondaire}
                         >
                           <TrashIcon className="h-3 w-3" />
                         </Button>
@@ -285,16 +287,16 @@ export default function Entreprises() {
                       <td className="px-2 py-2 text-sm">
                         <div className="flex gap-1">
                           <Link to={`/entreprises/${row.id}`}>
-                            <Button variant="outline" className="text-xs px-2 py-1">
+                            <Button variant="outline" className="text-xs px-2 py-1" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                               <EyeIcon className="h-3 w-3" />
                             </Button>
                           </Link>
                           <Link to={`/entreprises/${row.id}/edit`}>
-                            <Button variant="outline" className="text-xs px-2 py-1">
+                            <Button variant="outline" className="text-xs px-2 py-1" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                               <PencilSquareIcon className="h-3 w-3" />
                             </Button>
                           </Link>
-                          <Button variant="danger" onClick={() => setToDelete(row)} className="text-xs px-2 py-1">
+                          <Button variant="danger" onClick={() => setToDelete(row)} className="text-xs px-2 py-1" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                             <TrashIcon className="h-3 w-3" />
                           </Button>
                         </div>

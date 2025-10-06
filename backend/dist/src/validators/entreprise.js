@@ -21,7 +21,8 @@ export const entrepriseSchema = z.object({
         .optional(),
     email: z.string()
         .email('L\'email doit être une adresse valide.')
-        .max(100, 'L\'email ne doit pas dépasser 100 caractères.'),
+        .max(100, 'L\'email ne doit pas dépasser 100 caractères.')
+        .optional(),
     siteWeb: z.string()
         .url('Le site web doit être une URL valide.')
         .max(255, 'Le site web ne doit pas dépasser 255 caractères.')
@@ -32,6 +33,12 @@ export const entrepriseSchema = z.object({
     logo: z.string()
         .max(255, 'Le chemin du logo ne doit pas dépasser 255 caractères.')
         .nullable()
+        .optional(),
+    couleurPrimaire: z.string()
+        .regex(/^#[0-9A-Fa-f]{6}$/, 'La couleur primaire doit être un code hexadécimal valide (ex: #FF0000).')
+        .optional(),
+    couleurSecondaire: z.string()
+        .regex(/^#[0-9A-Fa-f]{6}$/, 'La couleur secondaire doit être un code hexadécimal valide (ex: #00FF00).')
         .optional(),
     estActive: z.boolean().optional(),
     dateCreation: z.date().optional(),

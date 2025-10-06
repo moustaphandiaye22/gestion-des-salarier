@@ -247,7 +247,7 @@ export default function EmployeeDetail() {
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/employees">
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button variant="outline" className="flex items-center gap-2" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                 <ArrowLeftIcon className="h-4 w-4" />
                 Retour
               </Button>
@@ -261,7 +261,7 @@ export default function EmployeeDetail() {
           </div>
           <div className="flex gap-2">
             <Link to={`/employees/${id}/edit`}>
-              <Button className="flex items-center gap-2">
+              <Button className="flex items-center gap-2" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                 <PencilSquareIcon className="h-4 w-4" />
                 Modifier
               </Button>
@@ -270,6 +270,8 @@ export default function EmployeeDetail() {
               variant="danger"
               onClick={() => setToDelete(employee)}
               className="flex items-center gap-2"
+              primaryColor={user?.entreprise?.couleurPrimaire}
+              secondaryColor={user?.entreprise?.couleurSecondaire}
             >
               <TrashIcon className="h-4 w-4" />
               Supprimer
@@ -304,6 +306,8 @@ export default function EmployeeDetail() {
                       variant="outline"
                       onClick={downloadQrCode}
                       className="flex items-center gap-2"
+                      primaryColor={user?.entreprise?.couleurPrimaire}
+                      secondaryColor={user?.entreprise?.couleurSecondaire}
                     >
                       <QrCodeIcon className="h-4 w-4" />
                       Télécharger QR Code
@@ -316,6 +320,8 @@ export default function EmployeeDetail() {
                     <Button
                       onClick={generateQrCode}
                       className="flex items-center gap-2"
+                      primaryColor={user?.entreprise?.couleurPrimaire}
+                      secondaryColor={user?.entreprise?.couleurSecondaire}
                     >
                       <QrCodeIcon className="h-4 w-4" />
                       Générer QR Code

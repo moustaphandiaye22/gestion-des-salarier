@@ -8,7 +8,28 @@ export class entrepriseRepository {
         return mnprisma.entreprise.create({ data });
     }
     async findById(id) {
-        return mnprisma.entreprise.findUnique({ where: { id }, include: { employes: true, cyclesPaie: true, paiements: true, utilisateurs: true } });
+        return mnprisma.entreprise.findUnique({
+            where: { id },
+            select: {
+                id: true,
+                nom: true,
+                description: true,
+                adresse: true,
+                telephone: true,
+                email: true,
+                siteWeb: true,
+                secteurActivite: true,
+                dateCreation: true,
+                estActive: true,
+                logo: true,
+                couleurPrimaire: true,
+                couleurSecondaire: true,
+                employes: true,
+                cyclesPaie: true,
+                paiements: true,
+                utilisateurs: true
+            }
+        });
     }
     async findAll() {
         return mnprisma.entreprise.findMany({ include: { employes: true, cyclesPaie: true, paiements: true, utilisateurs: true } });

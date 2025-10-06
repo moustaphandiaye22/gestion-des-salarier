@@ -10,6 +10,7 @@ export declare class PointageService {
     getPointagesByEmploye(employeId: number): Promise<{
         id: number;
         entrepriseId: number;
+        dateCreation: Date;
         datePointage: Date;
         heureEntree: Date | null;
         heureSortie: Date | null;
@@ -21,12 +22,12 @@ export declare class PointageService {
         ipAddress: string | null;
         localisation: import("@prisma/client/runtime/library").JsonValue | null;
         employeId: number;
-        dateCreation: Date;
         dateModification: Date;
     }[]>;
     getPointagesByEmployeAndPeriode(employeId: number, dateDebut: Date, dateFin: Date): Promise<{
         id: number;
         entrepriseId: number;
+        dateCreation: Date;
         datePointage: Date;
         heureEntree: Date | null;
         heureSortie: Date | null;
@@ -38,12 +39,12 @@ export declare class PointageService {
         ipAddress: string | null;
         localisation: import("@prisma/client/runtime/library").JsonValue | null;
         employeId: number;
-        dateCreation: Date;
         dateModification: Date;
     }[]>;
     getPointagesByEntrepriseAndDate(entrepriseId: number, dateDebut: Date, dateFin: Date): Promise<{
         id: number;
         entrepriseId: number;
+        dateCreation: Date;
         datePointage: Date;
         heureEntree: Date | null;
         heureSortie: Date | null;
@@ -55,12 +56,12 @@ export declare class PointageService {
         ipAddress: string | null;
         localisation: import("@prisma/client/runtime/library").JsonValue | null;
         employeId: number;
-        dateCreation: Date;
         dateModification: Date;
     }[]>;
     getPointagesByType(typePointage: string): Promise<{
         id: number;
         entrepriseId: number;
+        dateCreation: Date;
         datePointage: Date;
         heureEntree: Date | null;
         heureSortie: Date | null;
@@ -72,12 +73,12 @@ export declare class PointageService {
         ipAddress: string | null;
         localisation: import("@prisma/client/runtime/library").JsonValue | null;
         employeId: number;
-        dateCreation: Date;
         dateModification: Date;
     }[]>;
     getPointagesByStatut(statut: string): Promise<{
         id: number;
         entrepriseId: number;
+        dateCreation: Date;
         datePointage: Date;
         heureEntree: Date | null;
         heureSortie: Date | null;
@@ -89,7 +90,6 @@ export declare class PointageService {
         ipAddress: string | null;
         localisation: import("@prisma/client/runtime/library").JsonValue | null;
         employeId: number;
-        dateCreation: Date;
         dateModification: Date;
     }[]>;
     calculateHeuresTravaillees(employeId: number, dateDebut: Date, dateFin: Date): Promise<number>;

@@ -4,17 +4,20 @@ import type { InterfaceRepository } from './InterfaceRepository.js';
 export declare class entrepriseRepository implements InterfaceRepository<Entreprise> {
     setEstActive(id: number, estActive: boolean): Promise<Entreprise>;
     create(data: Omit<Entreprise, "id">): Promise<Entreprise>;
-    findById(id: number): Promise<({
-        paiements: {
-            id: number;
-            entrepriseId: number;
-            statut: import("@prisma/client").$Enums.StatutPaiement;
-            montant: Prisma.Decimal;
-            datePaiement: Date;
-            modePaiement: import("@prisma/client").$Enums.ModePaiement;
-            reference: string | null;
-            bulletinId: number;
-        }[];
+    findById(id: number): Promise<{
+        id: number;
+        nom: string;
+        email: string | null;
+        description: string | null;
+        adresse: string | null;
+        telephone: string | null;
+        siteWeb: string | null;
+        secteurActivite: string | null;
+        logo: string | null;
+        couleurPrimaire: string | null;
+        couleurSecondaire: string | null;
+        estActive: boolean;
+        dateCreation: Date;
         utilisateurs: {
             id: number;
             nom: string;
@@ -31,10 +34,10 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             motDePasse: string | null;
             estActif: boolean;
             entrepriseId: number;
+            adresse: string | null;
+            telephone: string | null;
             matricule: string;
             prenom: string;
-            telephone: string | null;
-            adresse: string | null;
             dateEmbauche: Date;
             statutEmploi: import("@prisma/client").$Enums.StatutEmploi;
             typeContrat: import("@prisma/client").$Enums.TypeContrat;
@@ -59,8 +62,8 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             id: number;
             nom: string;
             entrepriseId: number;
-            statut: import("@prisma/client").$Enums.StatutCyclePaie;
             description: string | null;
+            statut: import("@prisma/client").$Enums.StatutCyclePaie;
             dateDebut: Date;
             dateFin: Date;
             statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
@@ -68,32 +71,18 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             createdAt: Date;
             updatedAt: Date;
         }[];
-    } & {
-        id: number;
-        nom: string;
-        email: string | null;
-        telephone: string | null;
-        adresse: string | null;
-        dateCreation: Date;
-        description: string | null;
-        siteWeb: string | null;
-        secteurActivite: string | null;
-        logo: string | null;
-        couleurPrimaire: string | null;
-        couleurSecondaire: string | null;
-        estActive: boolean;
-    }) | null>;
+        paiements: {
+            id: number;
+            entrepriseId: number;
+            statut: import("@prisma/client").$Enums.StatutPaiement;
+            montant: Prisma.Decimal;
+            datePaiement: Date;
+            modePaiement: import("@prisma/client").$Enums.ModePaiement;
+            reference: string | null;
+            bulletinId: number;
+        }[];
+    } | null>;
     findAll(): Promise<({
-        paiements: {
-            id: number;
-            entrepriseId: number;
-            statut: import("@prisma/client").$Enums.StatutPaiement;
-            montant: Prisma.Decimal;
-            datePaiement: Date;
-            modePaiement: import("@prisma/client").$Enums.ModePaiement;
-            reference: string | null;
-            bulletinId: number;
-        }[];
         utilisateurs: {
             id: number;
             nom: string;
@@ -110,10 +99,10 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             motDePasse: string | null;
             estActif: boolean;
             entrepriseId: number;
+            adresse: string | null;
+            telephone: string | null;
             matricule: string;
             prenom: string;
-            telephone: string | null;
-            adresse: string | null;
             dateEmbauche: Date;
             statutEmploi: import("@prisma/client").$Enums.StatutEmploi;
             typeContrat: import("@prisma/client").$Enums.TypeContrat;
@@ -138,8 +127,8 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             id: number;
             nom: string;
             entrepriseId: number;
-            statut: import("@prisma/client").$Enums.StatutCyclePaie;
             description: string | null;
+            statut: import("@prisma/client").$Enums.StatutCyclePaie;
             dateDebut: Date;
             dateFin: Date;
             statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
@@ -147,32 +136,32 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             createdAt: Date;
             updatedAt: Date;
         }[];
+        paiements: {
+            id: number;
+            entrepriseId: number;
+            statut: import("@prisma/client").$Enums.StatutPaiement;
+            montant: Prisma.Decimal;
+            datePaiement: Date;
+            modePaiement: import("@prisma/client").$Enums.ModePaiement;
+            reference: string | null;
+            bulletinId: number;
+        }[];
     } & {
         id: number;
         nom: string;
         email: string | null;
-        telephone: string | null;
-        adresse: string | null;
-        dateCreation: Date;
         description: string | null;
+        adresse: string | null;
+        telephone: string | null;
         siteWeb: string | null;
         secteurActivite: string | null;
         logo: string | null;
         couleurPrimaire: string | null;
         couleurSecondaire: string | null;
         estActive: boolean;
+        dateCreation: Date;
     })[]>;
     findAllByUser(user: any): Promise<({
-        paiements: {
-            id: number;
-            entrepriseId: number;
-            statut: import("@prisma/client").$Enums.StatutPaiement;
-            montant: Prisma.Decimal;
-            datePaiement: Date;
-            modePaiement: import("@prisma/client").$Enums.ModePaiement;
-            reference: string | null;
-            bulletinId: number;
-        }[];
         utilisateurs: {
             id: number;
             nom: string;
@@ -189,10 +178,10 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             motDePasse: string | null;
             estActif: boolean;
             entrepriseId: number;
+            adresse: string | null;
+            telephone: string | null;
             matricule: string;
             prenom: string;
-            telephone: string | null;
-            adresse: string | null;
             dateEmbauche: Date;
             statutEmploi: import("@prisma/client").$Enums.StatutEmploi;
             typeContrat: import("@prisma/client").$Enums.TypeContrat;
@@ -217,8 +206,8 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             id: number;
             nom: string;
             entrepriseId: number;
-            statut: import("@prisma/client").$Enums.StatutCyclePaie;
             description: string | null;
+            statut: import("@prisma/client").$Enums.StatutCyclePaie;
             dateDebut: Date;
             dateFin: Date;
             statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
@@ -226,35 +215,45 @@ export declare class entrepriseRepository implements InterfaceRepository<Entrepr
             createdAt: Date;
             updatedAt: Date;
         }[];
+        paiements: {
+            id: number;
+            entrepriseId: number;
+            statut: import("@prisma/client").$Enums.StatutPaiement;
+            montant: Prisma.Decimal;
+            datePaiement: Date;
+            modePaiement: import("@prisma/client").$Enums.ModePaiement;
+            reference: string | null;
+            bulletinId: number;
+        }[];
     } & {
         id: number;
         nom: string;
         email: string | null;
-        telephone: string | null;
-        adresse: string | null;
-        dateCreation: Date;
         description: string | null;
+        adresse: string | null;
+        telephone: string | null;
         siteWeb: string | null;
         secteurActivite: string | null;
         logo: string | null;
         couleurPrimaire: string | null;
         couleurSecondaire: string | null;
         estActive: boolean;
+        dateCreation: Date;
     })[]>;
     update(id: number, data: Partial<Entreprise>): Promise<{
         id: number;
         nom: string;
         email: string | null;
-        telephone: string | null;
-        adresse: string | null;
-        dateCreation: Date;
         description: string | null;
+        adresse: string | null;
+        telephone: string | null;
         siteWeb: string | null;
         secteurActivite: string | null;
         logo: string | null;
         couleurPrimaire: string | null;
         couleurSecondaire: string | null;
         estActive: boolean;
+        dateCreation: Date;
     }>;
     delete(id: number): Promise<void>;
 }

@@ -32,15 +32,15 @@ export function CardBody({ children, className = "p-4" }) {
   return React.createElement("div", { className }, children);
 }
 
-export function Button({ variant = "solid", className = "", ...props }) {
+export function Button({ variant = "solid", className = "", primaryColor = "primary", secondaryColor = "secondary", ...props }) {
   const base = "inline-flex items-center justify-center rounded-md text-sm font-semibold px-3 py-2";
   const variants = {
     solid: "bg-gray-900 text-white hover:bg-gray-800",
     outline: "text-gray-900 ring-1 ring-gray-300 hover:bg-gray-100",
     ghost: "text-gray-700 hover:bg-gray-100",
     danger: "bg-red-600 text-white hover:bg-red-500",
-    primary: "bg-blue-600 text-white hover:bg-blue-700",
-    secondary: "bg-gray-600 text-white hover:bg-gray-700",
+    primary: `bg-${primaryColor}-600 text-white hover:bg-${primaryColor}-700`,
+    secondary: `bg-${secondaryColor}-600 text-white hover:bg-${secondaryColor}-700`,
   };
   return React.createElement("button", { className: cx(base, variants[variant], className), ...props });
 }

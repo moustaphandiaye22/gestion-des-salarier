@@ -8,7 +8,7 @@ import { useToast } from "../context/ToastContext";
 import { PencilSquareIcon, TrashIcon, PlusIcon, EyeIcon, DocumentArrowUpIcon, MagnifyingGlassIcon, DocumentArrowDownIcon } from "@heroicons/react/24/outline";
 
 export default function EmployeeList() {
-  const { selectedCompanyId } = useAuth();
+  const { selectedCompanyId, user } = useAuth();
   const { showSuccess, showError } = useToast();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -160,7 +160,7 @@ export default function EmployeeList() {
             actions={
               <div className="flex gap-2">
                 <Link to="/employees/new">
-                  <Button className="flex items-center gap-2">
+                  <Button className="flex items-center gap-2" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                     <PlusIcon className="h-5 w-5" />
                     Ajouter
                   </Button>
@@ -169,6 +169,8 @@ export default function EmployeeList() {
                   className="flex items-center gap-2"
                   variant="outline"
                   onClick={handleExportTemplate}
+                  primaryColor={user?.entreprise?.couleurPrimaire}
+                  secondaryColor={user?.entreprise?.couleurSecondaire}
                 >
                   <DocumentArrowDownIcon className="h-5 w-5" />
                   Modèle Excel
@@ -177,6 +179,8 @@ export default function EmployeeList() {
                   className="flex items-center gap-2"
                   variant="outline"
                   onClick={() => setImportModalOpen(true)}
+                  primaryColor={user?.entreprise?.couleurPrimaire}
+                  secondaryColor={user?.entreprise?.couleurSecondaire}
                 >
                   <DocumentArrowUpIcon className="h-5 w-5" />
                   Importer Excel

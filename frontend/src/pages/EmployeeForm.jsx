@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardHeader, CardBody, Input, Select, Button } from "../components/ui";
 import { employesApi, entreprisesApi, professionsApi } from "../utils/api";
 import { useToast } from "../context/ToastContext";
+import { useAuth } from "../context/AuthContext";
 
 // Validation functions matching backend validators
 function validateMatricule(value) {
@@ -106,6 +107,7 @@ function generateMatricule(entrepriseId, entreprises) {
 
 export default function EmployeeForm() {
   const { showSuccess, showError } = useToast();
+  const { user } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
@@ -481,8 +483,8 @@ export default function EmployeeForm() {
                 </div>
               )}
               {(form.salaireBase || form.allocations || form.deductions) && (
-                <div className="md:col-span-2 bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h3 className="text-lg font-semibold text-blue-900 mb-3">Aperçu du salaire</h3>
+                <div className="md:col-span-2 bg-primary-50 p-4 rounded-lg border border-primary-200">
+                  <h3 className="text-lg font-semibold text-primary-900 mb-3">Aperçu du salaire</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-white p-3 rounded border">
                       <div className="text-sm text-gray-600">Salaire brut</div>
@@ -582,8 +584,8 @@ export default function EmployeeForm() {
               </div>
               {error && <p className="text-sm text-red-600 md:col-span-2">{error}</p>}
               <div className="flex justify-end gap-2 md:col-span-2">
-                <Button type="button" variant="outline" onClick={() => navigate(-1)}>Annuler</Button>
-                <Button type="submit" disabled={loading}>{loading ? "Enregistrement..." : "Enregistrer"}</Button>
+                <Button type="button" variant="outline" onClick={() => navigate(-1)} primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>Annuler</Button>
+                <Button type="submit" disabled={loading} primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>{loading ? "Enregistrement..." : "Enregistrer"}</Button>
               </div>
             </form>
           </CardBody>

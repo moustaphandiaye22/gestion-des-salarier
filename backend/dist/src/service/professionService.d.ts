@@ -3,15 +3,15 @@ export declare class ProfessionService {
         id: number;
         nom: string;
         description: string | null;
-        categorie: string | null;
         estActive: boolean;
+        categorie: string | null;
     }[]>;
     getById(id: number): Promise<{
         id: number;
         nom: string;
         description: string | null;
-        categorie: string | null;
         estActive: boolean;
+        categorie: string | null;
     }>;
     create(data: {
         nom: string;
@@ -21,8 +21,8 @@ export declare class ProfessionService {
         id: number;
         nom: string;
         description: string | null;
-        categorie: string | null;
         estActive: boolean;
+        categorie: string | null;
     }>;
     update(id: number, data: {
         nom?: string;
@@ -33,15 +33,15 @@ export declare class ProfessionService {
         id: number;
         nom: string;
         description: string | null;
-        categorie: string | null;
         estActive: boolean;
+        categorie: string | null;
     }>;
     delete(id: number): Promise<{
         id: number;
         nom: string;
         description: string | null;
-        categorie: string | null;
         estActive: boolean;
+        categorie: string | null;
     }>;
 }
 //# sourceMappingURL=professionService.d.ts.map

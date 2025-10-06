@@ -6,8 +6,8 @@ export declare class CyclePaieService {
         id: number;
         nom: string;
         entrepriseId: number;
-        statut: import("@prisma/client").$Enums.StatutCyclePaie;
         description: string | null;
+        statut: import("@prisma/client").$Enums.StatutCyclePaie;
         dateDebut: Date;
         dateFin: Date;
         statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
@@ -19,8 +19,8 @@ export declare class CyclePaieService {
         id: number;
         nom: string;
         entrepriseId: number;
-        statut: import("@prisma/client").$Enums.StatutCyclePaie;
         description: string | null;
+        statut: import("@prisma/client").$Enums.StatutCyclePaie;
         dateDebut: Date;
         dateFin: Date;
         statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
@@ -32,8 +32,8 @@ export declare class CyclePaieService {
         id: number;
         nom: string;
         entrepriseId: number;
-        statut: import("@prisma/client").$Enums.StatutCyclePaie;
         description: string | null;
+        statut: import("@prisma/client").$Enums.StatutCyclePaie;
         dateDebut: Date;
         dateFin: Date;
         statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
@@ -45,8 +45,8 @@ export declare class CyclePaieService {
         id: number;
         nom: string;
         entrepriseId: number;
-        statut: import("@prisma/client").$Enums.StatutCyclePaie;
         description: string | null;
+        statut: import("@prisma/client").$Enums.StatutCyclePaie;
         dateDebut: Date;
         dateFin: Date;
         statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
@@ -59,8 +59,8 @@ export declare class CyclePaieService {
         id: number;
         nom: string;
         entrepriseId: number;
-        statut: import("@prisma/client").$Enums.StatutCyclePaie;
         description: string | null;
+        statut: import("@prisma/client").$Enums.StatutCyclePaie;
         dateDebut: Date;
         dateFin: Date;
         statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
@@ -72,8 +72,8 @@ export declare class CyclePaieService {
         id: number;
         nom: string;
         entrepriseId: number;
-        statut: import("@prisma/client").$Enums.StatutCyclePaie;
         description: string | null;
+        statut: import("@prisma/client").$Enums.StatutCyclePaie;
         dateDebut: Date;
         dateFin: Date;
         statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;
@@ -85,8 +85,8 @@ export declare class CyclePaieService {
         id: number;
         nom: string;
         entrepriseId: number;
-        statut: import("@prisma/client").$Enums.StatutCyclePaie;
         description: string | null;
+        statut: import("@prisma/client").$Enums.StatutCyclePaie;
         dateDebut: Date;
         dateFin: Date;
         statutValidation: import("@prisma/client").$Enums.StatutValidationCycle;

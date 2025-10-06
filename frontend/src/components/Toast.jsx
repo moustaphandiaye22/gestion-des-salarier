@@ -33,9 +33,9 @@ const Toast = ({ id, type, title, message, onClose, duration = 5000 }) => {
       case 'warning':
         return <ExclamationCircleIcon className="w-6 h-6 text-yellow-500" />;
       case 'info':
-        return <CheckCircleIcon className="w-6 h-6 text-blue-500" />;
+        return <CheckCircleIcon className="w-6 h-6 text-primary-500" />;
       default:
-        return <CheckCircleIcon className="w-6 h-6 text-blue-500" />;
+        return <CheckCircleIcon className="w-6 h-6 text-primary-500" />;
     }
   };
 
@@ -48,9 +48,9 @@ const Toast = ({ id, type, title, message, onClose, duration = 5000 }) => {
       case 'warning':
         return 'bg-yellow-50 border-yellow-200';
       case 'info':
-        return 'bg-blue-50 border-blue-200';
+        return 'bg-primary-50 border-primary-200';
       default:
-        return 'bg-blue-50 border-blue-200';
+        return 'bg-primary-50 border-primary-200';
     }
   };
 
