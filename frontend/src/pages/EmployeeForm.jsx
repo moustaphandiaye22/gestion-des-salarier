@@ -466,19 +466,20 @@ export default function EmployeeForm() {
               <Select label="Rôle utilisateur" value={form.roleUtilisateur} onChange={(e) => update("roleUtilisateur", e.target.value)} required>
                 <option value="EMPLOYE">Employé (pas d'accès système)</option>
                 <option value="CAISSIER">Caissier (accès au système)</option>
+                <option value="VIGILE">Vigile (accès au système)</option>
               </Select>
-              {form.roleUtilisateur === 'CAISSIER' && (
+              {(form.roleUtilisateur === 'CAISSIER' || form.roleUtilisateur === 'VIGILE') && (
                 <div>
                   <Input
                     label="Mot de passe"
                     type="password"
                     value={form.motDePasse}
                     onChange={(e) => update("motDePasse", e.target.value)}
-                    placeholder="Mot de passe pour l'accès caissier"
+                    placeholder={`Mot de passe pour l'accès ${form.roleUtilisateur === 'CAISSIER' ? 'caissier' : 'vigile'}`}
                     required={!isEdit}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {!isEdit ? "Requis pour créer un compte caissier" : "Laisser vide pour conserver le mot de passe actuel"}
+                    {!isEdit ? `Requis pour créer un compte ${form.roleUtilisateur === 'CAISSIER' ? 'caissier' : 'vigile'}` : "Laisser vide pour conserver le mot de passe actuel"}
                   </p>
                 </div>
               )}

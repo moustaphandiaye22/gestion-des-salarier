@@ -23,19 +23,24 @@ export class entrepriseRepository implements InterfaceRepository<Entreprise> {
   }
 
   async findAll() : Promise<Entreprise[]> {
-    return mnprisma.entreprise.findMany();
+    return mnprisma.entreprise.findMany({
+      orderBy: { id: 'desc' }
+    });
   }
 
   async findAllByUser(user: any) : Promise<Entreprise[]> {
     // Super Admin voit toutes les entreprises
     if (user.profil === 'SUPER_ADMIN') {
-      return mnprisma.entreprise.findMany();
+      return mnprisma.entreprise.findMany({
+        orderBy: { id: 'desc' }
+      });
     }
 
     // Admin d'Entreprise et Caissier voient seulement leur entreprise
     if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
       return mnprisma.entreprise.findMany({
-        where: { id: user.entrepriseId }
+        where: { id: user.entrepriseId },
+        orderBy: { id: 'desc' }
       });
     }
 

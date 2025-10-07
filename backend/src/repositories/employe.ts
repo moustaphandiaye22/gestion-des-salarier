@@ -6,11 +6,19 @@ import { mnprisma } from '../config/db.js';
 
 export class employeRepository implements InterfaceRepository<Employe> {
   async findByStatus(statutEmploi: StatutEmploi): Promise<Employe[]> {
-    return mnprisma.employe.findMany({ where: { statutEmploi }, include: { entreprise: true, bulletins: true, profession: true } });
+    return mnprisma.employe.findMany({
+      where: { statutEmploi },
+      include: { entreprise: true, bulletins: true, profession: true },
+      orderBy: { id: 'desc' }
+    });
   }
 
   async findByTypeContrat(typeContrat: TypeContrat): Promise<Employe[]> {
-  return mnprisma.employe.findMany({ where: { typeContrat }, include: { entreprise: true, bulletins: true, profession: true } });
+  return mnprisma.employe.findMany({
+    where: { typeContrat },
+    include: { entreprise: true, bulletins: true, profession: true },
+    orderBy: { id: 'desc' }
+  });
   }
 
 //   async findByPoste(poste: Poste): Promise<Employe[]> {
@@ -18,16 +26,31 @@ export class employeRepository implements InterfaceRepository<Employe> {
 //   }
 
   async findActifs(): Promise<Employe[]> {
-  return mnprisma.employe.findMany({ where: { estActif: true }, include: { entreprise: true, bulletins: true, profession: true } });
+  return mnprisma.employe.findMany({
+    where: { estActif: true },
+    include: { entreprise: true, bulletins: true, profession: true },
+    orderBy: { id: 'desc' }
+  });
   }
 
   async findInactifs(): Promise<Employe[]> {
-    return mnprisma.employe.findMany({ where: { estActif: false }, include: { entreprise: true, bulletins: true, profession: true } });
+    return mnprisma.employe.findMany({
+      where: { estActif: false },
+      include: { entreprise: true, bulletins: true, profession: true },
+      orderBy: { id: 'desc' }
+    });
   }
 
   async findByMatricule(matricule: string): Promise<Employe | null> {
     return mnprisma.employe.findFirst({
       where: { matricule },
+      include: { entreprise: true, bulletins: true, profession: true }
+    });
+  }
+
+  async findByEmail(email: string): Promise<Employe | null> {
+    return mnprisma.employe.findFirst({
+      where: { email },
       include: { entreprise: true, bulletins: true, profession: true }
     });
   }
@@ -45,7 +68,10 @@ export class employeRepository implements InterfaceRepository<Employe> {
 
 
   async findAll() : Promise<Employe[]> {
-  return mnprisma.employe.findMany({ include: { entreprise: true, bulletins: true, profession: true } });
+  return mnprisma.employe.findMany({
+    include: { entreprise: true, bulletins: true, profession: true },
+    orderBy: { id: 'desc' }
+  });
   }
 
   async findAllByUser(user: any, entrepriseId?: number) : Promise<Employe[]> {
@@ -54,11 +80,13 @@ export class employeRepository implements InterfaceRepository<Employe> {
       if (entrepriseId) {
         return mnprisma.employe.findMany({
           where: { entrepriseId },
-          include: { entreprise: true, bulletins: true, profession: true }
+          include: { entreprise: true, bulletins: true, profession: true },
+          orderBy: { id: 'desc' }
         });
       }
       return mnprisma.employe.findMany({
-        include: { entreprise: true, bulletins: true, profession: true }
+        include: { entreprise: true, bulletins: true, profession: true },
+        orderBy: { id: 'desc' }
       });
     }
 
@@ -66,7 +94,8 @@ export class employeRepository implements InterfaceRepository<Employe> {
     if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
       return mnprisma.employe.findMany({
         where: { entrepriseId: user.entrepriseId },
-        include: { entreprise: true, bulletins: true, profession: true }
+        include: { entreprise: true, bulletins: true, profession: true },
+        orderBy: { id: 'desc' }
       });
     }
 
@@ -74,7 +103,8 @@ export class employeRepository implements InterfaceRepository<Employe> {
     if (user.profil === 'EMPLOYE' && user.employeId) {
       return mnprisma.employe.findMany({
         where: { id: user.employeId },
-        include: { entreprise: true, bulletins: true, profession: true }
+        include: { entreprise: true, bulletins: true, profession: true },
+        orderBy: { id: 'desc' }
       });
     }
 

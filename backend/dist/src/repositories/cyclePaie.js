@@ -2,7 +2,11 @@ import { PrismaClient, Prisma } from '@prisma/client';
 import { mnprisma } from '../config/db.js';
 export class cyclePaieRepository {
     async findByEntreprise(entrepriseId) {
-        return mnprisma.cyclePaie.findMany({ where: { entrepriseId }, include: { entreprise: true, bulletins: true } });
+        return mnprisma.cyclePaie.findMany({
+            where: { entrepriseId },
+            include: { entreprise: true, bulletins: true },
+            orderBy: { id: 'desc' }
+        });
     }
     async setStatut(id, statut) {
         return mnprisma.cyclePaie.update({ where: { id }, data: { statut } });
@@ -24,20 +28,25 @@ export class cyclePaieRepository {
         return mnprisma.cyclePaie.findUnique({ where: { id }, include: { entreprise: true, bulletins: true } });
     }
     async findAll() {
-        return mnprisma.cyclePaie.findMany({ include: { entreprise: true, bulletins: true } });
+        return mnprisma.cyclePaie.findMany({
+            include: { entreprise: true, bulletins: true },
+            orderBy: { id: 'desc' }
+        });
     }
     async findAllByUser(user) {
         // Super Admin voit tous les cycles de paie
         if (user.profil === 'SUPER_ADMIN') {
             return mnprisma.cyclePaie.findMany({
-                include: { entreprise: true, bulletins: true }
+                include: { entreprise: true, bulletins: true },
+                orderBy: { id: 'desc' }
             });
         }
         // Admin d'Entreprise et Caissier voient seulement les cycles de leur entreprise
         if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
             return mnprisma.cyclePaie.findMany({
                 where: { entrepriseId: user.entrepriseId },
-                include: { entreprise: true, bulletins: true }
+                include: { entreprise: true, bulletins: true },
+                orderBy: { id: 'desc' }
             });
         }
         // Autres rôles n'ont pas accès aux cycles de paie

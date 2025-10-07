@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PointageController } from '../controller/pointageController.js';
-import { requireAdminOrSuper, requireReadAccess } from '../middleware/rbacMiddleware.js';
+import { requireAdminOrSuper, requireAdminOrSuperOrVigile, requireReadAccess } from '../middleware/rbacMiddleware.js';
 
 const router = Router();
 const pointageController = new PointageController();
@@ -17,11 +17,11 @@ router.post('/entree', requireReadAccess, pointageController.pointerEntree);
 // Pointer la sortie - employé, caissier, admin entreprise ou super admin
 router.post('/sortie', requireReadAccess, pointageController.pointerSortie);
 
-// Lister les pointages - admin entreprise ou super admin
-router.get('/', requireAdminOrSuper, pointageController.getAll);
+// Lister les pointages - admin entreprise, super admin ou vigile
+router.get('/', requireAdminOrSuperOrVigile, pointageController.getAll);
 
-// Filtrer les pointages - admin entreprise ou super admin
-router.get('/filter', requireAdminOrSuper, pointageController.filter);
+// Filtrer les pointages - admin entreprise, super admin ou vigile
+router.get('/filter', requireAdminOrSuperOrVigile, pointageController.filter);
 
 // Obtenir un pointage par ID - admin entreprise ou super admin
 router.get('/:id', requireAdminOrSuper, pointageController.getById);

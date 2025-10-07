@@ -6,7 +6,11 @@ import { mnprisma } from '../config/db.js';
 
 export class paiementRepository implements InterfaceRepository  <Paiement>{
   async findByBulletin(bulletinId: number): Promise<Paiement[]> {
-    return mnprisma.paiement.findMany({ where: { bulletinId }, include: { bulletin: true, entreprise: true } });
+    return mnprisma.paiement.findMany({
+      where: { bulletinId },
+      include: { bulletin: true, entreprise: true },
+      orderBy: { id: 'desc' }
+    });
   }
 
   async setStatut(id: number, statut: StatutPaiement): Promise<Paiement> {
@@ -23,14 +27,18 @@ export class paiementRepository implements InterfaceRepository  <Paiement>{
   }
 
   async findAll() : Promise <Paiement[]> {
-  return mnprisma.paiement.findMany({ include: { bulletin: true, entreprise: true } });
+  return mnprisma.paiement.findMany({
+    include: { bulletin: true, entreprise: true },
+    orderBy: { id: 'desc' }
+  });
   }
 
   async findAllByUser(user: any) : Promise <Paiement[]> {
     // Super Admin voit tous les paiements
     if (user.profil === 'SUPER_ADMIN') {
       return mnprisma.paiement.findMany({
-        include: { bulletin: { include: { employe: true } }, entreprise: true }
+        include: { bulletin: { include: { employe: true } }, entreprise: true },
+        orderBy: { id: 'desc' }
       });
     }
 
@@ -38,7 +46,8 @@ export class paiementRepository implements InterfaceRepository  <Paiement>{
     if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
       return mnprisma.paiement.findMany({
         where: { entrepriseId: user.entrepriseId },
-        include: { bulletin: { include: { employe: true } }, entreprise: true }
+        include: { bulletin: { include: { employe: true } }, entreprise: true },
+        orderBy: { id: 'desc' }
       });
     }
 
@@ -50,7 +59,8 @@ export class paiementRepository implements InterfaceRepository  <Paiement>{
             employeId: user.employeId
           }
         },
-        include: { bulletin: { include: { employe: true } }, entreprise: true }
+        include: { bulletin: { include: { employe: true } }, entreprise: true },
+        orderBy: { id: 'desc' }
       });
     }
 

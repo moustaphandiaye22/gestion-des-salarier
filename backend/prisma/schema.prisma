@@ -432,6 +432,7 @@ enum RoleUtilisateur {
   SUPER_ADMIN
   ADMIN_ENTREPRISE
   CAISSIER
+  VIGILE
   EMPLOYE
 }
 

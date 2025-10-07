@@ -13,6 +13,7 @@ import Register from "./pages/Register";
 // Pages
 import Dashboard from "./pages/Dashboard";
 import CaissierDashboard from "./pages/CaissierDashboard";
+import VigileDashboard from "./pages/VigileDashboard";
 import EmployeeList from "./pages/EmployeeList";
 import EmployeeForm from "./pages/EmployeeForm";
 import EmployeeDetail from "./pages/EmployeeDetail";
@@ -43,6 +44,10 @@ function RoleBasedDashboard() {
 
   if (user?.role === 'CAISSIER') {
     return <CaissierDashboard />;
+  }
+
+  if (user?.role === 'VIGILE') {
+    return <VigileDashboard />;
   }
 
   if (user?.role === 'EMPLOYE') {

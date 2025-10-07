@@ -97,4 +97,22 @@ export class BulletinController {
       res.status(500).json({ error: `Impossible d'exporter les bulletins : ${err.message}` });
     }
   }
+
+  async generateForCycle(req: Request, res: Response) {
+    try {
+      const cycleId = Number(req.params.cycleId);
+      if (isNaN(cycleId) || cycleId <= 0) {
+        return res.status(400).json({ error: 'Identifiant de cycle invalide' });
+      }
+
+      // Import CyclePaieService dynamically to avoid circular dependency
+      const { CyclePaieService } = await import('../service/cyclePaieService.js');
+      const cyclePaieService = new CyclePaieService();
+
+      await cyclePaieService.generateBulletinsForCycle(cycleId);
+      res.json({ message: 'Bulletins générés avec succès pour le cycle.' });
+    } catch (err: any) {
+      res.status(500).json({ error: `Impossible de générer les bulletins : ${err.message}` });
+    }
+  }
 }

@@ -214,6 +214,10 @@ export default function MainLayout({ children }) {
       if (user.role === 'CAISSIER') {
         return ['/cashier-dashboard', '/paiements', '/bulletins', '/rapports', '/journal-audit'].includes(it.to);
       }
+      // For VIGILE, only show pointages and QR codes
+      if (user.role === 'VIGILE') {
+        return ['/pointages', '/qrcodes'].includes(it.to);
+      }
       // For ADMIN_ENTREPRISE, filter menu items to only allowed ones
       if (user.role === 'ADMIN_ENTREPRISE') {
         const allowedPaths = [

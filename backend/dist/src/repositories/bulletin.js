@@ -13,7 +13,8 @@ export class bulletinRepository {
                 },
                 cycle: true,
                 paiements: true
-            }
+            },
+            orderBy: { id: 'desc' }
         });
     }
     async findByCycle(cycleId) {
@@ -28,7 +29,8 @@ export class bulletinRepository {
                 },
                 cycle: true,
                 paiements: true
-            }
+            },
+            orderBy: { id: 'desc' }
         });
     }
     async findByEmployeeAndCycle(employeId, cycleId) {
@@ -81,7 +83,8 @@ export class bulletinRepository {
                 },
                 cycle: true,
                 paiements: true
-            }
+            },
+            orderBy: { id: 'desc' }
         });
     }
     async findAllByUser(user) {
@@ -98,7 +101,8 @@ export class bulletinRepository {
         // Super Admin voit tous les bulletins
         if (user.profil === 'SUPER_ADMIN') {
             return mnprisma.bulletin.findMany({
-                include: includeClause
+                include: includeClause,
+                orderBy: { id: 'desc' }
             });
         }
         // Admin d'Entreprise et Caissier voient seulement les bulletins de leur entreprise
@@ -109,14 +113,16 @@ export class bulletinRepository {
                         entrepriseId: user.entrepriseId
                     }
                 },
-                include: includeClause
+                include: includeClause,
+                orderBy: { id: 'desc' }
             });
         }
         // Employé voit seulement ses propres bulletins
         if (user.profil === 'EMPLOYE' && user.employeId) {
             return mnprisma.bulletin.findMany({
                 where: { employeId: user.employeId },
-                include: includeClause
+                include: includeClause,
+                orderBy: { id: 'desc' }
             });
         }
         // Autres rôles n'ont pas accès aux bulletins

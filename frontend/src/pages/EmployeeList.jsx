@@ -267,6 +267,7 @@ export default function EmployeeList() {
                     <option value="">Tous rôles</option>
                     <option value="EMPLOYE">Employé</option>
                     <option value="CAISSIER">Caissier</option>
+                    <option value="VIGILE">Vigile</option>
                   </Select>
                 </div>
               </div>
@@ -323,9 +324,13 @@ export default function EmployeeList() {
                     <td className="px-2 py-2 text-sm text-gray-700 hidden sm:table-cell">{row.typeContrat}</td>
                     <td className="px-2 py-2 text-sm text-gray-700">
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        row.roleUtilisateur === 'CAISSIER' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                        row.roleUtilisateur === 'CAISSIER' ? 'bg-blue-100 text-blue-800' :
+                        row.roleUtilisateur === 'VIGILE' ? 'bg-purple-100 text-purple-800' :
+                        'bg-gray-100 text-gray-800'
                       }`}>
-                        {row.roleUtilisateur === 'CAISSIER' ? 'Caissier' : 'Employé'}
+                        {row.roleUtilisateur === 'CAISSIER' ? 'Caissier' :
+                         row.roleUtilisateur === 'VIGILE' ? 'Vigile' :
+                         'Employé'}
                       </span>
                     </td>
                     <td className="px-2 py-2 text-sm text-gray-700 text-right font-medium">

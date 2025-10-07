@@ -31,6 +31,7 @@ export declare const employeSchema: z.ZodObject<{
     deductions: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
     roleUtilisateur: z.ZodDefault<z.ZodEnum<{
         CAISSIER: "CAISSIER";
+        VIGILE: "VIGILE";
         EMPLOYE: "EMPLOYE";
     }>>;
     motDePasse: z.ZodNullable<z.ZodOptional<z.ZodString>>;
