@@ -8,9 +8,9 @@ export declare class ParametreGlobalRepository implements InterfaceRepository<Pa
         description: string | null;
         dateCreation: Date;
         dateModification: Date;
+        categorie: string | null;
         cle: string;
         valeur: string;
-        categorie: string | null;
         estModifiable: boolean;
     }>;
     getAll(): Promise<{
@@ -18,9 +18,9 @@ export declare class ParametreGlobalRepository implements InterfaceRepository<Pa
         description: string | null;
         dateCreation: Date;
         dateModification: Date;
+        categorie: string | null;
         cle: string;
         valeur: string;
-        categorie: string | null;
         estModifiable: boolean;
     }[]>;
     getById(id: number): Promise<{
@@ -28,9 +28,9 @@ export declare class ParametreGlobalRepository implements InterfaceRepository<Pa
         description: string | null;
         dateCreation: Date;
         dateModification: Date;
+        categorie: string | null;
         cle: string;
         valeur: string;
-        categorie: string | null;
         estModifiable: boolean;
     } | null>;
     getByKey(cle: string): Promise<{
@@ -38,9 +38,9 @@ export declare class ParametreGlobalRepository implements InterfaceRepository<Pa
         description: string | null;
         dateCreation: Date;
         dateModification: Date;
+        categorie: string | null;
         cle: string;
         valeur: string;
-        categorie: string | null;
         estModifiable: boolean;
     } | null>;
     update(id: number, data: any): Promise<{
@@ -48,9 +48,9 @@ export declare class ParametreGlobalRepository implements InterfaceRepository<Pa
         description: string | null;
         dateCreation: Date;
         dateModification: Date;
+        categorie: string | null;
         cle: string;
         valeur: string;
-        categorie: string | null;
         estModifiable: boolean;
     }>;
     delete(id: number): Promise<void>;
@@ -59,9 +59,9 @@ export declare class ParametreGlobalRepository implements InterfaceRepository<Pa
         description: string | null;
         dateCreation: Date;
         dateModification: Date;
+        categorie: string | null;
         cle: string;
         valeur: string;
-        categorie: string | null;
         estModifiable: boolean;
     }[]>;
 }

@@ -42,6 +42,7 @@ export const entrepriseSchema = z.object({
   couleurSecondaire: z.string()
     .regex(/^#[0-9A-Fa-f]{6}$/, 'La couleur secondaire doit être un code hexadécimal valide (ex: #00FF00).')
     .optional(),
+  superAdminAccessGranted: z.boolean().optional(),
   estActive: z.boolean().optional(),
   dateCreation: z.date().optional(),
   // Optional admin user data for company creation

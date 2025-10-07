@@ -16,6 +16,7 @@ export declare const entrepriseSchema: z.ZodObject<{
     logo: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     couleurPrimaire: z.ZodOptional<z.ZodString>;
     couleurSecondaire: z.ZodOptional<z.ZodString>;
+    superAdminAccessGranted: z.ZodOptional<z.ZodBoolean>;
     estActive: z.ZodOptional<z.ZodBoolean>;
     dateCreation: z.ZodOptional<z.ZodDate>;
     adminUser: z.ZodOptional<z.ZodObject<{

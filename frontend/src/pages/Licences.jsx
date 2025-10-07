@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog, Input, Select } from "../components/ui";
+import Pagination from "../components/Pagination";
 import { licencesApi, entreprisesApi } from "../utils/api";
 import { useToast } from "../context/ToastContext";
 import { TrashIcon, PlusIcon, PencilIcon, UserGroupIcon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
@@ -17,6 +18,10 @@ export default function Licences() {
   const [filterType, setFilterType] = useState("");
   const [filterStatut, setFilterStatut] = useState("");
   const [filterEntreprise, setFilterEntreprise] = useState("");
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   const [selected, setSelected] = useState(null);
   const [form, setForm] = useState({
@@ -160,6 +165,20 @@ export default function Licences() {
       return matchesSearch && matchesType && matchesStatut && matchesEntreprise;
     });
   }, [rows, searchTerm, filterType, filterStatut, filterEntreprise]);
+
+  // Paginated rows
+  const paginatedRows = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredRows.slice(startIndex, endIndex);
+  }, [filteredRows, currentPage, itemsPerPage]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterType, filterStatut, filterEntreprise]);
+
+  const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
 
   const getStatutColor = (statut) => {
     switch (statut) {
@@ -353,7 +372,7 @@ export default function Licences() {
                   "Date fin",
                   "Actions",
                 ]}
-                rows={filteredRows}
+                rows={paginatedRows}
                 renderRow={(row) => (
                   <tr key={row.id}>
                     <td className="px-2 py-2 text-sm text-gray-900 font-medium">
@@ -407,6 +426,15 @@ export default function Licences() {
                 )}
               />
             </div>
+            {filteredRows.length > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={filteredRows.length}
+                itemsPerPage={itemsPerPage}
+              />
+            )}
             {loading && <p className="mt-3 text-sm text-gray-600">Chargement...</p>}
           </CardBody>
         </Card>

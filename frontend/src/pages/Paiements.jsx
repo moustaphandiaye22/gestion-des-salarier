@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog, Input, Select } from "../components/ui";
+import Pagination from "../components/Pagination";
 import { paiementsApi } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -19,6 +20,10 @@ export default function Paiements() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatut, setFilterStatut] = useState("");
   const [filterEntreprise, setFilterEntreprise] = useState("");
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   async function load() {
     setLoading(true);
@@ -116,6 +121,20 @@ export default function Paiements() {
     });
   }, [rows, searchTerm, filterStatut, filterEntreprise]);
 
+  // Paginated rows
+  const paginatedRows = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredRows.slice(startIndex, endIndex);
+  }, [filteredRows, currentPage, itemsPerPage]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatut, filterEntreprise]);
+
+  const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
+
   // Get unique entreprises for filter dropdown
   const entreprises = useMemo(() => {
     const uniqueEntreprises = rows
@@ -203,7 +222,7 @@ export default function Paiements() {
                   "Statut",
                   "Actions",
                 ]}
-                rows={filteredRows}
+                rows={paginatedRows}
                 renderRow={(row) => (
                   <tr key={row.id}>
                     <td className="px-2 py-2 text-sm text-gray-900 font-medium">{row.entreprise?.nom || '-'}</td>
@@ -250,6 +269,15 @@ export default function Paiements() {
                 )}
               />
             </div>
+            {filteredRows.length > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={filteredRows.length}
+                itemsPerPage={itemsPerPage}
+              />
+            )}
             {loading && <p className="mt-3 text-sm text-gray-600">Chargement...</p>}
 
             <ConfirmDialog

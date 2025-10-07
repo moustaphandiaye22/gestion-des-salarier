@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog, Input, Select } from "../components/ui";
+import Pagination from "../components/Pagination";
 import { professionsApi } from "../utils/api";
 import { useToast } from "../context/ToastContext";
 import { PencilSquareIcon, TrashIcon, PlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
@@ -15,6 +16,10 @@ export default function Professions() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategorie, setFilterCategorie] = useState("");
   const [filterStatut, setFilterStatut] = useState("");
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   async function load() {
     setLoading(true);
@@ -65,6 +70,20 @@ export default function Professions() {
       return matchesSearch && matchesCategorie && matchesStatut;
     });
   }, [rows, searchTerm, filterCategorie, filterStatut]);
+
+  // Paginated rows
+  const paginatedRows = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredRows.slice(startIndex, endIndex);
+  }, [filteredRows, currentPage, itemsPerPage]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterCategorie, filterStatut]);
+
+  const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
 
   // Get unique categories for filter dropdown
   const categories = useMemo(() => {
@@ -137,7 +156,7 @@ export default function Professions() {
                   "Actif",
                   "Actions",
                 ]}
-                rows={filteredRows}
+                rows={paginatedRows}
                 renderRow={(row) => (
                   <tr key={row.id}>
                     <td className="px-2 py-2 text-sm text-gray-900 font-medium">{row.nom}</td>
@@ -164,6 +183,15 @@ export default function Professions() {
                 )}
               />
             </div>
+            {filteredRows.length > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={filteredRows.length}
+                itemsPerPage={itemsPerPage}
+              />
+            )}
           </CardBody>
         </Card>
 

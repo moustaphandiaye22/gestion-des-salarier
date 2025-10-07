@@ -111,6 +111,7 @@ export declare class SalaryCalculationService {
                 logo: string | null;
                 couleurPrimaire: string | null;
                 couleurSecondaire: string | null;
+                superAdminAccessGranted: boolean;
                 estActive: boolean;
                 dateCreation: Date;
             };
@@ -171,6 +172,7 @@ export declare class SalaryCalculationService {
             logo: string | null;
             couleurPrimaire: string | null;
             couleurSecondaire: string | null;
+            superAdminAccessGranted: boolean;
             estActive: boolean;
             dateCreation: Date;
         };

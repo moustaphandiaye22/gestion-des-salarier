@@ -10,12 +10,14 @@ export class EntrepriseController {
                 logoPath = `/assets/images/logos/${req.file.filename}`;
             }
             // Extract adminUser data and remove it from body
-            const { adminUser, logo, estActive, couleurPrimaire, couleurSecondaire, ...bodyData } = req.body;
+            const { adminUser, logo, estActive, couleurPrimaire, couleurSecondaire, superAdminAccessGranted, ...bodyData } = req.body;
             // Convert estActive string to boolean if needed
             const estActiveBool = estActive === 'true' || estActive === true;
+            const superAdminAccessGrantedBool = superAdminAccessGranted === 'true' || superAdminAccessGranted === true;
             const dataToParse = {
                 ...bodyData,
                 estActive: estActiveBool,
+                superAdminAccessGranted: superAdminAccessGrantedBool,
                 ...(logoPath !== null && { logo: logoPath }),
                 ...(couleurPrimaire && { couleurPrimaire }),
                 ...(couleurSecondaire && { couleurSecondaire }),
@@ -67,12 +69,14 @@ export class EntrepriseController {
                 logoPath = `/assets/images/logos/${req.file.filename}`;
             }
             // Remove logo from req.body if it exists (it might be a File object from FormData)
-            const { logo, estActive, couleurPrimaire, couleurSecondaire, ...bodyData } = req.body;
+            const { logo, estActive, couleurPrimaire, couleurSecondaire, superAdminAccessGranted, ...bodyData } = req.body;
             // Convert estActive string to boolean if needed
             const estActiveBool = estActive === 'true' || estActive === true;
+            const superAdminAccessGrantedBool = superAdminAccessGranted === 'true' || superAdminAccessGranted === true;
             const data = entrepriseSchema.partial().parse({
                 ...bodyData,
                 ...(estActive !== undefined && { estActive: estActiveBool }),
+                ...(superAdminAccessGranted !== undefined && { superAdminAccessGranted: superAdminAccessGrantedBool }),
                 ...(logoPath !== undefined && { logo: logoPath }),
                 ...(couleurPrimaire !== undefined && { couleurPrimaire }),
                 ...(couleurSecondaire !== undefined && { couleurSecondaire })

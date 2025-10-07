@@ -26,6 +26,7 @@ export declare class LicenceRepository {
             logo: string | null;
             couleurPrimaire: string | null;
             couleurSecondaire: string | null;
+            superAdminAccessGranted: boolean;
             estActive: boolean;
             dateCreation: Date;
         } | null;
@@ -55,6 +56,7 @@ export declare class LicenceRepository {
             logo: string | null;
             couleurPrimaire: string | null;
             couleurSecondaire: string | null;
+            superAdminAccessGranted: boolean;
             estActive: boolean;
             dateCreation: Date;
         } | null;
@@ -84,6 +86,7 @@ export declare class LicenceRepository {
             logo: string | null;
             couleurPrimaire: string | null;
             couleurSecondaire: string | null;
+            superAdminAccessGranted: boolean;
             estActive: boolean;
             dateCreation: Date;
         } | null;
@@ -113,6 +116,7 @@ export declare class LicenceRepository {
             logo: string | null;
             couleurPrimaire: string | null;
             couleurSecondaire: string | null;
+            superAdminAccessGranted: boolean;
             estActive: boolean;
             dateCreation: Date;
         } | null;
@@ -155,6 +159,7 @@ export declare class LicenceRepository {
             logo: string | null;
             couleurPrimaire: string | null;
             couleurSecondaire: string | null;
+            superAdminAccessGranted: boolean;
             estActive: boolean;
             dateCreation: Date;
         } | null;
@@ -184,6 +189,7 @@ export declare class LicenceRepository {
             logo: string | null;
             couleurPrimaire: string | null;
             couleurSecondaire: string | null;
+            superAdminAccessGranted: boolean;
             estActive: boolean;
             dateCreation: Date;
         } | null;
@@ -213,6 +219,7 @@ export declare class LicenceRepository {
             logo: string | null;
             couleurPrimaire: string | null;
             couleurSecondaire: string | null;
+            superAdminAccessGranted: boolean;
             estActive: boolean;
             dateCreation: Date;
         } | null;

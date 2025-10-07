@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Card, CardHeader, CardBody, Table, Button, ConfirmDialog, Input, Select } from "../components/ui";
+import Pagination from "../components/Pagination";
 import { utilisateursApi } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -23,6 +24,10 @@ export default function Utilisateurs() {
   const [filterRole, setFilterRole] = useState("");
   const [filterStatut, setFilterStatut] = useState("");
   const [filterEntreprise, setFilterEntreprise] = useState("");
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   async function load() {
     setLoading(true);
@@ -93,6 +98,20 @@ export default function Utilisateurs() {
       return matchesSearch && matchesRole && matchesStatut && matchesEntreprise;
     });
   }, [rows, searchTerm, filterRole, filterStatut, filterEntreprise]);
+
+  // Paginated rows
+  const paginatedRows = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredRows.slice(startIndex, endIndex);
+  }, [filteredRows, currentPage, itemsPerPage]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterRole, filterStatut, filterEntreprise]);
+
+  const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
 
   // Get unique roles and entreprises for filter dropdowns
   const roles = useMemo(() => {
@@ -172,7 +191,7 @@ export default function Utilisateurs() {
             <div className="max-h-[calc(100vh-12rem)] overflow-y-auto">
               <Table
                 head={["Nom", "Email", "Rôle", "Actif", "Entreprise", "Actions"]}
-                rows={filteredRows}
+                rows={paginatedRows}
                  renderRow={(row) => (
                    <tr key={row.id}>
                      <td className="px-2 py-2 text-sm text-gray-900 font-medium">{row.nom || '-'}</td>
@@ -201,6 +220,16 @@ export default function Utilisateurs() {
                  )}
               />
             </div>
+            {filteredRows.length > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={filteredRows.length}
+                itemsPerPage={itemsPerPage}
+              />
+            )}
+
             {loading && <p className="mt-3 text-sm text-gray-600">Chargement...</p>}
 
             <ConfirmDialog

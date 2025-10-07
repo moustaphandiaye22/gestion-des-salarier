@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardBody, Input, Select, Button } from "../components/ui";
 import { parametresGlobauxApi, entreprisesApi } from "../utils/api";
-import { PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { PencilIcon, PlusIcon, ShieldCheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useToast } from "../context/ToastContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function ParametreEntreprise() {
   const { showSuccess, showError } = useToast();
+  const { user } = useAuth();
   const [list, setList] = useState([]);
   const [error, setError] = useState(null);
   const [entreprises, setEntreprises] = useState([]);
+  const [currentEntreprise, setCurrentEntreprise] = useState(null);
 
   const [selected, setSelected] = useState(null);
   const [form, setForm] = useState({ cle: "", valeur: "", description: "", categorie: "GENERAL" });
   const [saving, setSaving] = useState(false);
+  const [togglingAccess, setTogglingAccess] = useState(false);
 
   function update(k, v) { setForm((f) => ({ ...f, [k]: v })); }
 
@@ -37,6 +41,15 @@ export default function ParametreEntreprise() {
       .catch(() => setEntreprises([]));
   }, []);
 
+  // Load current entreprise details for admin entreprise
+  useEffect(() => {
+    if (user?.role === 'ADMIN_ENTREPRISE' && user?.entrepriseId) {
+      entreprisesApi.get(user.entrepriseId)
+        .then((data) => setCurrentEntreprise(data))
+        .catch((err) => console.error('Erreur chargement entreprise:', err));
+    }
+  }, [user]);
+
   useEffect(() => {
     if (!selected) return;
     setForm({ cle: selected.cle || "", valeur: selected.valeur || "", description: selected.description || "", categorie: selected.categorie || "GENERAL" });
@@ -60,9 +73,75 @@ export default function ParametreEntreprise() {
     }
   }
 
+  async function toggleSuperAdminAccess() {
+    if (!currentEntreprise) return;
+
+    setTogglingAccess(true);
+    try {
+      const updatedData = {
+        superAdminAccessGranted: !currentEntreprise.superAdminAccessGranted
+      };
+      await entreprisesApi.update(currentEntreprise.id, updatedData);
+      setCurrentEntreprise({ ...currentEntreprise, ...updatedData });
+      showSuccess("Succès", `Accès super admin ${updatedData.superAdminAccessGranted ? 'autorisé' : 'refusé'} pour votre entreprise`);
+    } catch (err) {
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur de mise à jour", errorMessage);
+    } finally {
+      setTogglingAccess(false);
+    }
+  }
+
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-gray-50">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8">
+        {/* Section Accès Super Admin - visible seulement pour les admins d'entreprise */}
+        {user?.role === 'ADMIN_ENTREPRISE' && currentEntreprise && (
+          <Card className="mb-6">
+            <CardHeader title="Contrôle d'accès Super Admin" />
+            <CardBody>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">Accès Super Admin</h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    En activant cette option, vous autorisez les super administrateurs à accéder et gérer toutes les données de votre entreprise.
+                  </p>
+                  <div className="mt-2">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                      currentEntreprise.superAdminAccessGranted
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {currentEntreprise.superAdminAccessGranted ? 'Accès autorisé' : 'Accès refusé'}
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  variant={currentEntreprise.superAdminAccessGranted ? "danger" : "success"}
+                  onClick={toggleSuperAdminAccess}
+                  disabled={togglingAccess}
+                  className="flex items-center gap-2"
+                >
+                  {togglingAccess ? (
+                    "Modification..."
+                  ) : currentEntreprise.superAdminAccessGranted ? (
+                    <>
+                      <XMarkIcon className="h-5 w-5" />
+                      Refuser l'accès
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheckIcon className="h-5 w-5" />
+                      Autoriser l'accès
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardBody>
+          </Card>
+        )}
+
         <div className="grid md:grid-cols-2 gap-6">
           <Card>
             <CardHeader

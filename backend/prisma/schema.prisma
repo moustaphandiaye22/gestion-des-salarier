@@ -29,8 +29,9 @@ model Entreprise {
   logo            String?  @db.VarChar(255) // Chemin vers le logo de l'entreprise
   couleurPrimaire String?  @db.VarChar(7)  // Couleur primaire de l'entreprise (hex: #RRGGBB)
   couleurSecondaire String? @db.VarChar(7) // Couleur secondaire de l'entreprise (hex: #RRGGBB)
+  superAdminAccessGranted Boolean @default(false) // Accès complet accordé au super admin
   estActive       Boolean  @default(true)
-   dateCreation   DateTime           @default(now())
+  dateCreation   DateTime           @default(now())
 
    // Relations
    utilisateurs   Utilisateur[]

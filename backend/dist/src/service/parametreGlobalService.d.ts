@@ -4,9 +4,9 @@ export declare class ParametreGlobalService {
         description: string | null;
         dateCreation: Date;
         dateModification: Date;
+        categorie: string | null;
         cle: string;
         valeur: string;
-        categorie: string | null;
         estModifiable: boolean;
     }>;
     getAllParametresGlobaux(): Promise<{
@@ -14,9 +14,9 @@ export declare class ParametreGlobalService {
         description: string | null;
         dateCreation: Date;
         dateModification: Date;
+        categorie: string | null;
         cle: string;
         valeur: string;
-        categorie: string | null;
         estModifiable: boolean;
     }[]>;
     getParametreGlobalById(id: number): Promise<{
@@ -24,9 +24,9 @@ export declare class ParametreGlobalService {
         description: string | null;
         dateCreation: Date;
         dateModification: Date;
+        categorie: string | null;
         cle: string;
         valeur: string;
-        categorie: string | null;
         estModifiable: boolean;
     }>;
     getParametreGlobalByKey(cle: string): Promise<{
@@ -34,9 +34,9 @@ export declare class ParametreGlobalService {
         description: string | null;
         dateCreation: Date;
         dateModification: Date;
+        categorie: string | null;
         cle: string;
         valeur: string;
-        categorie: string | null;
         estModifiable: boolean;
     }>;
     updateParametreGlobal(id: number, data: any): Promise<{
@@ -44,9 +44,9 @@ export declare class ParametreGlobalService {
         description: string | null;
         dateCreation: Date;
         dateModification: Date;
+        categorie: string | null;
         cle: string;
         valeur: string;
-        categorie: string | null;
         estModifiable: boolean;
     }>;
     deleteParametreGlobal(id: number): Promise<void>;
@@ -55,9 +55,9 @@ export declare class ParametreGlobalService {
         description: string | null;
         dateCreation: Date;
         dateModification: Date;
+        categorie: string | null;
         cle: string;
         valeur: string;
-        categorie: string | null;
         estModifiable: boolean;
     }[]>;
     getParametreValue(cle: string): Promise<string | null>;

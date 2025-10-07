@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardHeader, CardBody, Input, Select, Button } from "../components/ui";
 import { entreprisesApi } from "../utils/api";
 import { useToast } from "../context/ToastContext";
+import { useAuth } from "../context/AuthContext";
 
 // Validation functions matching backend validators
 function validateNom(value) {
@@ -69,9 +70,16 @@ function validateAdminMotDePasse(value) {
 
 export default function EntrepriseForm() {
   const { showSuccess, showError } = useToast();
+  const { user } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
+
+  // Only super admin can create enterprises
+  if (!isEdit && user?.role !== 'SUPER_ADMIN') {
+    navigate('/entreprises');
+    return null;
+  }
 
   const [form, setForm] = useState({
     nom: "",
@@ -84,6 +92,7 @@ export default function EntrepriseForm() {
     logo: null,
     couleurPrimaire: "#2563eb", // Default blue
     couleurSecondaire: "#1d4ed8", // Default darker blue
+    superAdminAccessGranted: false,
     // Admin user fields
     adminNom: "",
     adminPrenom: "",
@@ -149,6 +158,7 @@ export default function EntrepriseForm() {
           estActive: data.estActive ?? true,
           couleurPrimaire: data.couleurPrimaire || "#2563eb",
           couleurSecondaire: data.couleurSecondaire || "#1d4ed8",
+          superAdminAccessGranted: data.superAdminAccessGranted ?? false,
         });
       })
       .catch((err) => setError(err?.response?.data?.message || err.message));
@@ -193,6 +203,7 @@ export default function EntrepriseForm() {
       payload.append('estActive', form.estActive.toString());
       payload.append('couleurPrimaire', form.couleurPrimaire);
       payload.append('couleurSecondaire', form.couleurSecondaire);
+      payload.append('superAdminAccessGranted', form.superAdminAccessGranted.toString());
 
       // Add logo file if provided
       if (form.logo) {
@@ -332,6 +343,18 @@ export default function EntrepriseForm() {
                 />
                 <label htmlFor="estActive" className="text-sm text-gray-700">Entreprise active</label>
               </div>
+              {user?.role === 'ADMIN_ENTREPRISE' && (
+                <div className="flex items-center gap-2 mt-4 md:col-span-2">
+                  <input
+                    type="checkbox"
+                    checked={form.superAdminAccessGranted}
+                    onChange={(e) => update("superAdminAccessGranted", e.target.checked)}
+                    className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                    id="superAdminAccessGranted"
+                  />
+                  <label htmlFor="superAdminAccessGranted" className="text-sm text-gray-700">Accès super admin accordé</label>
+                </div>
+              )}
 
               {/* Admin User Section */}
               <div className="md:col-span-2 mt-6">
