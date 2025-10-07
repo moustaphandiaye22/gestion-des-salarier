@@ -17,19 +17,24 @@ export class parametreEntrepriseRepository implements InterfaceRepository<Parame
 
 
   async findAll(): Promise<ParametreEntreprise[]> {
-    return mnprisma.parametreEntreprise.findMany();
+    return mnprisma.parametreEntreprise.findMany({
+      orderBy: { id: 'desc' }
+    });
   }
 
   async findAllByUser(user: any): Promise<ParametreEntreprise[]> {
     // Super Admin voit tous les paramètres d'entreprise
     if (user.profil === 'SUPER_ADMIN') {
-      return mnprisma.parametreEntreprise.findMany();
+      return mnprisma.parametreEntreprise.findMany({
+        orderBy: { id: 'desc' }
+      });
     }
 
     // Admin d'Entreprise voit seulement les paramètres de son entreprise
     if (user.profil === 'ADMIN_ENTREPRISE' && user.entrepriseId) {
       return mnprisma.parametreEntreprise.findMany({
-        where: { entrepriseId: user.entrepriseId }
+        where: { entrepriseId: user.entrepriseId },
+        orderBy: { id: 'desc' }
       });
     }
 
@@ -46,11 +51,17 @@ export class parametreEntrepriseRepository implements InterfaceRepository<Parame
   }
 
   async findByCle(cle: string): Promise<ParametreEntreprise[]> {
-    return mnprisma.parametreEntreprise.findMany({ where: { cle } });
+    return mnprisma.parametreEntreprise.findMany({
+      where: { cle },
+      orderBy: { id: 'desc' }
+    });
   }
 
   async findByEntreprise(entrepriseId: number): Promise<ParametreEntreprise[]> {
-    return mnprisma.parametreEntreprise.findMany({ where: { entrepriseId } });
+    return mnprisma.parametreEntreprise.findMany({
+      where: { entrepriseId },
+      orderBy: { id: 'desc' }
+    });
   }
 
 }

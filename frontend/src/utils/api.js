@@ -345,6 +345,7 @@ export const bulletinsApi = {
   remove: (id) => api.delete(`/api/bulletins/${id}`).then((r) => r.data),
   downloadPdf: (id) => api.get(`/api/bulletins/${id}/pdf`, { responseType: 'blob' }).then((r) => r.data),
   exportExcel: () => api.get(`/api/bulletins/export/excel`, { responseType: 'blob' }).then((r) => r),
+  generate: (cycleId) => api.post(`/api/bulletins/generate/cycle/${cycleId}`).then((r) => r.data),
 };
 
 export const paiementsApi = {

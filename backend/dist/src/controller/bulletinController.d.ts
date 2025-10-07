@@ -7,5 +7,6 @@ export declare class BulletinController {
     delete(req: Request, res: Response): Promise<void>;
     generatePDF(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
     exportToExcel(req: Request, res: Response): Promise<void>;
+    generateForCycle(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 }
 //# sourceMappingURL=bulletinController.d.ts.map

@@ -16,19 +16,24 @@ export class rapportRepository implements InterfaceRepository<Rapport> {
   }
 
   async findAll(): Promise<Rapport[]> {
-    return mnprisma.rapport.findMany();
+    return mnprisma.rapport.findMany({
+      orderBy: { id: 'desc' }
+    });
   }
 
   async findAllByUser(user: any): Promise<Rapport[]> {
     // Super Admin voit tous les rapports
     if (user.profil === 'SUPER_ADMIN') {
-      return mnprisma.rapport.findMany();
+      return mnprisma.rapport.findMany({
+        orderBy: { id: 'desc' }
+      });
     }
 
     // Admin d'Entreprise et Caissier voient seulement les rapports de leur entreprise
     if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
       return mnprisma.rapport.findMany({
-        where: { entrepriseId: user.entrepriseId }
+        where: { entrepriseId: user.entrepriseId },
+        orderBy: { id: 'desc' }
       });
     }
 
@@ -37,7 +42,8 @@ export class rapportRepository implements InterfaceRepository<Rapport> {
       return mnprisma.rapport.findMany({
         where: {
           typeRapport: 'EMPLOYES' // Pour l'instant, seulement les rapports généraux sur les employés
-        }
+        },
+        orderBy: { id: 'desc' }
       });
     }
 
@@ -54,6 +60,9 @@ export class rapportRepository implements InterfaceRepository<Rapport> {
   }
 
   async findByType(typeRapport: TypeRapport): Promise<Rapport[]> {
-    return mnprisma.rapport.findMany({ where: { typeRapport } });
+    return mnprisma.rapport.findMany({
+      where: { typeRapport },
+      orderBy: { id: 'desc' }
+    });
   }
 }

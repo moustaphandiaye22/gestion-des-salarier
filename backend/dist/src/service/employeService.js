@@ -3,6 +3,8 @@ import { pointageRepository } from '../repositories/pointage.js';
 import { employeSchema } from '../validators/employe.js';
 import { QrCodeService } from './qrCodeService.js';
 import { FileService } from './fileService.js';
+import { AuthUtils } from '../auth/authUtils.js';
+import { RoleUtilisateur } from '@prisma/client';
 export class EmployeService {
     employeRepository;
     pointageRepository;
@@ -18,8 +20,13 @@ export class EmployeService {
         const parsed = employeSchema.safeParse(data);
         if (!parsed.success)
             throw parsed.error;
+        // Hash du mot de passe si l'employé a un rôle système (CAISSIER ou VIGILE)
+        let employeData = { ...data };
+        if ((data.roleUtilisateur === 'CAISSIER' || data.roleUtilisateur === 'VIGILE') && data.motDePasse) {
+            employeData.motDePasse = await AuthUtils.hashPassword(data.motDePasse);
+        }
         // Créer l'employé
-        const employe = await this.employeRepository.create(data);
+        const employe = await this.employeRepository.create(employeData);
         // Générer automatiquement le QR code pour le nouvel employé
         try {
             const qrResult = await this.generateQrCodeWithFileSave(employe.id);
@@ -60,7 +67,21 @@ export class EmployeService {
         const parsed = employeSchema.partial().safeParse(data);
         if (!parsed.success)
             throw parsed.error;
-        return this.employeRepository.update(id, data);
+        // Hash du mot de passe si l'employé a un rôle système et que le mot de passe est fourni
+        let updateData = { ...data };
+        if (data.motDePasse) {
+            // Vérifier le rôle actuel de l'employé pour déterminer si on doit hasher
+            const existingEmploye = await this.employeRepository.findById(id);
+            if (existingEmploye && existingEmploye.roleUtilisateur &&
+                (existingEmploye.roleUtilisateur === 'CAISSIER' || existingEmploye.roleUtilisateur === 'VIGILE')) {
+                updateData.motDePasse = await AuthUtils.hashPassword(data.motDePasse);
+            }
+            // Si on change le rôle vers CAISSIER ou VIGILE et qu'un mot de passe est fourni
+            else if (data.roleUtilisateur === 'CAISSIER' || data.roleUtilisateur === 'VIGILE') {
+                updateData.motDePasse = await AuthUtils.hashPassword(data.motDePasse);
+            }
+        }
+        return this.employeRepository.update(id, updateData);
     }
     async deleteEmploye(id) {
         return this.employeRepository.delete(id);

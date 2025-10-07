@@ -7,6 +7,7 @@ export declare const utilisateurValidator: z.ZodObject<{
         SUPER_ADMIN: "SUPER_ADMIN";
         ADMIN_ENTREPRISE: "ADMIN_ENTREPRISE";
         CAISSIER: "CAISSIER";
+        VIGILE: "VIGILE";
         EMPLOYE: "EMPLOYE";
     }>;
     estActif: z.ZodOptional<z.ZodBoolean>;

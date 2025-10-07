@@ -19,7 +19,8 @@ export class bulletinRepository implements InterfaceRepository<Bulletin> {
         },
         cycle: true,
         paiements: true
-      }
+      },
+      orderBy: { id: 'desc' }
     });
   }
 
@@ -35,7 +36,8 @@ export class bulletinRepository implements InterfaceRepository<Bulletin> {
       },
       cycle: true,
       paiements: true
-    }
+    },
+    orderBy: { id: 'desc' }
   });
   }
 
@@ -93,7 +95,8 @@ export class bulletinRepository implements InterfaceRepository<Bulletin> {
       },
       cycle: true,
       paiements: true
-    }
+    },
+    orderBy: { id: 'desc' }
   });
   }
 
@@ -112,7 +115,8 @@ export class bulletinRepository implements InterfaceRepository<Bulletin> {
     // Super Admin voit tous les bulletins
     if (user.profil === 'SUPER_ADMIN') {
       return mnprisma.bulletin.findMany({
-        include: includeClause
+        include: includeClause,
+        orderBy: { id: 'desc' }
       });
     }
 
@@ -124,7 +128,8 @@ export class bulletinRepository implements InterfaceRepository<Bulletin> {
             entrepriseId: user.entrepriseId
           }
         },
-        include: includeClause
+        include: includeClause,
+        orderBy: { id: 'desc' }
       });
     }
 
@@ -132,7 +137,8 @@ export class bulletinRepository implements InterfaceRepository<Bulletin> {
     if (user.profil === 'EMPLOYE' && user.employeId) {
       return mnprisma.bulletin.findMany({
         where: { employeId: user.employeId },
-        include: includeClause
+        include: includeClause,
+        orderBy: { id: 'desc' }
       });
     }
 

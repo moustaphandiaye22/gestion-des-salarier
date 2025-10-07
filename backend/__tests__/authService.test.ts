@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 import { AuthService } from '../src/service/authService.js';
 import type { IUserRepository } from '../src/interfaces/IUserRepository.js';
+import { employeRepository } from '../src/repositories/employe.js';
 import { ValidationError, AuthenticationError } from '../src/errors/CustomError.js';
 import { AuthUtils } from '../src/auth/authUtils.js';
 
@@ -15,7 +16,25 @@ const mockUserRepository: jest.Mocked<IUserRepository> = {
   delete: jest.fn(),
 };
 
-const authService = new AuthService(mockUserRepository);
+// Mock du repository employé
+const mockEmployeRepository: jest.Mocked<employeRepository> = {
+  create: jest.fn(),
+  findAll: jest.fn(),
+  findById: jest.fn(),
+  findByEmail: jest.fn(),
+  findAllByUser: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+  findByMatricule: jest.fn(),
+  findByStatus: jest.fn(),
+  findByTypeContrat: jest.fn(),
+  findActifs: jest.fn(),
+  findInactifs: jest.fn(),
+  setStatus: jest.fn(),
+  getEmployePointages: jest.fn(),
+};
+
+const authService = new AuthService(mockUserRepository, mockEmployeRepository);
 
 describe('AuthService', () => {
   beforeEach(() => {

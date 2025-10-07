@@ -23,8 +23,9 @@ export const requireOwnershipOrAdmin = (req, res, next) => {
 };
 export const requireSuperAdmin = requireRole(['SUPER_ADMIN']);
 export const requireAdminOrSuper = requireRole(['ADMIN_ENTREPRISE', 'SUPER_ADMIN']);
+export const requireAdminOrSuperOrVigile = requireRole(['ADMIN_ENTREPRISE', 'SUPER_ADMIN', 'VIGILE']);
 export const requireCashierOrAdmin = requireRole(['CAISSIER', 'ADMIN_ENTREPRISE', 'SUPER_ADMIN']);
-export const requireReadAccess = requireRole(['CAISSIER', 'ADMIN_ENTREPRISE', 'SUPER_ADMIN']);
+export const requireReadAccess = requireRole(['CAISSIER', 'VIGILE', 'ADMIN_ENTREPRISE', 'SUPER_ADMIN']);
 export const requireCompanyAccess = (req, res, next) => {
     if (!req.user) {
         return res.status(401).json({ error: 'Utilisateur non authentifié' });
@@ -33,8 +34,8 @@ export const requireCompanyAccess = (req, res, next) => {
     if (req.user.profil === 'SUPER_ADMIN') {
         return next();
     }
-    // Admin and cashier can only access their own company
-    if ((req.user.profil === 'ADMIN_ENTREPRISE' || req.user.profil === 'CAISSIER') && req.user.entrepriseId) {
+    // Admin, cashier, and vigile can only access their own company
+    if ((req.user.profil === 'ADMIN_ENTREPRISE' || req.user.profil === 'CAISSIER' || req.user.profil === 'VIGILE') && req.user.entrepriseId) {
         const companyId = Number(req.params.id) || req.user.entrepriseId;
         if (req.user.entrepriseId === companyId) {
             return next();
@@ -59,22 +60,22 @@ export const requireSuperAdminAccess = async (req, res, next) => {
     try {
         let companyId = null;
         // Determine the resource type from the route
-        const path = req.route?.path || req.path;
-        if (path.includes('/employe') || path.includes('/pointage') || path.includes('/paiement') || path.includes('/bulletin')) {
+        const baseUrl = req.baseUrl; // This gives /api/entreprises, /api/employes, etc.
+        if (baseUrl.includes('/employes') || baseUrl.includes('/pointages') || baseUrl.includes('/paiements') || baseUrl.includes('/bulletins')) {
             // For employee-related resources, find the employee's company
-            if (path.includes('/employe')) {
+            if (baseUrl.includes('/employes')) {
                 const { employeRepository } = await import('../repositories/employe.js');
                 const repo = new employeRepository();
                 const employe = await repo.findById(resourceId);
                 companyId = employe?.entrepriseId || null;
             }
-            else if (path.includes('/pointage')) {
+            else if (baseUrl.includes('/pointages')) {
                 const { pointageRepository } = await import('../repositories/pointage.js');
                 const repo = new pointageRepository();
                 const pointage = await repo.findById(resourceId);
                 companyId = pointage?.employe?.entrepriseId || null;
             }
-            else if (path.includes('/paiement')) {
+            else if (baseUrl.includes('/paiements')) {
                 const { paiementRepository } = await import('../repositories/paiement.js');
                 const repo = new paiementRepository();
                 const paiement = await repo.findById(resourceId);
@@ -91,7 +92,7 @@ export const requireSuperAdminAccess = async (req, res, next) => {
                     }
                 }
             }
-            else if (path.includes('/bulletin')) {
+            else if (baseUrl.includes('/bulletins')) {
                 const { bulletinRepository } = await import('../repositories/bulletin.js');
                 const repo = new bulletinRepository();
                 const bulletin = await repo.findById(resourceId);
@@ -104,7 +105,7 @@ export const requireSuperAdminAccess = async (req, res, next) => {
                 }
             }
         }
-        else if (path.includes('/entreprise')) {
+        else if (baseUrl.includes('/entreprises')) {
             // For enterprise routes, the ID is already the company ID
             companyId = resourceId;
         }

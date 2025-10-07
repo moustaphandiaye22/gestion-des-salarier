@@ -8,7 +8,11 @@ import type { InterfaceRepository } from './InterfaceRepository.js';
 export class cyclePaieRepository implements InterfaceRepository<CyclePaie> {
 
   async findByEntreprise(entrepriseId: number): Promise< CyclePaie []> {
-    return mnprisma.cyclePaie.findMany({ where: { entrepriseId }, include: { entreprise: true, bulletins: true } });
+    return mnprisma.cyclePaie.findMany({
+      where: { entrepriseId },
+      include: { entreprise: true, bulletins: true },
+      orderBy: { id: 'desc' }
+    });
   }
 
   async setStatut(id: number, statut: StatutCyclePaie): Promise<CyclePaie> {
@@ -33,14 +37,18 @@ export class cyclePaieRepository implements InterfaceRepository<CyclePaie> {
   }
 
   async findAll() : Promise<CyclePaie[]> {
-  return mnprisma.cyclePaie.findMany({ include: { entreprise: true, bulletins: true } });
+  return mnprisma.cyclePaie.findMany({
+    include: { entreprise: true, bulletins: true },
+    orderBy: { id: 'desc' }
+  });
   }
 
   async findAllByUser(user: any) : Promise<CyclePaie[]> {
     // Super Admin voit tous les cycles de paie
     if (user.profil === 'SUPER_ADMIN') {
       return mnprisma.cyclePaie.findMany({
-        include: { entreprise: true, bulletins: true }
+        include: { entreprise: true, bulletins: true },
+        orderBy: { id: 'desc' }
       });
     }
 
@@ -48,7 +56,8 @@ export class cyclePaieRepository implements InterfaceRepository<CyclePaie> {
     if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
       return mnprisma.cyclePaie.findMany({
         where: { entrepriseId: user.entrepriseId },
-        include: { entreprise: true, bulletins: true }
+        include: { entreprise: true, bulletins: true },
+        orderBy: { id: 'desc' }
       });
     }
 

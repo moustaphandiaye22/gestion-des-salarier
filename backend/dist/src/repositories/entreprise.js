@@ -16,17 +16,22 @@ export class entrepriseRepository {
         });
     }
     async findAll() {
-        return mnprisma.entreprise.findMany();
+        return mnprisma.entreprise.findMany({
+            orderBy: { id: 'desc' }
+        });
     }
     async findAllByUser(user) {
         // Super Admin voit toutes les entreprises
         if (user.profil === 'SUPER_ADMIN') {
-            return mnprisma.entreprise.findMany();
+            return mnprisma.entreprise.findMany({
+                orderBy: { id: 'desc' }
+            });
         }
         // Admin d'Entreprise et Caissier voient seulement leur entreprise
         if ((user.profil === 'ADMIN_ENTREPRISE' || user.profil === 'CAISSIER') && user.entrepriseId) {
             return mnprisma.entreprise.findMany({
-                where: { id: user.entrepriseId }
+                where: { id: user.entrepriseId },
+                orderBy: { id: 'desc' }
             });
         }
         // Employé voit seulement son entreprise

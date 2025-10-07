@@ -32,8 +32,9 @@ export const requireOwnershipOrAdmin = (req: Request, res: Response, next: NextF
 
 export const requireSuperAdmin = requireRole(['SUPER_ADMIN']);
 export const requireAdminOrSuper = requireRole(['ADMIN_ENTREPRISE', 'SUPER_ADMIN']);
+export const requireAdminOrSuperOrVigile = requireRole(['ADMIN_ENTREPRISE', 'SUPER_ADMIN', 'VIGILE']);
 export const requireCashierOrAdmin = requireRole(['CAISSIER', 'ADMIN_ENTREPRISE', 'SUPER_ADMIN']);
-export const requireReadAccess = requireRole(['CAISSIER', 'ADMIN_ENTREPRISE', 'SUPER_ADMIN']);
+export const requireReadAccess = requireRole(['CAISSIER', 'VIGILE', 'ADMIN_ENTREPRISE', 'SUPER_ADMIN']);
 
 export const requireCompanyAccess = (req: Request, res: Response, next: NextFunction) => {
   if (!req.user) {
@@ -45,8 +46,8 @@ export const requireCompanyAccess = (req: Request, res: Response, next: NextFunc
     return next();
   }
 
-  // Admin and cashier can only access their own company
-  if ((req.user.profil === 'ADMIN_ENTREPRISE' || req.user.profil === 'CAISSIER') && req.user.entrepriseId) {
+  // Admin, cashier, and vigile can only access their own company
+  if ((req.user.profil === 'ADMIN_ENTREPRISE' || req.user.profil === 'CAISSIER' || req.user.profil === 'VIGILE') && req.user.entrepriseId) {
     const companyId = Number(req.params.id) || req.user.entrepriseId;
     if (req.user.entrepriseId === companyId) {
       return next();

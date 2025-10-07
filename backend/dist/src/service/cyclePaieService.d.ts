@@ -1,6 +1,8 @@
 import { StatutCyclePaie } from '@prisma/client';
 export declare class CyclePaieService {
     private cyclePaieRepository;
+    private bulletinService;
+    private salaryCalculationService;
     constructor();
     createCyclePaie(data: any): Promise<{
         id: number;
@@ -94,6 +96,7 @@ export declare class CyclePaieService {
         createdAt: Date;
         updatedAt: Date;
     }>;
+    generateBulletinsForCycle(cycleId: number): Promise<void>;
     canCashierPayCycle(id: number, user: any): Promise<boolean>;
 }
 //# sourceMappingURL=cyclePaieService.d.ts.map

@@ -2,10 +2,13 @@ import { AuthUtils } from '../auth/authUtils.js';
 import { utilisateurValidator } from '../validators/utilisateur.js';
 import { Logger } from '../utils/logger.js';
 import { ValidationError, AuthenticationError, NotFoundError, InternalServerError } from '../errors/CustomError.js';
+import { employeRepository } from '../repositories/employe.js';
 export class AuthService {
     userRepository;
-    constructor(userRepository) {
+    employeRepo;
+    constructor(userRepository, employeRepo) {
         this.userRepository = userRepository;
+        this.employeRepo = employeRepo;
     }
     async register(data) {
         try {
@@ -52,27 +55,36 @@ export class AuthService {
             if (!data.email || !data.motDePasse) {
                 throw new ValidationError('Email et mot de passe requis');
             }
-            // Trouver l'utilisateur
-            const utilisateur = await this.userRepository.findByEmail(data.email);
-            if (!utilisateur) {
+            let user = null;
+            let isEmployee = false;
+            // D'abord, chercher dans la table Utilisateur
+            user = await this.userRepository.findByEmail(data.email);
+            if (!user) {
+                // Si pas trouvé dans Utilisateur, chercher dans Employe
+                user = await this.employeRepo.findByEmail(data.email);
+                if (user) {
+                    isEmployee = true;
+                }
+            }
+            if (!user) {
                 Logger.warn('Tentative de connexion avec email inexistant', { email: data.email });
                 throw new AuthenticationError('Email ou mot de passe incorrect');
             }
-            // Vérifier si l'utilisateur est actif
-            if (!utilisateur.estActif) {
+            // Vérifier si l'utilisateur/employé est actif
+            if (!user.estActif) {
                 Logger.warn('Tentative de connexion avec compte inactif', { email: data.email });
                 throw new AuthenticationError('Votre compte est désactivé. Contactez l\'administrateur.');
             }
             // Vérifier le mot de passe
-            const isValidPassword = await AuthUtils.verifyPassword(data.motDePasse, utilisateur.motDePasse);
+            const isValidPassword = await AuthUtils.verifyPassword(data.motDePasse, user.motDePasse);
             if (!isValidPassword) {
                 Logger.warn('Mot de passe incorrect', { email: data.email });
                 throw new AuthenticationError('Email ou mot de passe incorrect');
             }
             // Générer les tokens
-            const tokens = this.generateTokens(utilisateur);
-            Logger.info('Connexion réussie', { userId: utilisateur.id, email: utilisateur.email });
-            return { utilisateur, ...tokens };
+            const tokens = this.generateTokensForUser(user, isEmployee);
+            Logger.info('Connexion réussie', { userId: user.id, email: user.email, isEmployee });
+            return { utilisateur: user, ...tokens };
         }
         catch (error) {
             Logger.error('Erreur lors de la connexion', error, { email: data.email });
@@ -215,9 +227,28 @@ export class AuthService {
         const refreshToken = AuthUtils.generateRefreshToken(payload);
         return { accessToken, refreshToken };
     }
+    generateTokensForUser(user, isEmployee) {
+        let payload = {
+            email: user.email,
+        };
+        if (isEmployee) {
+            // Pour les employés (CAISSIER, VIGILE)
+            payload.profil = user.roleUtilisateur;
+            payload.employeId = user.id;
+            payload.entrepriseId = user.entrepriseId;
+        }
+        else {
+            // Pour les utilisateurs réguliers
+            payload.profil = user.role;
+            payload.entrepriseId = user.entrepriseId;
+        }
+        const accessToken = AuthUtils.generateAccessToken(payload);
+        const refreshToken = AuthUtils.generateRefreshToken(payload);
+        return { accessToken, refreshToken };
+    }
 }
 // Factory function pour créer le service avec les dépendances
-export const createAuthService = (userRepository) => {
-    return new AuthService(userRepository);
+export const createAuthService = (userRepository, employeRepository) => {
+    return new AuthService(userRepository, employeRepository);
 };
 //# sourceMappingURL=authService.js.map

@@ -26,11 +26,13 @@ export default function UserForm({ isOpen, onClose, onSuccess, user = null }) {
         { value: 'SUPER_ADMIN', label: 'Super Admin' },
         { value: 'ADMIN_ENTREPRISE', label: 'Admin Entreprise' },
         { value: 'CAISSIER', label: 'Caissier' },
+        { value: 'VIGILE', label: 'Vigile' },
         { value: 'EMPLOYE', label: 'Employé' }
       ];
     } else if (currentUser?.role === 'ADMIN_ENTREPRISE') {
       return [
         { value: 'CAISSIER', label: 'Caissier' },
+        { value: 'VIGILE', label: 'Vigile' },
         { value: 'EMPLOYE', label: 'Employé' }
       ];
     }

@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 export class ParametreGlobalRepository implements InterfaceRepository<ParametreGlobal> {
   async findAll(): Promise<ParametreGlobal[]> {
     return await prisma.parametreGlobal.findMany({
-      orderBy: { categorie: 'asc' }
+      orderBy: { id: 'desc' }
     });
   }
 
@@ -22,7 +22,7 @@ export class ParametreGlobalRepository implements InterfaceRepository<ParametreG
 
   async getAll() {
     return await prisma.parametreGlobal.findMany({
-      orderBy: { categorie: 'asc' }
+      orderBy: { id: 'desc' }
     });
   }
 
@@ -54,7 +54,7 @@ export class ParametreGlobalRepository implements InterfaceRepository<ParametreG
   async getByCategory(categorie: string) {
     return await prisma.parametreGlobal.findMany({
       where: { categorie },
-      orderBy: { cle: 'asc' }
+      orderBy: { id: 'desc' }
     });
   }
 }

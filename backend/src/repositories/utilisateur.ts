@@ -38,7 +38,9 @@ export class utilisateurRepository implements IUserRepository {
   async findAll(): Promise<Utilisateur[]> {
     try {
       Logger.info('Récupération de tous les utilisateurs');
-      const utilisateurs = await mnprisma.utilisateur.findMany();
+      const utilisateurs = await mnprisma.utilisateur.findMany({
+        orderBy: { id: 'desc' }
+      });
       Logger.info('Utilisateurs récupérés avec succès', { count: utilisateurs.length });
       return utilisateurs;
     } catch (error: any) {
@@ -79,7 +81,10 @@ export class utilisateurRepository implements IUserRepository {
   async findByRole(role: RoleUtilisateur): Promise<Utilisateur[]> {
     try {
       Logger.info('Recherche d\'utilisateurs par rôle', { role });
-      const utilisateurs = await mnprisma.utilisateur.findMany({ where: { role } });
+      const utilisateurs = await mnprisma.utilisateur.findMany({
+        where: { role },
+        orderBy: { id: 'desc' }
+      });
       Logger.info('Utilisateurs trouvés par rôle', { role, count: utilisateurs.length });
       return utilisateurs;
     } catch (error: any) {
@@ -134,7 +139,8 @@ export class utilisateurRepository implements IUserRepository {
     try {
       Logger.info('Recherche d\'utilisateurs par entreprise', { entrepriseId });
       const utilisateurs = await mnprisma.utilisateur.findMany({
-        where: { entrepriseId }
+        where: { entrepriseId },
+        orderBy: { id: 'desc' }
       });
       Logger.info('Utilisateurs trouvés par entreprise', { entrepriseId, count: utilisateurs.length });
       return utilisateurs;
