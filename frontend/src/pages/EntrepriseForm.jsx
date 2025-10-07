@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardHeader, CardBody, Input, Select, Button } from "../components/ui";
 import { entreprisesApi } from "../utils/api";
 import { useToast } from "../context/ToastContext";
+import { useAuth } from "../context/AuthContext";
 
 // Validation functions matching backend validators
 function validateNom(value) {
@@ -69,9 +70,16 @@ function validateAdminMotDePasse(value) {
 
 export default function EntrepriseForm() {
   const { showSuccess, showError } = useToast();
+  const { user } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
+
+  // Only super admin can create enterprises
+  if (!isEdit && user?.role !== 'SUPER_ADMIN') {
+    navigate('/entreprises');
+    return null;
+  }
 
   const [form, setForm] = useState({
     nom: "",
@@ -82,6 +90,9 @@ export default function EntrepriseForm() {
     secteurActivite: "",
     estActive: true,
     logo: null,
+    couleurPrimaire: "#2563eb", // Default blue
+    couleurSecondaire: "#1d4ed8", // Default darker blue
+    superAdminAccessGranted: false,
     // Admin user fields
     adminNom: "",
     adminPrenom: "",
@@ -145,6 +156,9 @@ export default function EntrepriseForm() {
           siteWeb: data.siteWeb || "",
           secteurActivite: data.secteurActivite || "",
           estActive: data.estActive ?? true,
+          couleurPrimaire: data.couleurPrimaire || "#2563eb",
+          couleurSecondaire: data.couleurSecondaire || "#1d4ed8",
+          superAdminAccessGranted: data.superAdminAccessGranted ?? false,
         });
       })
       .catch((err) => setError(err?.response?.data?.message || err.message));
@@ -187,6 +201,9 @@ export default function EntrepriseForm() {
       payload.append('siteWeb', form.siteWeb || '');
       payload.append('secteurActivite', form.secteurActivite || '');
       payload.append('estActive', form.estActive.toString());
+      payload.append('couleurPrimaire', form.couleurPrimaire);
+      payload.append('couleurSecondaire', form.couleurSecondaire);
+      payload.append('superAdminAccessGranted', form.superAdminAccessGranted.toString());
 
       // Add logo file if provided
       if (form.logo) {
@@ -197,10 +214,13 @@ export default function EntrepriseForm() {
       if (form.adminNom && form.adminEmail && form.adminMotDePasse) {
         const adminUser = {
           nom: form.adminNom,
-          prenom: form.adminPrenom || undefined,
           email: form.adminEmail,
           motDePasse: form.adminMotDePasse,
         };
+        // Only include prenom if it's not empty
+        if (form.adminPrenom && form.adminPrenom.trim()) {
+          adminUser.prenom = form.adminPrenom.trim();
+        }
         payload.append('adminUser', JSON.stringify(adminUser));
       }
 
@@ -245,9 +265,10 @@ export default function EntrepriseForm() {
                 <Input
                   label="Email"
                   type="email"
-                  value={form.email}
+                  value={form.email || ""}
                   onChange={(e) => update("email", e.target.value)}
                   error={errors.email}
+                  autoComplete="username"
                 />
               </div>
               <div>
@@ -276,6 +297,28 @@ export default function EntrepriseForm() {
                   error={errors.secteurActivite}
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Couleur primaire
+                </label>
+                <input
+                  type="color"
+                  value={form.couleurPrimaire}
+                  onChange={(e) => update("couleurPrimaire", e.target.value)}
+                  className="block w-full h-10 border border-gray-300 rounded-md"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Couleur secondaire
+                </label>
+                <input
+                  type="color"
+                  value={form.couleurSecondaire}
+                  onChange={(e) => update("couleurSecondaire", e.target.value)}
+                  className="block w-full h-10 border border-gray-300 rounded-md"
+                />
+              </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Logo de l'entreprise
@@ -284,7 +327,7 @@ export default function EntrepriseForm() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => update("logo", e.target.files[0])}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
                 />
                 <p className="mt-1 text-sm text-gray-500">
                   Formats acceptés: JPG, PNG, GIF. Taille maximale: 5MB
@@ -300,6 +343,18 @@ export default function EntrepriseForm() {
                 />
                 <label htmlFor="estActive" className="text-sm text-gray-700">Entreprise active</label>
               </div>
+              {user?.role === 'ADMIN_ENTREPRISE' && (
+                <div className="flex items-center gap-2 mt-4 md:col-span-2">
+                  <input
+                    type="checkbox"
+                    checked={form.superAdminAccessGranted}
+                    onChange={(e) => update("superAdminAccessGranted", e.target.checked)}
+                    className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                    id="superAdminAccessGranted"
+                  />
+                  <label htmlFor="superAdminAccessGranted" className="text-sm text-gray-700">Accès super admin accordé</label>
+                </div>
+              )}
 
               {/* Admin User Section */}
               <div className="md:col-span-2 mt-6">
@@ -324,9 +379,10 @@ export default function EntrepriseForm() {
                     <Input
                       label="Email de l'admin"
                       type="email"
-                      value={form.adminEmail}
+                      value={form.adminEmail || ""}
                       onChange={(e) => update("adminEmail", e.target.value)}
                       error={errors.adminEmail}
+                      autoComplete="username"
                     />
                   </div>
                   <div>
@@ -343,8 +399,8 @@ export default function EntrepriseForm() {
               </div>
               {error && <p className="text-sm text-red-600 md:col-span-2">{error}</p>}
               <div className="flex justify-end gap-2 md:col-span-2">
-                <Button type="button" variant="outline" onClick={() => navigate(-1)}>Annuler</Button>
-                <Button type="submit" disabled={loading}>{loading ? "Enregistrement..." : "Enregistrer"}</Button>
+                <Button type="button" variant="outline" onClick={() => navigate(-1)} primaryColor={form.couleurPrimaire} secondaryColor={form.couleurSecondaire}>Annuler</Button>
+                <Button type="submit" disabled={loading} primaryColor={form.couleurPrimaire} secondaryColor={form.couleurSecondaire}>{loading ? "Enregistrement..." : "Enregistrer"}</Button>
               </div>
             </form>
           </CardBody>

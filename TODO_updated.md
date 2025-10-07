@@ -8,6 +8,7 @@
 - [x] Navigation: Added "Ajouter" button to navigate to /cycles-paie/new
 - [x] Navigation: Added edit button and clickable name to navigate to /cycles-paie/{id}/edit
 - [x] Form navigation back to list after save/cancel
+- [x] Added pagination to Utilisateurs, Licences, Paiements, and Professions pages
 
 ## Pending
 - [ ] Implement payment functionality for cashier (currently alert)

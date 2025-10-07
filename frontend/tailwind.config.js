@@ -2,34 +2,36 @@
 const withMT = require("@material-tailwind/react/utils/withMT");
 
 module.exports = withMT({
+  darkMode: 'class',
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
-        // Palette professionnelle - gris et neutres
+        // Dynamic primary colors using CSS variables
         primary: {
-          50: '#f9fafb',
-          100: '#f3f4f6',
-          200: '#e5e7eb',
-          300: '#d1d5db',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
-          700: '#374151',
-          800: '#1f2937',
-          900: '#111827',
+          50: 'color-mix(in srgb, var(--color-primary) 10%, white)',
+          100: 'color-mix(in srgb, var(--color-primary) 20%, white)',
+          200: 'color-mix(in srgb, var(--color-primary) 30%, white)',
+          300: 'color-mix(in srgb, var(--color-primary) 40%, white)',
+          400: 'color-mix(in srgb, var(--color-primary) 50%, white)',
+          500: 'var(--color-primary)',
+          600: 'color-mix(in srgb, var(--color-primary) 80%, black)',
+          700: 'color-mix(in srgb, var(--color-primary) 70%, black)',
+          800: 'color-mix(in srgb, var(--color-primary) 60%, black)',
+          900: 'color-mix(in srgb, var(--color-primary) 50%, black)',
         },
+        // Dynamic secondary colors using CSS variables
         secondary: {
-          50: '#fafafa',
-          100: '#f4f4f5',
-          200: '#e4e4e7',
-          300: '#d4d4d8',
-          400: '#a1a1aa',
-          500: '#71717a',
-          600: '#52525b',
-          700: '#3f3f46',
-          800: '#27272a',
-          900: '#18181b',
+          50: 'color-mix(in srgb, var(--color-secondary) 10%, white)',
+          100: 'color-mix(in srgb, var(--color-secondary) 20%, white)',
+          200: 'color-mix(in srgb, var(--color-secondary) 30%, white)',
+          300: 'color-mix(in srgb, var(--color-secondary) 40%, white)',
+          400: 'color-mix(in srgb, var(--color-secondary) 50%, white)',
+          500: 'var(--color-secondary)',
+          600: 'color-mix(in srgb, var(--color-secondary) 80%, black)',
+          700: 'color-mix(in srgb, var(--color-secondary) 70%, black)',
+          800: 'color-mix(in srgb, var(--color-secondary) 60%, black)',
+          900: 'color-mix(in srgb, var(--color-secondary) 50%, black)',
         },
         accent: {
           50: '#fefce8',

@@ -129,7 +129,7 @@ export default function QRCodeManager({ employeId, entrepriseId, className = "" 
     <Card className={className}>
       <CardBody className="p-6">
         <div className="flex items-center gap-2 mb-4">
-          <QrCodeIcon className="h-5 w-5 text-blue-600" />
+          <QrCodeIcon className="h-5 w-5 text-primary-600" />
           <h3 className="text-lg font-semibold text-gray-900">
             Gestion des QR Codes
           </h3>

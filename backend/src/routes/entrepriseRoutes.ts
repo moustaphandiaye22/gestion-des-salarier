@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { EntrepriseController } from '../controller/entrepriseController.js';
-import { requireSuperAdmin, requireAdminOrSuper, requireCompanyAccess, requireReadAccess } from '../middleware/rbacMiddleware.js';
+import { requireSuperAdmin, requireAdminOrSuper, requireCompanyAccess, requireReadAccess, requireSuperAdminAccess } from '../middleware/rbacMiddleware.js';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -43,11 +43,11 @@ router.post('/', requireSuperAdmin, upload.single('logo'), entrepriseController.
 // Lister toutes les entreprises - caissier, super admin voit toutes, admin entreprise voit la sienne
 router.get('/', requireReadAccess, entrepriseController.getAll);
 
-// Obtenir les détails d'une entreprise - caissier, super admin ou admin de l'entreprise
-router.get('/:id', requireCompanyAccess, entrepriseController.getById);
+// Obtenir les détails d'une entreprise - caissier, super admin (avec autorisation) ou admin de l'entreprise
+router.get('/:id', requireSuperAdminAccess, entrepriseController.getById);
 
-// Mettre à jour une entreprise - super admin ou admin de l'entreprise
-router.put('/:id', requireCompanyAccess, upload.single('logo'), entrepriseController.update);
+// Mettre à jour une entreprise - super admin (avec autorisation) ou admin de l'entreprise
+router.put('/:id', requireSuperAdminAccess, upload.single('logo'), entrepriseController.update);
 
 // Supprimer une entreprise - seulement super admin
 router.delete('/:id', requireSuperAdmin, entrepriseController.delete);

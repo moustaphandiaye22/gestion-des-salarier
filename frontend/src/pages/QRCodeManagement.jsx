@@ -21,10 +21,10 @@ export default function QRCodeManagement() {
       // First, scan the QR code to get employee information
       console.log('📡 Appel API scanQrCode...');
       const scanResult = await qrcodesApi.scanQrCode(qrContent);
-      console.log('✅ Résultat API:', scanResult);
+      console.log(' Résultat API:', scanResult);
 
       if (scanResult && scanResult.employe) {
-        console.log('👤 Employé trouvé:', scanResult.employe);
+        console.log(' Employé trouvé:', scanResult.employe);
         // Show employee information for confirmation
         setScanResult({
           success: true,
@@ -122,7 +122,7 @@ export default function QRCodeManagement() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <QrCodeIcon className="h-7 w-7 text-blue-600" />
+            <QrCodeIcon className="h-7 w-7 text-primary-600" />
             Gestion des QR Codes
           </h1>
           <p className="mt-1 text-gray-600">
@@ -138,7 +138,7 @@ export default function QRCodeManagement() {
                 onClick={() => setActiveTab('generate')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'generate'
-                    ? 'border-blue-500 text-blue-600'
+                    ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
@@ -148,7 +148,7 @@ export default function QRCodeManagement() {
                 onClick={() => setActiveTab('scan')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'scan'
-                    ? 'border-blue-500 text-blue-600'
+                    ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >

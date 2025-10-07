@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -31,6 +32,8 @@ async function main() {
         telephone: '+221 33 123 45 67',
         email: 'contact@techcorp.sn',
         logo: 'images/logos/LOGOst.png',
+        couleurPrimaire: '#2563eb', // Bleu
+        couleurSecondaire: '#1d4ed8', // Bleu foncé
         estActive: true,
       },
     });
@@ -43,6 +46,8 @@ async function main() {
         telephone: '+223 20 12 34 56',
         email: 'info@agrisolutions.ml',
         logo: 'images/logos/images.png',
+        couleurPrimaire: '#16a34a', // Vert
+        couleurSecondaire: '#15803d', // Vert foncé
         estActive: true,
       },
     });

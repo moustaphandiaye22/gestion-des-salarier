@@ -6,4 +6,5 @@ export declare const requireAdminOrSuper: (req: Request, res: Response, next: Ne
 export declare const requireCashierOrAdmin: (req: Request, res: Response, next: NextFunction) => Response<any, Record<string, any>> | undefined;
 export declare const requireReadAccess: (req: Request, res: Response, next: NextFunction) => Response<any, Record<string, any>> | undefined;
 export declare const requireCompanyAccess: (req: Request, res: Response, next: NextFunction) => void | Response<any, Record<string, any>>;
+export declare const requireSuperAdminAccess: (req: Request, res: Response, next: NextFunction) => Promise<void | Response<any, Record<string, any>>>;
 //# sourceMappingURL=rbacMiddleware.d.ts.map

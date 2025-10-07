@@ -120,8 +120,8 @@ export default function EmployeeDashboard() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                <UserIcon className="h-8 w-8 text-blue-600" />
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
+                <UserIcon className="h-8 w-8 text-primary-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
@@ -151,11 +151,11 @@ export default function EmployeeDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Taux de présence</p>
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-2xl font-bold text-primary-600">
                     {stats?.attendanceRate || 0}%
                   </p>
                 </div>
-                <ChartBarIcon className="h-8 w-8 text-blue-500" />
+                <ChartBarIcon className="h-8 w-8 text-primary-500" />
               </div>
             </CardBody>
           </Card>
@@ -206,11 +206,11 @@ export default function EmployeeDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Heures travaillées</p>
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-2xl font-bold text-primary-600">
                     {stats?.heuresTravaillees || 0}h
                   </p>
                 </div>
-                <ClockIcon className="h-8 w-8 text-blue-500" />
+                <ClockIcon className="h-8 w-8 text-primary-500" />
               </div>
             </CardBody>
           </Card>
@@ -235,7 +235,7 @@ export default function EmployeeDashboard() {
               </div>
               <div className="flex justify-between items-center py-3">
                 <span className="text-gray-700">Prochain paiement</span>
-                <span className="font-semibold text-blue-600">
+                <span className="font-semibold text-primary-600">
                   {stats?.prochainPaiement ? new Date(stats.prochainPaiement).toLocaleDateString() : 'N/A'}
                 </span>
               </div>
@@ -257,11 +257,11 @@ export default function EmployeeDashboard() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                  <CurrencyDollarIcon className="h-5 w-5 text-blue-500" />
+                <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-lg">
+                  <CurrencyDollarIcon className="h-5 w-5 text-primary-500" />
                   <div>
-                    <p className="text-sm font-medium text-blue-800">Paiement reçu</p>
-                    <p className="text-xs text-blue-600">
+                    <p className="text-sm font-medium text-primary-800">Paiement reçu</p>
+                    <p className="text-xs text-primary-600">
                       {recentPayments[0]?.montant?.toLocaleString()} CFA
                     </p>
                   </div>
@@ -323,7 +323,7 @@ export default function EmployeeDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <QrCodeIcon className="h-5 w-5 text-blue-500 mt-0.5" />
+                    <QrCodeIcon className="h-5 w-5 text-primary-500 mt-0.5" />
                     <div>
                       <h4 className="font-medium text-gray-900">Pointage QR Code</h4>
                       <p className="text-sm text-gray-600">

@@ -337,7 +337,7 @@ export default function QRCodeScanner({ onScanSuccess, onClose, className = "" }
         <CardBody className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <QrCodeIcon className="h-5 w-5 text-blue-600" />
+              <QrCodeIcon className="h-5 w-5 text-primary-600" />
               Scanner QR Code
             </h3>
             <Button
@@ -429,9 +429,9 @@ export default function QRCodeScanner({ onScanSuccess, onClose, className = "" }
                     ref={canvasRef}
                     className="hidden"
                   />
-                  <div className="absolute inset-0 border-2 border-blue-500 rounded-lg pointer-events-none">
+                  <div className="absolute inset-0 border-2 border-primary-500 rounded-lg pointer-events-none">
                     <div className="absolute inset-2 border-2 border-white/50 rounded-lg flex items-center justify-center">
-                      <div className="w-24 h-24 border-2 border-blue-500 rounded-lg bg-white/10"></div>
+                      <div className="w-24 h-24 border-2 border-primary-500 rounded-lg bg-white/10"></div>
                     </div>
                   </div>
                   <div className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
@@ -477,7 +477,7 @@ export default function QRCodeScanner({ onScanSuccess, onClose, className = "" }
                   value={manualQRCode}
                   onChange={(e) => setManualQRCode(e.target.value)}
                   placeholder="Collez ou saisissez le contenu du QR code"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
                 <div className="flex gap-2 mt-2">
                   <Button

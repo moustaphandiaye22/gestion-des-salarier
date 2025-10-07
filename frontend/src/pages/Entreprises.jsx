@@ -5,7 +5,7 @@ import Pagination from "../components/Pagination";
 import { entreprisesApi } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import { PencilSquareIcon, TrashIcon, PlusIcon, EyeIcon, MagnifyingGlassIcon, Squares2X2Icon, ListBulletIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon, TrashIcon, PlusIcon, EyeIcon, MagnifyingGlassIcon, Squares2X2Icon, ListBulletIcon, ShieldCheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function Entreprises() {
   const [rows, setRows] = useState([]);
@@ -57,6 +57,21 @@ export default function Entreprises() {
       const errorMessage = err?.response?.data?.message || err.message;
       setError(errorMessage);
       showError("Erreur de suppression", errorMessage);
+    }
+  }
+
+  async function toggleSuperAdminAccess(entreprise) {
+    try {
+      const updatedData = {
+        superAdminAccessGranted: !entreprise.superAdminAccessGranted
+      };
+      await entreprisesApi.update(entreprise.id, updatedData);
+      load();
+      showSuccess("Succès", `Accès super admin ${updatedData.superAdminAccessGranted ? 'autorisé' : 'refusé'} pour ${entreprise.nom}`);
+    } catch (err) {
+      const errorMessage = err?.response?.data?.message || err.message;
+      setError(errorMessage);
+      showError("Erreur de mise à jour", errorMessage);
     }
   }
 
@@ -138,25 +153,27 @@ export default function Entreprises() {
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setViewMode('card')}
-                    className={`p-1 rounded ${viewMode === 'card' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-200'}`}
+                    className={`p-1 rounded ${viewMode === 'card' ? 'bg-primary-600 text-white' : 'text-gray-600 hover:bg-gray-200'}`}
                     title="Vue en cartes"
                   >
                     <Squares2X2Icon className="h-5 w-5" />
                   </button>
                   <button
                     onClick={() => setViewMode('table')}
-                    className={`p-1 rounded ${viewMode === 'table' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-200'}`}
+                    className={`p-1 rounded ${viewMode === 'table' ? 'bg-primary-600 text-white' : 'text-gray-600 hover:bg-gray-200'}`}
                     title="Vue en liste"
                   >
                     <ListBulletIcon className="h-5 w-5" />
                   </button>
                 </div>
-                <Link to="/entreprises/new">
-                  <Button className="flex items-center gap-2">
-                    <PlusIcon className="h-5 w-5" />
-                    Ajouter
-                  </Button>
-                </Link>
+                {user?.role === 'SUPER_ADMIN' && (
+                  <Link to="/entreprises/new">
+                    <Button className="flex items-center gap-2" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
+                      <PlusIcon className="h-5 w-5" />
+                      Ajouter
+                    </Button>
+                  </Link>
+                )}
               </div>
             }
           />
@@ -190,11 +207,20 @@ export default function Entreprises() {
                             </Link>
                           </h3>
                         </div>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          row.estActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {row.estActive ? 'Active' : 'Inactive'}
-                        </span>
+                        <div className="flex flex-col gap-1">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            row.estActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {row.estActive ? 'Active' : 'Inactive'}
+                          </span>
+                          {user?.profil === 'SUPER_ADMIN' && (
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                              row.superAdminAccessGranted ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {row.superAdminAccessGranted ? 'Super Admin' : 'Accès limité'}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       <div className="space-y-2 text-sm text-gray-600">
@@ -220,21 +246,44 @@ export default function Entreprises() {
 
                       <div className="flex gap-2 mt-4">
                         <Link to={`/entreprises/${row.id}`} className="flex-1">
-                          <Button variant="outline" className="w-full text-xs">
+                          <Button variant="outline" className="w-full text-xs" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                             <EyeIcon className="h-3 w-3 mr-1" />
                             Voir
                           </Button>
                         </Link>
                         <Link to={`/entreprises/${row.id}/edit`} className="flex-1">
-                          <Button variant="outline" className="w-full text-xs">
+                          <Button variant="outline" className="w-full text-xs" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                             <PencilSquareIcon className="h-3 w-3 mr-1" />
                             Éditer
                           </Button>
                         </Link>
+                        {user?.profil === 'SUPER_ADMIN' && (
+                          <Button
+                            variant={row.superAdminAccessGranted ? "danger" : "success"}
+                            onClick={() => toggleSuperAdminAccess(row)}
+                            className="text-xs px-2"
+                            primaryColor={user?.entreprise?.couleurPrimaire}
+                            secondaryColor={user?.entreprise?.couleurSecondaire}
+                          >
+                            {row.superAdminAccessGranted ? (
+                              <>
+                                <XMarkIcon className="h-3 w-3 mr-1" />
+                                Refuser
+                              </>
+                            ) : (
+                              <>
+                                <ShieldCheckIcon className="h-3 w-3 mr-1" />
+                                Autoriser
+                              </>
+                            )}
+                          </Button>
+                        )}
                         <Button
                           variant="danger"
                           onClick={() => setToDelete(row)}
                           className="text-xs px-2"
+                          primaryColor={user?.entreprise?.couleurPrimaire}
+                          secondaryColor={user?.entreprise?.couleurSecondaire}
                         >
                           <TrashIcon className="h-3 w-3" />
                         </Button>
@@ -254,6 +303,7 @@ export default function Entreprises() {
                     "Site Web",
                     "Secteur",
                     "Statut",
+                    "Accès Super Admin",
                     "Actions",
                   ]}
                   rows={paginatedRows}
@@ -282,19 +332,55 @@ export default function Entreprises() {
                           {row.estActive ? 'Active' : 'Inactive'}
                         </span>
                       </td>
+                      <td className="px-2 py-2 text-sm text-gray-700 text-center">
+                        {user?.profil === 'SUPER_ADMIN' ? (
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            row.superAdminAccessGranted ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {row.superAdminAccessGranted ? 'Autorisé' : 'Refusé'}
+                          </span>
+                        ) : (
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            row.superAdminAccessGranted ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {row.superAdminAccessGranted ? 'Oui' : 'Non'}
+                          </span>
+                        )}
+                      </td>
                       <td className="px-2 py-2 text-sm">
                         <div className="flex gap-1">
                           <Link to={`/entreprises/${row.id}`}>
-                            <Button variant="outline" className="text-xs px-2 py-1">
+                            <Button variant="outline" className="text-xs px-2 py-1" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                               <EyeIcon className="h-3 w-3" />
                             </Button>
                           </Link>
                           <Link to={`/entreprises/${row.id}/edit`}>
-                            <Button variant="outline" className="text-xs px-2 py-1">
+                            <Button variant="outline" className="text-xs px-2 py-1" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                               <PencilSquareIcon className="h-3 w-3" />
                             </Button>
                           </Link>
-                          <Button variant="danger" onClick={() => setToDelete(row)} className="text-xs px-2 py-1">
+                          {user?.profil === 'SUPER_ADMIN' && (
+                            <Button
+                              variant={row.superAdminAccessGranted ? "danger" : "success"}
+                              onClick={() => toggleSuperAdminAccess(row)}
+                              className="text-xs px-2 py-1"
+                              primaryColor={user?.entreprise?.couleurPrimaire}
+                              secondaryColor={user?.entreprise?.couleurSecondaire}
+                            >
+                              {row.superAdminAccessGranted ? (
+                                <>
+                                  <XMarkIcon className="h-3 w-3 mr-1" />
+                                  Refuser
+                                </>
+                              ) : (
+                                <>
+                                  <ShieldCheckIcon className="h-3 w-3 mr-1" />
+                                  Autoriser
+                                </>
+                              )}
+                            </Button>
+                          )}
+                          <Button variant="danger" onClick={() => setToDelete(row)} className="text-xs px-2 py-1" primaryColor={user?.entreprise?.couleurPrimaire} secondaryColor={user?.entreprise?.couleurSecondaire}>
                             <TrashIcon className="h-3 w-3" />
                           </Button>
                         </div>

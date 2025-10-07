@@ -4,7 +4,7 @@ import { Button } from "../components/ui";
 import { useAuth } from "../context/AuthContext";
 import { entreprisesApi, API_BASE_URL } from "../utils/api";
 import UserProfileDropdown from "../components/UserProfileDropdown";
-import {
+ import {
   HomeIcon,
   UsersIcon,
   BuildingOfficeIcon,
@@ -30,7 +30,6 @@ const NAV = [
     { to: "/dashboard", label: "Tableau de bord", icon: ChartPieIcon },
     { to: "/cashier-dashboard", label: "Tableau de bord Caissier", icon: ChartPieIcon, cashierOnly: true },
     { to: "/employees", label: "Employés", icon: UsersIcon },
-    { to: "/utilisateurs", label: "Utilisateurs", icon: UserCircleIcon },
   { to: "/pointages", label: "Pointages", icon: ClockIcon },
   { to: "/qrcodes", label: "QR Codes", icon: QrCodeIcon },
   { to: "/entreprises", label: "Entreprises", icon: BuildingOfficeIcon },
@@ -55,6 +54,8 @@ export default function MainLayout({ children }) {
   const [loading, setLoading] = useState(false);
   const [selectedCompanyName, setSelectedCompanyName] = useState(null);
   const [companies, setCompanies] = useState([]);
+  const [companyColors, setCompanyColors] = useState({ primary: '#2563eb', secondary: '#1d4ed8' });
+  const [isGrayscale, setIsGrayscale] = useState(false);
 
   // Show loading if user is not loaded yet
   if (!user) {
@@ -65,56 +66,111 @@ export default function MainLayout({ children }) {
     );
   }
 
+  // Function to set colors
+  const setColors = (primaryColor, secondaryColor) => {
+    document.documentElement.style.setProperty('--color-primary', primaryColor);
+    document.documentElement.style.setProperty('--color-secondary', secondaryColor);
+  };
+
+  // Helper function to lighten colors
+  const lightenColor = (color, amount) => {
+    // Simple color lightening - convert hex to rgb, lighten, convert back
+    const hex = color.replace('#', '');
+    const r = Math.min(255, parseInt(hex.substr(0, 2), 16) + Math.round(amount * 255));
+    const g = Math.min(255, parseInt(hex.substr(2, 2), 16) + Math.round(amount * 255));
+    const b = Math.min(255, parseInt(hex.substr(4, 2), 16) + Math.round(amount * 255));
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+  };
+
   // Fetch company logo and name when user is authenticated
   useEffect(() => {
     async function loadCompanyInfo() {
       if (isAuthenticated && user?.role !== 'EMPLOYE') {
-        if (user?.role === 'SUPER_ADMIN' && selectedCompanyId) {
-          try {
-            const entreprise = await entreprisesApi.get(parseInt(selectedCompanyId));
-            setSelectedCompanyName(entreprise.nom);
-            if (entreprise?.logo) {
-              // Use full backend URL for static assets
-              const logoPath = entreprise.logo.startsWith('images/') ? API_BASE_URL + '/assets/' + entreprise.logo : API_BASE_URL + entreprise.logo;
-              setCompanyLogo(logoPath);
-              setCompanyName(entreprise.nom);
-            } else {
-              setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
-              setCompanyName("SalairePro");
+        if (user?.role === 'SUPER_ADMIN') {
+          // For SUPER_ADMIN, apply company colors when a company is selected
+          if (selectedCompanyId) {
+            // Load the selected company's colors
+            try {
+              const entreprise = await entreprisesApi.get(parseInt(selectedCompanyId));
+              if (entreprise?.couleurPrimaire && entreprise?.couleurSecondaire) {
+                setCompanyColors({
+                  primary: entreprise.couleurPrimaire,
+                  secondary: entreprise.couleurSecondaire,
+                });
+                setColors(entreprise.couleurPrimaire, entreprise.couleurSecondaire);
+              } else {
+                // Fallback to default if company has no colors
+                setCompanyColors({ primary: '#2563eb', secondary: '#1d4ed8' });
+                setColors('#2563eb', '#1d4ed8');
+              }
+            } catch (error) {
+              console.error('Error loading selected company colors:', error);
+              setCompanyColors({ primary: '#2563eb', secondary: '#1d4ed8' });
+              setColors('#2563eb', '#1d4ed8');
             }
-          } catch (error) {
-            console.error('Error loading selected company info:', error);
-            // Reset selected company if loading fails
-            setSelectedCompanyId(null);
-            setSelectedCompanyName(null);
+          } else {
+            // No company selected - use default colors
+            setCompanyColors({ primary: '#2563eb', secondary: '#1d4ed8' });
+            setColors('#2563eb', '#1d4ed8');
+          }
+
+          // Set grayscale for super admin with no company selected
+          setIsGrayscale(user?.role === 'SUPER_ADMIN' && !selectedCompanyId);
+
+          // Still load selected company info for display if selected
+          if (selectedCompanyId) {
+            try {
+              const entreprise = await entreprisesApi.get(parseInt(selectedCompanyId));
+              setSelectedCompanyName(entreprise.nom);
+              if (entreprise?.logo) {
+                const logoPath = entreprise.logo.startsWith('images/') ? API_BASE_URL + '/assets/' + entreprise.logo : API_BASE_URL + entreprise.logo;
+                setCompanyLogo(logoPath);
+                setCompanyName(entreprise.nom);
+              }
+            } catch (error) {
+              console.error('Error loading selected company info:', error);
+              setSelectedCompanyId(null);
+              setSelectedCompanyName(null);
+            }
+          }
+        } else if (user?.entreprise && (user?.role === 'ADMIN_ENTREPRISE' || user?.role === 'CAISSIER')) {
+          // For ADMIN_ENTREPRISE and CAISSIER, use their company's colors automatically
+          const entreprise = user.entreprise;
+          if (entreprise?.logo) {
+            const logoPath = entreprise.logo.startsWith('images/') ? API_BASE_URL + '/assets/' + entreprise.logo : API_BASE_URL + entreprise.logo;
+            setCompanyLogo(logoPath);
+            setCompanyName(entreprise.nom);
+          } else {
             setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
             setCompanyName("SalairePro");
           }
-        } else if (user?.entrepriseId && user?.role !== 'SUPER_ADMIN' && user?.role !== 'EMPLOYE') {
-          try {
-            const entreprise = await entreprisesApi.get(user.entrepriseId);
-            if (entreprise?.logo) {
-              // Use full backend URL for static assets
-              const logoPath = entreprise.logo.startsWith('images/') ? API_BASE_URL + '/assets/' + entreprise.logo : API_BASE_URL + entreprise.logo;
-              setCompanyLogo(logoPath);
-              setCompanyName(entreprise.nom);
-            } else {
-              setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
-              setCompanyName("SalairePro");
-            }
-          } catch (error) {
-            console.error('Error loading company info:', error);
-            setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
-            setCompanyName("SalairePro");
+          // Set CSS variables for colors from user's company
+          if (entreprise?.couleurPrimaire && entreprise?.couleurSecondaire) {
+            setCompanyColors({
+              primary: entreprise.couleurPrimaire,
+              secondary: entreprise.couleurSecondaire,
+            });
+            setColors(entreprise.couleurPrimaire, entreprise.couleurSecondaire);
+          } else {
+            // Fallback to default colors if company doesn't have colors
+            setCompanyColors({ primary: '#2563eb', secondary: '#1d4ed8' });
+            setColors('#2563eb', '#1d4ed8');
           }
+          setIsGrayscale(false);
         } else {
-          setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg"); // default logo for super admin
+          setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
           setCompanyName("SalairePro");
+          setCompanyColors({ primary: '#2563eb', secondary: '#1d4ed8' });
+          setColors('#2563eb', '#1d4ed8');
+          setIsGrayscale(false);
         }
       } else if (isAuthenticated && user?.role === 'EMPLOYE') {
         // For employees, use default logo and company name
         setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
         setCompanyName("SalairePro");
+        setCompanyColors({ primary: '#2563eb', secondary: '#1d4ed8' });
+        setColors('#2563eb', '#1d4ed8');
+        setIsGrayscale(false);
       }
     }
 
@@ -212,7 +268,7 @@ export default function MainLayout({ children }) {
   };
 
   return (
-    <div className="flex h-screen bg-surface-50">
+    <div className="flex h-screen bg-surface-50 text-surface-900">
       {/* Sidebar fixe */}
       <aside className="hidden lg:flex lg:flex-col lg:w-64 bg-white border-r border-surface-200 shadow-soft">
         {/* Logo et titre */}
@@ -233,18 +289,18 @@ export default function MainLayout({ children }) {
             <div className="space-y-3">
               {/* Super admin company selector */}
               {user?.role === 'SUPER_ADMIN' && (
-                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="p-3 bg-primary-50 rounded-lg border border-primary-200">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <p className="text-xs font-medium text-blue-900">Sélection d'entreprise</p>
+                    <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
+                    <p className="text-xs font-medium text-primary-900">Sélection d'entreprise</p>
                   </div>
                   {selectedCompanyId && selectedCompanyName && (
-                    <p className="text-sm font-medium text-blue-900 truncate mb-2">
+                    <p className="text-sm font-medium text-primary-900 truncate mb-2">
                       Actuellement: {selectedCompanyName}
                     </p>
                   )}
                   <select
-                    className="w-full p-2 rounded border border-blue-300 text-sm"
+                    className="w-full p-2 rounded border border-primary-300 text-sm"
                     value={selectedCompanyId || ""}
                     onChange={async (e) => {
                       const newId = e.target.value;
@@ -259,6 +315,14 @@ export default function MainLayout({ children }) {
                               : API_BASE_URL + entreprise.logo
                           );
                           setCompanyName(entreprise.nom);
+                        // Set CSS variables for colors
+                        if (entreprise?.couleurPrimaire && entreprise?.couleurSecondaire) {
+                          setCompanyColors({
+                            primary: entreprise.couleurPrimaire,
+                            secondary: entreprise.couleurSecondaire,
+                          });
+                          setColors(entreprise.couleurPrimaire, entreprise.couleurSecondaire);
+                        }
                         } catch (error) {
                           console.error('Error loading selected company info:', error);
                         }
@@ -266,6 +330,9 @@ export default function MainLayout({ children }) {
                         setSelectedCompanyName(null);
                         setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
                         setCompanyName("SalairePro");
+                        setCompanyColors({ primary: '#2563eb', secondary: '#1d4ed8' });
+                        document.documentElement.style.setProperty('--color-primary', '#2563eb');
+                        document.documentElement.style.setProperty('--color-secondary', '#1d4ed8');
                       }
                     }}
                   >
@@ -284,7 +351,7 @@ export default function MainLayout({ children }) {
                         setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
                         setCompanyName("SalairePro");
                       }}
-                      className="text-xs text-blue-600 hover:text-blue-800 mt-2 block"
+                      className="text-xs text-primary-600 hover:text-primary-800 mt-2 block"
                     >
                       Retour à l'administration globale
                     </button>
@@ -330,18 +397,18 @@ export default function MainLayout({ children }) {
           {/* Footer mobile sidebar */}
           {isAuthenticated && user?.role === 'SUPER_ADMIN' && (
             <div className="p-4 border-t border-surface-200">
-              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="p-3 bg-primary-50 rounded-lg border border-primary-200">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <p className="text-xs font-medium text-blue-900">Sélection d'entreprise</p>
+                  <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
+                  <p className="text-xs font-medium text-primary-900">Sélection d'entreprise</p>
                 </div>
                 {selectedCompanyId && selectedCompanyName && (
-                  <p className="text-sm font-medium text-blue-900 truncate mb-2">
+                  <p className="text-sm font-medium text-primary-900 truncate mb-2">
                     Actuellement: {selectedCompanyName}
                   </p>
                 )}
                 <select
-                  className="w-full p-2 rounded border border-blue-300 text-sm"
+                  className="w-full p-2 rounded border border-primary-300 text-sm"
                   value={selectedCompanyId || ""}
                   onChange={async (e) => {
                     const newId = e.target.value;
@@ -356,6 +423,14 @@ export default function MainLayout({ children }) {
                             : API_BASE_URL + entreprise.logo
                         );
                         setCompanyName(entreprise.nom);
+                        // Set CSS variables for colors
+                        if (entreprise?.couleurPrimaire && entreprise?.couleurSecondaire) {
+                          setCompanyColors({
+                            primary: entreprise.couleurPrimaire,
+                            secondary: entreprise.couleurSecondaire,
+                          });
+                          setColors(entreprise.couleurPrimaire, entreprise.couleurSecondaire);
+                        }
                       } catch (error) {
                         console.error('Error loading selected company info:', error);
                       }
@@ -363,6 +438,9 @@ export default function MainLayout({ children }) {
                       setSelectedCompanyName(null);
                       setCompanyLogo(API_BASE_URL + "/assets/images/logos/logo.jpg");
                       setCompanyName("SalairePro");
+                      setCompanyColors({ primary: '#2563eb', secondary: '#1d4ed8' });
+                      document.documentElement.style.setProperty('--color-primary', '#2563eb');
+                      document.documentElement.style.setProperty('--color-secondary', '#1d4ed8');
                     }
                     setMobileOpen(false); // Close mobile menu after selection
                   }}
@@ -383,7 +461,7 @@ export default function MainLayout({ children }) {
                       setCompanyName("SalairePro");
                       setMobileOpen(false);
                     }}
-                    className="text-xs text-blue-600 hover:text-blue-800 mt-2 block"
+                    className="text-xs text-primary-600 hover:text-primary-800 mt-2 block"
                   >
                     Retour à l'administration globale
                   </button>
@@ -412,7 +490,9 @@ export default function MainLayout({ children }) {
 
             <div className="flex items-center gap-4">
               {isAuthenticated ? (
-                <UserProfileDropdown />
+                <>
+                  <UserProfileDropdown />
+                </>
               ) : (
                 <div className="flex items-center gap-4">
                   <Link

@@ -68,8 +68,8 @@ export default function PointageRapide({ onPointageCreated, className = "" }) {
   return (
     <div className={`bg-white rounded-lg border border-gray-200 p-6 ${className}`}>
       <div className="text-center space-y-4">
-        <div className="w-16 h-16 mx-auto bg-blue-50 rounded-full flex items-center justify-center">
-          <QrCodeIcon className="h-8 w-8 text-blue-600" />
+        <div className="w-16 h-16 mx-auto bg-primary-50 rounded-full flex items-center justify-center">
+          <QrCodeIcon className="h-8 w-8 text-primary-600" />
         </div>
 
         <div>
