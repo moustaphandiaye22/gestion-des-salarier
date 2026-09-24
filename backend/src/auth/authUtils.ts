@@ -22,18 +22,26 @@ export class AuthUtils {
   }
 
   static generateAccessToken(payload: JwtPayload): string {
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+    return jwt.sign(payload, JWT_SECRET!, { expiresIn: '1h' });
   }
 
   static generateRefreshToken(payload: JwtPayload): string {
-    return jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: '7d' });
+    return jwt.sign(payload, JWT_REFRESH_SECRET!, { expiresIn: '7d' });
   }
 
   static verifyAccessToken(token: string): JwtPayload {
-    return jwt.verify(token, JWT_SECRET) as JwtPayload;
+    const decoded = jwt.verify(token, JWT_SECRET!);
+    if (typeof decoded === 'string' || !decoded || typeof decoded.email !== 'string') {
+      throw new Error('Token JWT invalide');
+    }
+    return decoded as JwtPayload;
   }
 
   static verifyRefreshToken(token: string): JwtPayload {
-    return jwt.verify(token, JWT_REFRESH_SECRET) as JwtPayload;
+    const decoded = jwt.verify(token, JWT_REFRESH_SECRET!);
+    if (typeof decoded === 'string' || !decoded || typeof decoded.email !== 'string') {
+      throw new Error('Token JWT invalide');
+    }
+    return decoded as JwtPayload;
   }
 }

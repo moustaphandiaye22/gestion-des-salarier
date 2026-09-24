@@ -18,10 +18,18 @@ export class AuthUtils {
         return jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: '7d' });
     }
     static verifyAccessToken(token) {
-        return jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (typeof decoded === 'string' || !decoded || typeof decoded.email !== 'string') {
+            throw new Error('Token JWT invalide');
+        }
+        return decoded;
     }
     static verifyRefreshToken(token) {
-        return jwt.verify(token, JWT_REFRESH_SECRET);
+        const decoded = jwt.verify(token, JWT_REFRESH_SECRET);
+        if (typeof decoded === 'string' || !decoded || typeof decoded.email !== 'string') {
+            throw new Error('Token JWT invalide');
+        }
+        return decoded;
     }
 }
 //# sourceMappingURL=auth.js.map
